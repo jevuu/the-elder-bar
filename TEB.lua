@@ -711,10 +711,6 @@ end
 ------------------------------------------------------
 -- HideBar
 ------------------------------------------------------
---function TEB.HideBar()
---    if autohide_GameMenu then hideBar = true end
---end
-
 function TEB.HideBar(eventCode, reticleHidden)
     if reticleHidden == true and ignoreReticleUpdate == false then
         if autohide_GameMenu and not(HUD_UI_SCENE:IsShowing() or GetInteractionType() == 14 or LOOT_SCENE:IsShowing()) then
@@ -725,7 +721,7 @@ function TEB.HideBar(eventCode, reticleHidden)
             hideBar = false
         end
     elseif reticleHidden == false and ignoreReticleUpdate == false then
-        hideBar = true
+        hideBar = false
     else 
         ignoreReticleUpdate = false
     end
@@ -4868,6 +4864,7 @@ function TEB.OnUpdate()
     
     
 
+    --[[
     local currentTopBarAlpha = ZO_TopBarBackground:GetAlpha()
 
     if currentTopBarAlpha ~= 1 then
@@ -4880,6 +4877,7 @@ function TEB.OnUpdate()
     end
     
     lastTopBarAlpha = currentTopBarAlpha
+    ]]
 
     if centerTimer > 60 * 60 * 5 then
         TEB:UpdateControlsPosition()
@@ -7304,13 +7302,9 @@ end
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
---EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_BANK, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
---EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_END, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CRAFTING_STATION_INTERACT, TEB.CraftingHideBar)
---EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_END_CRAFTING_STATION_INTERACT, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_GUILD_BANK, TEB.GuildBankHideBar)
---EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_GUILD_BANK, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
