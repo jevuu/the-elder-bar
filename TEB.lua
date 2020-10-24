@@ -64,6 +64,7 @@ local ap_SessionStart = os.time()
 local ap_SessionStartPoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
 local scale = 100
 local barLayer = 0
+local ignoreReticleUpdate = false
 
 local pulseWhenCritical = false
 local clock_TwentyFourHourClock = true
@@ -710,43 +711,80 @@ end
 ------------------------------------------------------
 -- HideBar
 ------------------------------------------------------
-function TEB.HideBar()
-    if autohide_GameMenu then hideBar = true end
+--function TEB.HideBar()
+--    if autohide_GameMenu then hideBar = true end
+--end
+
+function TEB.HideBar(eventCode, reticleHidden)
+    if reticleHidden == true and ignoreReticleUpdate == false then
+        if autohide_GameMenu and not(HUD_UI_SCENE:IsShowing() or GetInteractionType() == 14 or LOOT_SCENE:IsShowing()) then
+            -- Reticle Hidebar detected menu, chat or lootscreen, and autohide_GameMenu is true
+            hideBar = true
+        else
+            -- Did not detect menu, or chat, or lootscreen, or autohide is disabled
+            hideBar = false
+        end
+    elseif reticleHidden == false and ignoreReticleUpdate == false then
+        hideBar = true
+    else 
+        ignoreReticleUpdate = false
+    end
 end
 
 ------------------------------------------------------
 -- ShowBar
 ------------------------------------------------------
 function TEB.ShowBar()
-    hideBar = false
+    local reticleHidden = ZO_ReticleContainerReticle:IsHidden()
+    if not reticleHidden or LOOT_SCENE:IsShowing() then
+        hideBar = false
+        ignoreReticleUpdate = false
+    end
 end
 
 ------------------------------------------------------
 -- ChatterHideBar
 ------------------------------------------------------
 function TEB.ChatterHideBar()
-    if autohide_Chatter then hideBar = true end
+    if autohide_Chatter then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
 end
 
 ------------------------------------------------------
 -- CraftingHideBar
 ------------------------------------------------------
 function TEB.CraftingHideBar()
-    if autohide_Crafting then hideBar = true end
+    ignoreReticleUpdate = true -- This is needed due to the reticle update event being called after the crafting event
+    if autohide_Crafting then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
 end
 
 ------------------------------------------------------
 -- BankHideBar
 ------------------------------------------------------
 function TEB.BankHideBar()
-    if autohide_Bank then hideBar = true end
+    if autohide_Bank then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
 end
 
 ------------------------------------------------------
 -- GuildBankHideBar
 ------------------------------------------------------
 function TEB.GuildBankHideBar()
-    if autohide_GuildBank then hideBar = true end
+    if autohide_GuildBank then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
 end
 
 ------------------------------------------------------
@@ -7266,17 +7304,20 @@ end
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_BANK, TEB.ShowBar)
+--EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_BANK, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_END, TEB.ShowBar)
+--EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_END, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CRAFTING_STATION_INTERACT, TEB.CraftingHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_END_CRAFTING_STATION_INTERACT, TEB.ShowBar)
+--EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_END_CRAFTING_STATION_INTERACT, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_GUILD_BANK, TEB.GuildBankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_GUILD_BANK, TEB.ShowBar)
+--EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_GUILD_BANK, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
- 
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_RETICLE_HIDDEN_UPDATE, TEB.HideBar)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ACTION_LAYER_POPPED, TEB.ShowBar)
+
 EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
