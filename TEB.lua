@@ -3096,7 +3096,7 @@ function TEB.balance()
         etColor = "|cffdf00"
         etIcon = "warning"
     end
-    if eventtickets <= et_Danger then
+    if eventtickets >= et_Danger then
         etColor = "|ccc0000"
         etIcon = "danger"
     end
