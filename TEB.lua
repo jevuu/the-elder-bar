@@ -3200,7 +3200,6 @@ end
 -- UpdateGold
 ------------------------------------------------------ 
 function TEB.UpdateGold()
-    d("UpdateGoldCalled")
     goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
     goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
     goldTotal = goldCharacter + goldBank
