@@ -4633,6 +4633,7 @@ function TEB.CombatColorFade()
         EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
     end
 end
+
 --====================================================
 --====================================================
 -- OnUpdate
@@ -7357,6 +7358,23 @@ function TEB.CreateSettingsWindow()
     },                   	  	    
   })
 
+end
+
+-- Combat bar color opacity
+function TEB.CombatColor(eventCode, combatState)
+    inCombat = combatState or false
+    d(inCombat)
+    if combatIndicator then
+        EVENT_MANAGER:RegisterForUpdate("TEBCombatColorFade", 20, TEB.CombatColorFade)
+    end
+    -- local maxAlpha = combatOpacity/100
+    -- local incrementAlpha = maxAlpha / 20
+    
+    --[[if showCombatOpacity > 0 then
+        showCombatOpacity = showCombatOpacity - 1
+        TEBTopCombatBG:SetAlpha(maxAlpha)
+        combatAlpha = maxAlpha
+    end]] 
 end
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
