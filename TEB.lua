@@ -725,6 +725,7 @@ function TEB.HideBar(eventCode, reticleHidden)
     else 
         ignoreReticleUpdate = false
     end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -736,6 +737,7 @@ function TEB.ShowBar()
         hideBar = false
         ignoreReticleUpdate = false
     end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -747,6 +749,7 @@ function TEB.ChatterHideBar()
     else
         hideBar = false 
     end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -759,6 +762,7 @@ function TEB.CraftingHideBar()
     else
         hideBar = false 
     end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -770,6 +774,7 @@ function TEB.BankHideBar()
     else
         hideBar = false 
     end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -781,6 +786,7 @@ function TEB.GuildBankHideBar()
     else
         hideBar = false 
     end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -4575,6 +4581,58 @@ function CountItemsInBag(bagId)
 
     return filled, crown_filled, empty, lockpicks, treasures, not_treasures, stolenSlots, pettyRepairKit, minorRepairKit, lesserRepairKit, commonRepairKit, greaterRepairKit, grandRepairKit, crownRepairKit
 end
+
+--====================================================
+--====================================================
+-- Asynchronous tasks
+--====================================================
+--====================================================
+
+------------------------------------------------------
+-- HideBarFade. Controls bar fade in and out.
+------------------------------------------------------
+function TEB.HideBarFade()
+    if hideBar and barAlpha > 0 then
+        barAlpha = barAlpha - .2
+        if barAlpha < 0 then 
+            barAlpha = 0 
+            EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+        end
+        TEBTop:SetAlpha(barAlpha)
+    elseif not hideBar and barAlpha < 1 then
+        barAlpha = barAlpha + .2
+        if barAlpha > 1 then 
+            barAlpha = 1 
+            EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+        end
+        TEBTop:SetAlpha(barAlpha)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+    end
+end
+
+------------------------------------------------------
+-- CombatColorFade. Controls combat color/indicator fade in and out.
+------------------------------------------------------
+function TEB.CombatColorFade()
+    if inCombat and combatAlpha < combatOpacity/100 then
+        combatAlpha = combatAlpha + .2
+        if combatAlpha > combatOpacity/100 then
+            combatAlpha = combatOpacity
+            EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
+        end
+        TEBTopCombatBG:SetAlpha(combatAlpha)
+    elseif not inCombat and combatAlpha > 0 then
+        combatAlpha = combatAlpha - .2
+        if combatAlpha < 0 then
+            combatAlpha = 0
+            EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
+        end
+        TEBTopCombatBG:SetAlpha(combatAlpha)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
+    end
+end
 --====================================================
 --====================================================
 -- OnUpdate
@@ -4887,6 +4945,7 @@ function TEB.OnUpdate()
         TEB:SetBarPosition()
     end
     
+    --[[
     if hideBar  and barAlpha > 0 then
         barAlpha = barAlpha - .05
         if barAlpha < 0 then barAlpha = 0 end
@@ -4919,6 +4978,7 @@ function TEB.OnUpdate()
         if combatAlpha < 0 then combatAlpha = 0 end
         TEBTopCombatBG:SetAlpha(combatAlpha)
     end
+    ]]
     
     refreshTimer = refreshTimer + 1
     centerTimer = centerTimer + 1
@@ -5210,8 +5270,8 @@ function TEB.CreateSettingsWindow()
             },                 
             {
                 type = "slider",
-                name = "Bar background transparency",
-                tooltip = "Set The Elder Bar's background transparency. Lower number means more transparent.",
+                name = "Bar background opacity",
+                tooltip = "Set The Elder Bar's background opacity.",
                 min = 0,
                 max = 100,
                 step = 1,
@@ -5236,8 +5296,8 @@ function TEB.CreateSettingsWindow()
             },   
             {
                 type = "slider",
-                name = "Combat indicator transparency",
-                tooltip = "Set the combat indicator's transparency. Lower number means more transparent.",
+                name = "Combat indicator opacity",
+                tooltip = "Set the combat indicator's opacity.",
                 min = 0,
                 max = 100,
                 step = 1,
@@ -7300,19 +7360,21 @@ function TEB.CreateSettingsWindow()
 end
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
+
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.CalculateBagItems)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
+
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CRAFTING_STATION_INTERACT, TEB.CraftingHideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_GUILD_BANK, TEB.GuildBankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
-
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_RETICLE_HIDDEN_UPDATE, TEB.HideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ACTION_LAYER_POPPED, TEB.ShowBar)
 
 EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_COMBAT_STATE, TEB.CombatColor)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
