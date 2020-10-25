@@ -668,7 +668,7 @@ function TEB:Initialize()
     TEB:RebuildBar()
     TEB:UpdateControlsPosition()
     TEB.ResizeBar()
-    
+
     TEB.AddToMountDatabase(GetUnitName("player"))
     TEB.AddToGoldDatabase(GetUnitName("player"))
 end
@@ -836,6 +836,7 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Gold" then
                 lastGadget, firstGadgetAdded = TEB:RebuildGold(lastGadget, firstGadgetAdded)
+                TEB.UpdateGold()
             end
             if gadgetList[i] == "Tel Var Stones" then
                 lastGadget, firstGadgetAdded = TEB:RebuildTelvarStones(lastGadget, firstGadgetAdded)
@@ -3000,12 +3001,12 @@ function TEB.balance()
     telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
     telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
     telvar = telvarc + telvarb
-    goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-    goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
-    goldTotal = goldCharacter + goldBank
+    --goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+    --goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
+    --goldTotal = goldCharacter + goldBank
     eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
     maxeventtickets = 12
-    goldBankUnformatted = goldBank
+    --goldBankUnformatted = goldBank
     
     if eventtickets > 0 then
         etHasTickets = true
@@ -3014,19 +3015,20 @@ function TEB.balance()
     end
     
     if thousandsSeparator then
-        goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
-        goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBank))
-        goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
+    --    goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
+    --    goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBank))
+    --    goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
         telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(telvar))
     else
-        goldCharacter = string.format(goldCharacter)
-        goldBank = string.format(goldBank)
-        goldTotal = string.format(goldTotal)        
+    --    goldCharacter = string.format(goldCharacter)
+    --    goldBank = string.format(goldBank)
+    --    goldTotal = string.format(goldTotal)        
         telvar = string.format(telvar)        
     end
 
-    local trackedGold = 0
-            
+    --local trackedGold = 0
+    
+    --[[
     if gold_DisplayPreference == "gold on character" then
         gold = goldCharacter
     end
@@ -3061,6 +3063,7 @@ function TEB.balance()
             gold = goldBankUnformatted + trackedGold
         end
     end
+    ]]
     
     ap = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
     crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
@@ -3193,6 +3196,63 @@ function TEB.balance()
     
 end
 
+------------------------------------------------------
+-- UpdateGold
+------------------------------------------------------ 
+function TEB.UpdateGold()
+    d("UpdateGoldCalled")
+    goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+    goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
+    goldTotal = goldCharacter + goldBank
+    goldBankUnformatted = goldBank
+
+    if thousandsSeparator then
+        goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
+        goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBank))
+        goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
+    else
+        goldCharacter = string.format(goldCharacter)
+        goldBank = string.format(goldBank)
+        goldTotal = string.format(goldTotal)        
+    end
+
+    local trackedGold = 0
+
+    if gold_DisplayPreference == "gold on character" then
+        gold = goldCharacter
+    end
+    if gold_DisplayPreference == "gold on character/gold in bank" then
+        gold = goldCharacter.."/".. goldBank
+    end
+    if gold_DisplayPreference == "gold on character (gold in bank)" then
+        gold = goldCharacter.." ("..goldBank..")"
+    end
+    if gold_DisplayPreference == "character+bank gold" then
+        gold = goldTotal
+    end
+    if gold_DisplayPreference == "tracked gold" or gold_DisplayPreference == "tracked+bank gold" then
+        for k, v in pairs(gold_Tracker) do
+            if v[1] then
+                trackedGold = trackedGold + v[2]
+            end
+        end   
+    end            
+
+    if gold_DisplayPreference == "tracked gold" then
+        if thousandsSeparator then     
+            gold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(trackedGold))
+        else
+            gold = goldBankUnformatted + trackedGold
+        end
+    end        
+    if gold_DisplayPreference == "tracked+bank gold" then
+        if thousandsSeparator then     
+            gold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBankUnformatted + trackedGold))
+        else
+            gold = goldBankUnformatted + trackedGold
+        end
+    end
+end
 ------------------------------------------------------
 -- mounttimer
 ------------------------------------------------------    
@@ -7392,6 +7452,8 @@ EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_CO
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_COMBAT_STATE, TEB.CombatColor)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MONEY_UPDATE, TEB.UpdateGold)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
