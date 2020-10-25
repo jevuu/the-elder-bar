@@ -7363,7 +7363,6 @@ end
 -- Combat bar color opacity
 function TEB.CombatColor(eventCode, combatState)
     inCombat = combatState or false
-    d(inCombat)
     if combatIndicator then
         EVENT_MANAGER:RegisterForUpdate("TEBCombatColorFade", 20, TEB.CombatColorFade)
     end
