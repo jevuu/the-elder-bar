@@ -3192,6 +3192,12 @@ function TEB.UpdateEventTickets()
     if et_DisplayPreference == "tickets/max" then
         eventtickets = eventtickets.."/12"
     end
+      
+    if gadgetText["Event Tickets"] then
+        TEBTopET:SetText(eventtickets)
+    else
+        TEBTopET:SetText("")
+    end                                  
 end
 
 ------------------------------------------------------
@@ -4723,36 +4729,6 @@ function TEB.OnUpdate()
        --gold = "737,011"
         --lvlText="734"
         --skyShardsInfo="1/11"
-        if gadgetText["Gold"] then
-            TEBTopGold:SetText(gold)
-        else
-            TEBTopGold:SetText("")
-        end
-        if gadgetText["Tel Var Stones"] then
-            TEBTopTelvar:SetText(string.format(telvar))   
-        else
-            TEBTopTelvar:SetText("")   
-        end
-        if gadgetText["Transmute Crystals"] then
-            TEBTopTC:SetText(string.format(crystal))   
-        else
-            TEBTopTC:SetText("")   
-        end
-        if gadgetText["Writ Vouchers"] then
-            TEBTopWrit:SetText(string.format(writs))  
-        else
-            TEBTopWrit:SetText("")
-        end   
-        if gadgetText["Alliance Points"] then
-            TEBTopAP:SetText(apString) 
-        else
-            TEBTopAP:SetText("")
-        end   
-        if gadgetText["Level"] then
-            TEBTopLevel:SetText(string.format(lvlText)) 
-        else
-            TEBTopLevel:SetText("")
-        end   
         if gadgetText["Bag Space"] then
             TEBTopBag:SetText(string.format(bagInfo))
         else
@@ -4862,12 +4838,7 @@ function TEB.OnUpdate()
             TEBTopMail:SetText(unread_mail)
         else
             TEBTopMail:SetText("")
-        end  
-        if gadgetText["Event Tickets"] then
-            TEBTopET:SetText(eventtickets)
-        else
-            TEBTopET:SetText("")
-        end                                  
+        end
         if gadgetText["Food Buff Timer"] then
             TEBTopFood:SetText(food)
         else
