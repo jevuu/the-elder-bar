@@ -46,6 +46,8 @@ local foodTimerRunning = false
 local foodTimerVisible = false
 account = GetDisplayName("player")
 local trackerDropdown = {}
+local coordinates = ""
+local zoneNameDisplay = ""
 
 local backdropOpacity = 0
 local combatOpacity = 0
@@ -64,6 +66,7 @@ local ap_SessionStart = os.time()
 local ap_SessionStartPoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
 local scale = 100
 local barLayer = 0
+local ignoreReticleUpdate = false
 
 local pulseWhenCritical = false
 local clock_TwentyFourHourClock = true
@@ -176,6 +179,7 @@ local vampirism_StageColor = {
     [4] = "red"
 }
 local font = "Univers57"
+local champion_Points_Soft_Cap = 810
 
 local gadgetSettings = {}
 local mount_Tracker = {}
@@ -667,7 +671,7 @@ function TEB:Initialize()
     TEB:RebuildBar()
     TEB:UpdateControlsPosition()
     TEB.ResizeBar()
-    
+
     TEB.AddToMountDatabase(GetUnitName("player"))
     TEB.AddToGoldDatabase(GetUnitName("player"))
 end
@@ -710,43 +714,82 @@ end
 ------------------------------------------------------
 -- HideBar
 ------------------------------------------------------
-function TEB.HideBar()
-    if autohide_GameMenu then hideBar = true end
+function TEB.HideBar(eventCode, reticleHidden)
+    if reticleHidden == true and ignoreReticleUpdate == false then
+        if autohide_GameMenu and not(HUD_UI_SCENE:IsShowing() or GetInteractionType() == 14 or LOOT_SCENE:IsShowing()) then
+            -- Reticle Hidebar detected menu, chat or lootscreen, and autohide_GameMenu is true
+            hideBar = true
+        else
+            -- Did not detect menu, or chat, or lootscreen, or autohide is disabled
+            hideBar = false
+        end
+    elseif reticleHidden == false and ignoreReticleUpdate == false then
+        hideBar = false
+    else 
+        ignoreReticleUpdate = false
+    end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
 -- ShowBar
 ------------------------------------------------------
 function TEB.ShowBar()
-    hideBar = false
+    local reticleHidden = ZO_ReticleContainerReticle:IsHidden()
+    if not reticleHidden or LOOT_SCENE:IsShowing() then
+        hideBar = false
+        ignoreReticleUpdate = false
+    end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
 -- ChatterHideBar
 ------------------------------------------------------
 function TEB.ChatterHideBar()
-    if autohide_Chatter then hideBar = true end
+    if autohide_Chatter then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
 -- CraftingHideBar
 ------------------------------------------------------
 function TEB.CraftingHideBar()
-    if autohide_Crafting then hideBar = true end
+    ignoreReticleUpdate = true -- This is needed due to the reticle update event being called after the crafting event
+    if autohide_Crafting then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
 -- BankHideBar
 ------------------------------------------------------
 function TEB.BankHideBar()
-    if autohide_Bank then hideBar = true end
+    if autohide_Bank then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
 -- GuildBankHideBar
 ------------------------------------------------------
 function TEB.GuildBankHideBar()
-    if autohide_GuildBank then hideBar = true end
+    if autohide_GuildBank then 
+        hideBar = true
+    else
+        hideBar = false 
+    end
+    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
 ------------------------------------------------------
@@ -781,7 +824,13 @@ function TEB:RebuildBar()
                 gadgetReference[k][1]:SetHidden(true)
                 gadgetReference[k][2]:SetHidden(true)            
             end
-        end                   
+        end         
+
+        EVENT_MANAGER:UnregisterForUpdate("TEBZone")
+        TEB.getZone()
+
+        TEB.UpdateAllCurrency()
+        TEB.UpdateLevel()
 
         for i=1, #defaultGadgets do
             if gadgetList[i] ~= "(None)" then
@@ -853,6 +902,7 @@ function TEB:RebuildBar()
             end  
             if gadgetList[i] == "Location" then
                 lastGadget, firstGadgetAdded = TEB:RebuildLocation(lastGadget, firstGadgetAdded)
+                EVENT_MANAGER:RegisterForUpdate("TEBZone", 500, TEB.zone)
             end
             if gadgetList[i] == "Thief's Tools" then
                 lastGadget, firstGadgetAdded = TEB:RebuildTT(lastGadget, firstGadgetAdded)
@@ -2206,17 +2256,14 @@ function TEB.ShowToolTipLocation(self)
     local toolTipLeft = ""
     if location_DisplayPreference == "(x, y) Zone Name" then
         toolTipLeft = toolTipLeft .. "(Coordinates) Zone Name.\n\n"
-    end
-    if location_DisplayPreference == "Zone Name (x, y)" then
+    elseif location_DisplayPreference == "Zone Name (x, y)" then
         toolTipLeft = toolTipLeft .. "Zone Name (Coordinates).\n\n"
-    end
-    if location_DisplayPreference == "Zone Name" then
-        toolTipLeft = toolTipLeft .. "Current zone Name.\n\n"
-    end
-    if location_DisplayPreference == "x, y" then
+    elseif location_DisplayPreference == "Zone Name" then
+        toolTipLeft = toolTipLeft .. "Current Zone Name.\n\n"
+    elseif location_DisplayPreference == "x, y" then
         toolTipLeft = toolTipLeft .. "Current coordinates.\n\n"
     end
-    toolTipLeft = toolTipLeft .. zoneName.."\n".."("..coordinates..")"    
+    toolTipLeft = toolTipLeft .. zoneNameDisplay.."\n".."("..coordinates..")"    
     local toolTipRight = ""
     
     FormatTooltip(toolTipLeft, toolTipRight)
@@ -2956,37 +3003,51 @@ end
 ------------------------------------------------------
 -- balance
 ------------------------------------------------------
-function TEB.balance()
-    telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
-    telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
-    telvar = telvarc + telvarb
+function TEB.balance(eventCode, currencyType)
+    if currencyType == 1 then
+        TEB.UpdateGold()
+    elseif currencyType == 2 then
+        TEB.UpdateAP()
+    elseif currencyType == 3 then
+        TEB.UpdateTelvar()
+    elseif currencyType == 4 then
+        TEB.UpdateWritVouchers()
+    elseif currencyType == 5 then
+        TEB.UpdateTransmutateCrystals()
+    --elseif currencyType == 6 then
+    --    TEB.UpdateCrownGems()
+    --elseif currencyType == 7 then
+    --    TEB.UpdateCrowns()
+    --elseif currencyType == 8 then
+    --    TEB.UpdateStyleStones()
+    elseif currencyType == 9 then
+        TEB.UpdateEventTickets()
+    --elseif currencyType == 10 then
+        --TEB.UpdateUndauntedKeys()
+    end
+end
+
+------------------------------------------------------
+-- UpdateGold
+------------------------------------------------------ 
+function TEB.UpdateGold()
     goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
     goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
     goldTotal = goldCharacter + goldBank
-    eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
-    maxeventtickets = 12
     goldBankUnformatted = goldBank
-    
-    if eventtickets > 0 then
-        etHasTickets = true
-    else
-        etHasTickets = false
-    end
-    
+
     if thousandsSeparator then
         goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
         goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBank))
         goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
-        telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(telvar))
     else
         goldCharacter = string.format(goldCharacter)
         goldBank = string.format(goldBank)
         goldTotal = string.format(goldTotal)        
-        telvar = string.format(telvar)        
     end
 
     local trackedGold = 0
-            
+
     if gold_DisplayPreference == "gold on character" then
         gold = goldCharacter
     end
@@ -3021,10 +3082,19 @@ function TEB.balance()
             gold = goldBankUnformatted + trackedGold
         end
     end
-    
+
+    if gadgetText["Gold"] then
+        TEBTopGold:SetText(gold)
+    else
+        TEBTopGold:SetText("")
+    end
+end
+
+------------------------------------------------------
+-- UpdateAP
+------------------------------------------------------    
+function TEB.UpdateAP()
     ap = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-    crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
-    writs = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
 
     ap_Session = ap - ap_SessionStartPoints
     ap_Hour = 0
@@ -3035,36 +3105,15 @@ function TEB.balance()
             ap_Hour = math.floor(ap_Session / ((os.time() - ap_SessionStart) / 3600))
         end            
     end
-    
+
     if thousandsSeparator then
         ap = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap))
         ap_Session = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Session))
         ap_Hour = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Hour))
-        crystal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(crystal))
-        writs = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(writs))
     else
         ap = string.format(ap) 
         ap_Session = string.format(ap_Session) 
         ap_Hour = string.format(ap_Hour) 
-        crystal = string.format(crystal) 
-        writs = string.format(writs) 
-    end
-    
-    local etIcon = "normal"
-    local etColor = "|ccccccc"
-    if eventtickets >= et_Warning then
-        etColor = "|cffdf00"
-        etIcon = "warning"
-    end
-    if eventtickets <= et_Danger then
-        etColor = "|ccc0000"
-        etIcon = "danger"
-    end
-    TEB.SetIcon("Event Tickets", etIcon)
-    
-    eventtickets = etColor..string.format(eventtickets)
-    if et_DisplayPreference == "tickets/max" then
-        eventtickets = eventtickets.."/12"
     end
     
     if ap_DisplayPreference == "Total Points" then
@@ -3091,15 +3140,151 @@ function TEB.balance()
     if ap_DisplayPreference == "Total Points/Session Points/Points Per Hour" then
         apString = ap.."/"..ap_Session.."/"..ap_Hour
     end
+       
+    if gadgetText["Alliance Points"] then
+        TEBTopAP:SetText(apString) 
+    else
+        TEBTopAP:SetText("")
+    end   
+end
+
+------------------------------------------------------
+-- UpdateTelvar
+------------------------------------------------------    
+function TEB.UpdateTelvar()
+    telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
+    telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
+    telvar = telvarc + telvarb
+
+    if thousandsSeparator then
+        telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(telvar))
+    else
+        telvar = string.format(telvar)        
+    end
     
+    if gadgetText["Tel Var Stones"] then
+        TEBTopTelvar:SetText(string.format(telvar))   
+    else
+        TEBTopTelvar:SetText("")   
+    end
+end
+
+------------------------------------------------------
+-- UpdateWritVouchers
+------------------------------------------------------   
+function TEB.UpdateWritVouchers()
+    writs = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
+
+    if thousandsSeparator then
+        writs = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(writs))
+    else
+        writs = string.format(writs) 
+    end
+    
+    if gadgetText["Writ Vouchers"] then
+        TEBTopWrit:SetText(string.format(writs))  
+    else
+        TEBTopWrit:SetText("")
+    end
+end
+
+------------------------------------------------------
+-- UpdateTransmuteCrystals
+------------------------------------------------------    
+function TEB.UpdateTransmutateCrystals()
+    crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
+
+    if thousandsSeparator then
+        crystal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(crystal))
+    else
+        crystal = string.format(crystal) 
+    end
+
+    if gadgetText["Transmute Crystals"] then
+        TEBTopTC:SetText(string.format(crystal))   
+    else
+        TEBTopTC:SetText("")   
+    end
+end
+------------------------------------------------------
+-- UpdateEventTickets
+------------------------------------------------------
+function TEB.UpdateEventTickets()
+    eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
+    maxeventtickets = 12
+
+    if eventtickets > 0 then
+        etHasTickets = true
+    else
+        etHasTickets = false
+    end
+    
+    local etIcon = "normal"
+    local etColor = "|ccccccc"
+    if eventtickets >= et_Warning then
+        etColor = "|cffdf00"
+        etIcon = "warning"
+    end
+    if eventtickets >= et_Danger then
+        etColor = "|ccc0000"
+        etIcon = "danger"
+    end
+    TEB.SetIcon("Event Tickets", etIcon)
+    
+    eventtickets = etColor..string.format(eventtickets)
+    if et_DisplayPreference == "tickets/max" then
+        eventtickets = eventtickets.."/12"
+    end
+      
+    if gadgetText["Event Tickets"] then
+        TEBTopET:SetText(eventtickets)
+    else
+        TEBTopET:SetText("")
+    end                                  
+end
+
+------------------------------------------------------
+-- UpdateAllCurrency
+------------------------------------------------------  
+function TEB.UpdateAllCurrency()
+    TEB.UpdateGold()
+    TEB.UpdateAP()
+    TEB.UpdateTelvar()
+    TEB.UpdateWritVouchers()
+    TEB.UpdateTransmutateCrystals()
+    TEB.UpdateEventTickets()
+end
+
+------------------------------------------------------
+-- UpdateLevel
+------------------------------------------------------  
+function TEB.UpdateLevel()
+
     lvl = GetUnitLevel("player")
     cp = GetPlayerChampionPointsEarned()
     
-    lvlText = ""
+    local cp_Over_Soft_Cap = cp - champion_Points_Soft_Cap
+    local cp_modulus = cp % 3
+    local cp_dividend = (cp_Over_Soft_Cap - cp_modulus) / 3
 
-	unspentWarrior = GetNumUnspentChampionPoints( 1 )
-	unspentMage = GetNumUnspentChampionPoints( 2 )
-    unspentThief = GetNumUnspentChampionPoints( 3 )
+    lvlText = ""
+    local cp_Over_Soft_Cap_Warrior = 0
+    local cp_Over_Soft_Cap_Thief = 0
+    local cp_Over_Soft_Cap_Mage = 0
+
+    if cp > champion_Points_Soft_Cap then
+        if cp_modulus >= 1 then 
+            cp_Over_Soft_Cap_Warrior = cp_dividend + 1
+        end
+        if cp_modulus == 2 then
+            cp_Over_Soft_Cap_Thief = cp_dividend + 1
+        end
+        cp_Over_Soft_Cap_Mage = cp_dividend
+    end
+
+	unspentWarrior = GetNumUnspentChampionPoints( 1 ) - cp_Over_Soft_Cap_Warrior
+	unspentMage = GetNumUnspentChampionPoints( 2 ) - cp_Over_Soft_Cap_Mage
+    unspentThief = GetNumUnspentChampionPoints( 3 ) - cp_Over_Soft_Cap_Thief
     unspentTotal = unspentWarrior + unspentMage + unspentThief
 	local hasUnspentPoints = false
 	if unspentTotal > 0 then
@@ -3151,6 +3336,12 @@ function TEB.balance()
         lvlText = lvlText .."|CCCCCCC)"
     end
     
+    if gadgetText["Level"] then
+        TEBTopLevel:SetText(string.format(lvlText)) 
+    else
+        TEBTopLevel:SetText("")
+    end   
+
 end
 
 ------------------------------------------------------
@@ -3307,28 +3498,38 @@ end
 ------------------------------------------------------
 -- zone
 ------------------------------------------------------
+-- Gets the zone and subzone name when the player changes zones.
+-- Registered to trigger by EVENT_ZONE_CHANGED
+-- You would think that it would be reliable to pass in zoneName and subZoneName
+-- from the event, but sometimes they're empty strings for some reason.
+function TEB.getZone()
+	zoneNameDisplay = GetPlayerActiveSubzoneName()
+	if zoneNameDisplay == "" then zoneNameDisplay = GetUnitZone("player") end
+end
+
+-- This function is responsible for updating what is displayed on the widget.
+-- This is registered for update with the name "TEBZone"
 function TEB.zone()
-	local x, y, heading = GetMapPlayerPosition("player")
+    local x, y, heading = GetMapPlayerPosition("player")
 	x = round(x * 100,0)
-	y = round(y * 100,0)
-	zoneName = GetPlayerActiveSubzoneName()
-	if zoneName == "" then zoneName = GetUnitZone("player") end
-	
-	zoneName = TEB.fixname(zoneName)
-	coordinates = string.format(x)..", "..string.format(y)
-	
-	if location_DisplayPreference == "(x, y) Zone Name" then
-    	location = "("..coordinates..") "..zoneName
+    y = round(y * 100,0)
+    coordinates = string.format(x)..", "..string.format(y)
+
+    if location_DisplayPreference == "(x, y) Zone Name" then
+        location = "("..coordinates..") "..zoneNameDisplay
+    elseif location_DisplayPreference == "Zone Name (x, y)" then
+        location = zoneNameDisplay.." ("..coordinates..")"
+    elseif location_DisplayPreference == "Zone Name" then
+        location = zoneNameDisplay
+    elseif location_DisplayPreference == "x, y" then
+        location = coordinates
     end
-	if location_DisplayPreference == "Zone Name (x, y)" then
-    	location = zoneName.." ("..coordinates..")"
-    end
-	if location_DisplayPreference == "Zone Name" then
-    	location = zoneName
-    end
-	if location_DisplayPreference == "x, y" then
-    	location = coordinates
-    end
+     
+    if gadgetText["Location"] then
+        TEBTopLocation:SetText(location)
+    else
+        TEBTopLocation:SetText("")
+    end  
 end
 	
 ------------------------------------------------------
@@ -3647,7 +3848,7 @@ end
 
 function getWCColor(wcPerc, hasPoison, poisonCount)
     local wcColor = "|ccccccc"
-    local poisonColor = "|cccccc"
+    local poisonColor = "|ccccccc"
     local iconColor = "normal"
     if hasPoison and wc_AutoPoison then
         if poisonCount <= wc_PoisonWarning then
@@ -3902,11 +4103,12 @@ function TEB.researchtimer(researchIcon, craftId)
     local toolTipLeft = ""
     local toolTipRight = ""
     local timerRunning = false
-    local freeSlots = 0
     local timers, totalSlots, traits = TEB.CalculateCraftingTimers(craftId)
+    local freeSlots = totalSlots
     if #timers > 0 then
         timerRunning = true        
         for timerIndex=1,#timers do
+            freeSlots = freeSlots - 1
             if timers[timerIndex] < leastTime then
                 leastTime = timers[timerIndex]
             end
@@ -3919,7 +4121,6 @@ function TEB.researchtimer(researchIcon, craftId)
         	toolTipRight = toolTipRight .."\n".. timerString
         end
         for timerIndex=#timers+1,totalSlots do
-            freeSlots = freeSlots + 1
             toolTipLeft = toolTipLeft .. "\n" .. "Slot "..string.format(timerIndex)
             toolTipRight = toolTipRight .."\n"..research_FreeText            
         end
@@ -4541,6 +4742,59 @@ function CountItemsInBag(bagId)
 
     return filled, crown_filled, empty, lockpicks, treasures, not_treasures, stolenSlots, pettyRepairKit, minorRepairKit, lesserRepairKit, commonRepairKit, greaterRepairKit, grandRepairKit, crownRepairKit
 end
+
+--====================================================
+--====================================================
+-- Asynchronous tasks
+--====================================================
+--====================================================
+
+------------------------------------------------------
+-- HideBarFade. Controls bar fade in and out.
+------------------------------------------------------
+function TEB.HideBarFade()
+    if hideBar and barAlpha > 0 then
+        barAlpha = barAlpha - .2
+        if barAlpha < 0 then 
+            barAlpha = 0 
+            EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+        end
+        TEBTop:SetAlpha(barAlpha)
+    elseif not hideBar and barAlpha < 1 then
+        barAlpha = barAlpha + .2
+        if barAlpha > 1 then 
+            barAlpha = 1 
+            EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+        end
+        TEBTop:SetAlpha(barAlpha)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+    end
+end
+
+------------------------------------------------------
+-- CombatColorFade. Controls combat color/indicator fade in and out.
+------------------------------------------------------
+function TEB.CombatColorFade()
+    if inCombat and combatAlpha < combatOpacity/100 then
+        combatAlpha = combatAlpha + .2
+        if combatAlpha > combatOpacity/100 then
+            combatAlpha = combatOpacity
+            EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
+        end
+        TEBTopCombatBG:SetAlpha(combatAlpha)
+    elseif not inCombat and combatAlpha > 0 then
+        combatAlpha = combatAlpha - .2
+        if combatAlpha < 0 then
+            combatAlpha = 0
+            EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
+        end
+        TEBTopCombatBG:SetAlpha(combatAlpha)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
+    end
+end
+
 --====================================================
 --====================================================
 -- OnUpdate
@@ -4548,7 +4802,6 @@ end
 --====================================================
 function TEB.OnUpdate()
     if refreshTimer > 19 then
-        TEB.balance()
         TEB.skyshards()
         TEB.bags()
         TEB.mounttimer()
@@ -4563,7 +4816,6 @@ function TEB.OnUpdate()
         TEB.latency()
         TEB.fps()
         TEB.weaponcharge()
-        TEB.zone()
         TEB.memory()
         TEB.recall()
         TEB.pvp()
@@ -4581,36 +4833,6 @@ function TEB.OnUpdate()
        --gold = "737,011"
         --lvlText="734"
         --skyShardsInfo="1/11"
-        if gadgetText["Gold"] then
-            TEBTopGold:SetText(gold)
-        else
-            TEBTopGold:SetText("")
-        end
-        if gadgetText["Tel Var Stones"] then
-            TEBTopTelvar:SetText(string.format(telvar))   
-        else
-            TEBTopTelvar:SetText("")   
-        end
-        if gadgetText["Transmute Crystals"] then
-            TEBTopTC:SetText(string.format(crystal))   
-        else
-            TEBTopTC:SetText("")   
-        end
-        if gadgetText["Writ Vouchers"] then
-            TEBTopWrit:SetText(string.format(writs))  
-        else
-            TEBTopWrit:SetText("")
-        end   
-        if gadgetText["Alliance Points"] then
-            TEBTopAP:SetText(apString) 
-        else
-            TEBTopAP:SetText("")
-        end   
-        if gadgetText["Level"] then
-            TEBTopLevel:SetText(string.format(lvlText)) 
-        else
-            TEBTopLevel:SetText("")
-        end   
         if gadgetText["Bag Space"] then
             TEBTopBag:SetText(string.format(bagInfo))
         else
@@ -4685,12 +4907,7 @@ function TEB.OnUpdate()
             TEBTopWC:SetText(weaponCharge)
         else
             TEBTopWC:SetText("")
-        end            
-        if gadgetText["Location"] then
-            TEBTopLocation:SetText(location)
-        else
-            TEBTopLocation:SetText("")
-        end          
+        end    
         if gadgetText["Thief's Tools"] then
             TEBTopTT:SetText(tt)
         else
@@ -4720,12 +4937,7 @@ function TEB.OnUpdate()
             TEBTopMail:SetText(unread_mail)
         else
             TEBTopMail:SetText("")
-        end  
-        if gadgetText["Event Tickets"] then
-            TEBTopET:SetText(eventtickets)
-        else
-            TEBTopET:SetText("")
-        end                                  
+        end
         if gadgetText["Food Buff Timer"] then
             TEBTopFood:SetText(food)
         else
@@ -4829,6 +5041,7 @@ function TEB.OnUpdate()
     
     
 
+    --[[
     local currentTopBarAlpha = ZO_TopBarBackground:GetAlpha()
 
     if currentTopBarAlpha ~= 1 then
@@ -4841,6 +5054,7 @@ function TEB.OnUpdate()
     end
     
     lastTopBarAlpha = currentTopBarAlpha
+    ]]
 
     if centerTimer > 60 * 60 * 5 then
         TEB:UpdateControlsPosition()
@@ -4850,6 +5064,7 @@ function TEB.OnUpdate()
         TEB:SetBarPosition()
     end
     
+    --[[
     if hideBar  and barAlpha > 0 then
         barAlpha = barAlpha - .05
         if barAlpha < 0 then barAlpha = 0 end
@@ -4882,6 +5097,7 @@ function TEB.OnUpdate()
         if combatAlpha < 0 then combatAlpha = 0 end
         TEBTopCombatBG:SetAlpha(combatAlpha)
     end
+    ]]
     
     refreshTimer = refreshTimer + 1
     centerTimer = centerTimer + 1
@@ -4929,7 +5145,7 @@ function TEB.fixname(itemName)
     if string.sub(itemName, -2) == "^n" then itemName = itemName:sub(1, -3) end
     if string.sub(itemName, -2) == "^f" then itemName = itemName:sub(1, -3) end
     if string.sub(itemName, -2) == "^m" then itemName = itemName:sub(1, -3) end
-    itemName = itemName:gsub("([a-zA-Z])(%w*)", function(a,b) return string.upper(a)..b end)
+    --itemName = itemName:gsub("([a-zA-Z])(%w*)", function(a,b) return string.upper(a)..b end)
     return itemName
 end
 
@@ -5173,8 +5389,8 @@ function TEB.CreateSettingsWindow()
             },                 
             {
                 type = "slider",
-                name = "Bar background transparency",
-                tooltip = "Set The Elder Bar's background transparency. Lower number means more transparent.",
+                name = "Bar background opacity",
+                tooltip = "Set The Elder Bar's background opacity.",
                 min = 0,
                 max = 100,
                 step = 1,
@@ -5199,8 +5415,8 @@ function TEB.CreateSettingsWindow()
             },   
             {
                 type = "slider",
-                name = "Combat indicator transparency",
-                tooltip = "Set the combat indicator's transparency. Lower number means more transparent.",
+                name = "Combat indicator opacity",
+                tooltip = "Set the combat indicator's opacity.",
                 min = 0,
                 max = 100,
                 step = 1,
@@ -7262,21 +7478,45 @@ function TEB.CreateSettingsWindow()
 
 end
 
+-- Combat bar color opacity
+function TEB.CombatColor(eventCode, combatState)
+    inCombat = combatState or false
+    if combatIndicator then
+        EVENT_MANAGER:RegisterForUpdate("TEBCombatColorFade", 20, TEB.CombatColorFade)
+    end
+    -- local maxAlpha = combatOpacity/100
+    -- local incrementAlpha = maxAlpha / 20
+    
+    --[[if showCombatOpacity > 0 then
+        showCombatOpacity = showCombatOpacity - 1
+        TEBTopCombatBG:SetAlpha(maxAlpha)
+        combatAlpha = maxAlpha
+    end]] 
+end
+
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
+
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.CalculateBagItems)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_BANK, TEB.ShowBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_END, TEB.ShowBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CRAFTING_STATION_INTERACT, TEB.CraftingHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_END_CRAFTING_STATION_INTERACT, TEB.ShowBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_GUILD_BANK, TEB.GuildBankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CLOSE_GUILD_BANK, TEB.ShowBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CRAFTING_STATION_INTERACT, TEB.CraftingHideBar)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_GUILD_BANK, TEB.GuildBankHideBar)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_RETICLE_HIDDEN_UPDATE, TEB.HideBar)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ACTION_LAYER_POPPED, TEB.ShowBar)
+
+EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
- 
-EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_COMBAT_STATE, TEB.CombatColor)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CURRENCY_UPDATE, TEB.balance)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_LEVEL_UPDATE, TEB.UpdateLevel)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHAMPION_POINT_UPDATE, TEB.UpdateLevel)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ZONE_CHANGED, TEB.getZone)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
