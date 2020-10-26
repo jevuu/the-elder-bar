@@ -176,6 +176,7 @@ local vampirism_StageColor = {
     [4] = "red"
 }
 local font = "Univers57"
+local champion_Points_Soft_Cap = 810
 
 local gadgetSettings = {}
 local mount_Tracker = {}
