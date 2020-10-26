@@ -46,6 +46,8 @@ local foodTimerRunning = false
 local foodTimerVisible = false
 account = GetDisplayName("player")
 local trackerDropdown = {}
+local coordinates = ""
+local zoneNameDisplay = ""
 
 local backdropOpacity = 0
 local combatOpacity = 0
@@ -781,7 +783,10 @@ function TEB:RebuildBar()
                 gadgetReference[k][1]:SetHidden(true)
                 gadgetReference[k][2]:SetHidden(true)            
             end
-        end                   
+        end         
+
+        EVENT_MANAGER:UnregisterForUpdate("TEBZone")
+        TEB.getZoneRebuild()
 
         for i=1, #defaultGadgets do
             if gadgetList[i] ~= "(None)" then
@@ -853,6 +858,7 @@ function TEB:RebuildBar()
             end  
             if gadgetList[i] == "Location" then
                 lastGadget, firstGadgetAdded = TEB:RebuildLocation(lastGadget, firstGadgetAdded)
+                EVENT_MANAGER:RegisterForUpdate("TEBZone", 500, TEB.zone)
             end
             if gadgetList[i] == "Thief's Tools" then
                 lastGadget, firstGadgetAdded = TEB:RebuildTT(lastGadget, firstGadgetAdded)
@@ -2206,17 +2212,14 @@ function TEB.ShowToolTipLocation(self)
     local toolTipLeft = ""
     if location_DisplayPreference == "(x, y) Zone Name" then
         toolTipLeft = toolTipLeft .. "(Coordinates) Zone Name.\n\n"
-    end
-    if location_DisplayPreference == "Zone Name (x, y)" then
+    elseif location_DisplayPreference == "Zone Name (x, y)" then
         toolTipLeft = toolTipLeft .. "Zone Name (Coordinates).\n\n"
-    end
-    if location_DisplayPreference == "Zone Name" then
-        toolTipLeft = toolTipLeft .. "Current zone Name.\n\n"
-    end
-    if location_DisplayPreference == "x, y" then
+    elseif location_DisplayPreference == "Zone Name" then
+        toolTipLeft = toolTipLeft .. "Current Zone Name.\n\n"
+    elseif location_DisplayPreference == "x, y" then
         toolTipLeft = toolTipLeft .. "Current coordinates.\n\n"
     end
-    toolTipLeft = toolTipLeft .. zoneName.."\n".."("..coordinates..")"    
+    toolTipLeft = toolTipLeft .. zoneNameDisplay.."\n".."("..coordinates..")"    
     local toolTipRight = ""
     
     FormatTooltip(toolTipLeft, toolTipRight)
@@ -3307,28 +3310,43 @@ end
 ------------------------------------------------------
 -- zone
 ------------------------------------------------------
+-- Gets the zone and subzone name when the player changes zones.
+-- Registered to trigger by EVENT_ZONE_CHANGED
+function TEB.getZone(eventCode, zoneName, subZoneName)
+	zoneNameDisplay = subZoneName or ""
+	if zoneNameDisplay == "" then zoneNameDisplay = zoneName end
+end
+
+-- This is only called when RebuildBar is called so that the widget can be
+-- populated with zone info after reconfiguring it or (re)loading the UI.
+function TEB.getZoneRebuild()
+	zoneNameDisplay = GetPlayerActiveSubzoneName()
+	if zoneNameDisplay == "" then zoneNameDisplay = GetUnitZone("player") end
+end
+
+-- This function is responsible for updating what is displayed on the widget.
+-- This is registered for update with the name "TEBZone"
 function TEB.zone()
-	local x, y, heading = GetMapPlayerPosition("player")
+    local x, y, heading = GetMapPlayerPosition("player")
 	x = round(x * 100,0)
-	y = round(y * 100,0)
-	zoneName = GetPlayerActiveSubzoneName()
-	if zoneName == "" then zoneName = GetUnitZone("player") end
-	
-	zoneName = TEB.fixname(zoneName)
-	coordinates = string.format(x)..", "..string.format(y)
-	
-	if location_DisplayPreference == "(x, y) Zone Name" then
-    	location = "("..coordinates..") "..zoneName
+    y = round(y * 100,0)
+    coordinates = string.format(x)..", "..string.format(y)
+
+    if location_DisplayPreference == "(x, y) Zone Name" then
+        location = "("..coordinates..") "..zoneNameDisplay
+    elseif location_DisplayPreference == "Zone Name (x, y)" then
+        location = zoneNameDisplay.." ("..coordinates..")"
+    elseif location_DisplayPreference == "Zone Name" then
+        location = zoneNameDisplay
+    elseif location_DisplayPreference == "x, y" then
+        location = coordinates
     end
-	if location_DisplayPreference == "Zone Name (x, y)" then
-    	location = zoneName.." ("..coordinates..")"
-    end
-	if location_DisplayPreference == "Zone Name" then
-    	location = zoneName
-    end
-	if location_DisplayPreference == "x, y" then
-    	location = coordinates
-    end
+     
+    if gadgetText["Location"] then
+        TEBTopLocation:SetText(location)
+    else
+        TEBTopLocation:SetText("")
+    end  
 end
 	
 ------------------------------------------------------
@@ -4564,7 +4582,6 @@ function TEB.OnUpdate()
         TEB.latency()
         TEB.fps()
         TEB.weaponcharge()
-        TEB.zone()
         TEB.memory()
         TEB.recall()
         TEB.pvp()
@@ -4686,12 +4703,7 @@ function TEB.OnUpdate()
             TEBTopWC:SetText(weaponCharge)
         else
             TEBTopWC:SetText("")
-        end            
-        if gadgetText["Location"] then
-            TEBTopLocation:SetText(location)
-        else
-            TEBTopLocation:SetText("")
-        end          
+        end    
         if gadgetText["Thief's Tools"] then
             TEBTopTT:SetText(tt)
         else
@@ -7278,6 +7290,8 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBl
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
  
 EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ZONE_CHANGED, TEB.getZone)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
