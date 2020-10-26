@@ -827,7 +827,7 @@ function TEB:RebuildBar()
         end         
 
         EVENT_MANAGER:UnregisterForUpdate("TEBZone")
-        TEB.getZoneRebuild()
+        TEB.getZone()
 
         TEB.UpdateAllCurrency()
         TEB.UpdateLevel()
@@ -3500,14 +3500,9 @@ end
 ------------------------------------------------------
 -- Gets the zone and subzone name when the player changes zones.
 -- Registered to trigger by EVENT_ZONE_CHANGED
-function TEB.getZone(eventCode, zoneName, subZoneName)
-	zoneNameDisplay = subZoneName or ""
-	if zoneNameDisplay == "" then zoneNameDisplay = zoneName end
-end
-
--- This is only called when RebuildBar is called so that the widget can be
--- populated with zone info after reconfiguring it or (re)loading the UI.
-function TEB.getZoneRebuild()
+-- You would think that it would be reliable to pass in zoneName and subZoneName
+-- from the event, but sometimes they're empty strings for some reason.
+function TEB.getZone()
 	zoneNameDisplay = GetPlayerActiveSubzoneName()
 	if zoneNameDisplay == "" then zoneNameDisplay = GetUnitZone("player") end
 end
