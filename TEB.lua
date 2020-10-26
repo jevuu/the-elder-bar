@@ -177,6 +177,7 @@ local vampirism_StageColor = {
     [4] = "red"
 }
 local font = "Univers57"
+local champion_Points_Soft_Cap = 810
 
 local gadgetSettings = {}
 local mount_Tracker = {}
@@ -823,6 +824,9 @@ function TEB:RebuildBar()
             end
         end                   
 
+        TEB.UpdateAllCurrency()
+        TEB.UpdateLevel()
+
         for i=1, #defaultGadgets do
             if gadgetList[i] ~= "(None)" then
                 TEB.SetIcon(gadgetList[i], "normal")                                                             
@@ -836,7 +840,6 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Gold" then
                 lastGadget, firstGadgetAdded = TEB:RebuildGold(lastGadget, firstGadgetAdded)
-                TEB.UpdateGold()
             end
             if gadgetList[i] == "Tel Var Stones" then
                 lastGadget, firstGadgetAdded = TEB:RebuildTelvarStones(lastGadget, firstGadgetAdded)
@@ -2997,203 +3000,28 @@ end
 ------------------------------------------------------
 -- balance
 ------------------------------------------------------
-function TEB.balance()
-    telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
-    telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
-    telvar = telvarc + telvarb
-    --goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-    --goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
-    --goldTotal = goldCharacter + goldBank
-    eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
-    maxeventtickets = 12
-    --goldBankUnformatted = goldBank
-    
-    if eventtickets > 0 then
-        etHasTickets = true
-    else
-        etHasTickets = false
+function TEB.balance(eventCode, currencyType)
+    if currencyType == 1 then
+        TEB.UpdateGold()
+    elseif currencyType == 2 then
+        TEB.UpdateAP()
+    elseif currencyType == 3 then
+        TEB.UpdateTelvar()
+    elseif currencyType == 4 then
+        TEB.UpdateWritVouchers()
+    elseif currencyType == 5 then
+        TEB.UpdateTransmutateCrystals()
+    --elseif currencyType == 6 then
+    --    TEB.UpdateCrownGems()
+    --elseif currencyType == 7 then
+    --    TEB.UpdateCrowns()
+    --elseif currencyType == 8 then
+    --    TEB.UpdateStyleStones()
+    elseif currencyType == 9 then
+        TEB.UpdateEventTickets()
+    --elseif currencyType == 10 then
+        --TEB.UpdateUndauntedKeys()
     end
-    
-    if thousandsSeparator then
-    --    goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
-    --    goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBank))
-    --    goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
-        telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(telvar))
-    else
-    --    goldCharacter = string.format(goldCharacter)
-    --    goldBank = string.format(goldBank)
-    --    goldTotal = string.format(goldTotal)        
-        telvar = string.format(telvar)        
-    end
-
-    --local trackedGold = 0
-    
-    --[[
-    if gold_DisplayPreference == "gold on character" then
-        gold = goldCharacter
-    end
-    if gold_DisplayPreference == "gold on character/gold in bank" then
-        gold = goldCharacter.."/".. goldBank
-    end
-    if gold_DisplayPreference == "gold on character (gold in bank)" then
-        gold = goldCharacter.." ("..goldBank..")"
-    end
-    if gold_DisplayPreference == "character+bank gold" then
-        gold = goldTotal
-    end
-    if gold_DisplayPreference == "tracked gold" or gold_DisplayPreference == "tracked+bank gold" then
-        for k, v in pairs(gold_Tracker) do
-            if v[1] then
-                trackedGold = trackedGold + v[2]
-            end
-        end   
-    end            
-
-    if gold_DisplayPreference == "tracked gold" then
-        if thousandsSeparator then     
-            gold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(trackedGold))
-        else
-            gold = goldBankUnformatted + trackedGold
-        end
-    end        
-    if gold_DisplayPreference == "tracked+bank gold" then
-        if thousandsSeparator then     
-            gold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBankUnformatted + trackedGold))
-        else
-            gold = goldBankUnformatted + trackedGold
-        end
-    end
-    ]]
-    
-    ap = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-    crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
-    writs = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
-
-    ap_Session = ap - ap_SessionStartPoints
-    ap_Hour = 0
-    if os.time() - ap_SessionStart > 0 then
-        if os.time() - ap_SessionStart < 3600 then
-            ap_Hour = math.floor(ap_Session)
-        else
-            ap_Hour = math.floor(ap_Session / ((os.time() - ap_SessionStart) / 3600))
-        end            
-    end
-    
-    if thousandsSeparator then
-        ap = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap))
-        ap_Session = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Session))
-        ap_Hour = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Hour))
-        crystal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(crystal))
-        writs = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(writs))
-    else
-        ap = string.format(ap) 
-        ap_Session = string.format(ap_Session) 
-        ap_Hour = string.format(ap_Hour) 
-        crystal = string.format(crystal) 
-        writs = string.format(writs) 
-    end
-    
-    local etIcon = "normal"
-    local etColor = "|ccccccc"
-    if eventtickets >= et_Warning then
-        etColor = "|cffdf00"
-        etIcon = "warning"
-    end
-    if eventtickets >= et_Danger then
-        etColor = "|ccc0000"
-        etIcon = "danger"
-    end
-    TEB.SetIcon("Event Tickets", etIcon)
-    
-    eventtickets = etColor..string.format(eventtickets)
-    if et_DisplayPreference == "tickets/max" then
-        eventtickets = eventtickets.."/12"
-    end
-    
-    if ap_DisplayPreference == "Total Points" then
-        apString = ap
-    end
-    if ap_DisplayPreference == "Session Points" then
-        apString = ap_Session
-    end
-    if ap_DisplayPreference == "Points Per Hour" then
-        apString = ap_Hour
-    end
-    if ap_DisplayPreference == "Total Points/Points Per Hour" then
-        apString = ap.."/"..ap_Hour
-    end
-    if ap_DisplayPreference == "Session Points/Points Per Hour" then
-        apString = ap_Session.."/"..ap_Hour
-    end
-    if ap_DisplayPreference == "Total Points/Session Points" then
-        apString = ap.."/"..ap_Session
-    end
-    if ap_DisplayPreference == "Total Points/Session Points (Points Per Hour)" then
-        apString = ap.."/"..ap_Session.." ("..ap_Hour..")"
-    end
-    if ap_DisplayPreference == "Total Points/Session Points/Points Per Hour" then
-        apString = ap.."/"..ap_Session.."/"..ap_Hour
-    end
-    
-    lvl = GetUnitLevel("player")
-    cp = GetPlayerChampionPointsEarned()
-    
-    lvlText = ""
-
-	unspentWarrior = GetNumUnspentChampionPoints( 1 )
-	unspentMage = GetNumUnspentChampionPoints( 2 )
-    unspentThief = GetNumUnspentChampionPoints( 3 )
-    unspentTotal = unspentWarrior + unspentMage + unspentThief
-	local hasUnspentPoints = false
-	if unspentTotal > 0 then
-    	hasUnspentPoints = true
-    end
-    
-    local showUnspent = false
-    
-    if lvl < 50 then
-        if string.match(level_DisplayPreferenceNotMax, "Character Level") then
-            lvlText = string.format(lvl)
-        end
-        if string.match(level_DisplayPreferenceNotMax, "Champion Points") then
-            lvlText = string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceNotMax, "Character Level%/Champion Points") then
-            lvlText = string.format(lvl).."/"..string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceNotMax, "%(Unspent Points%)") and ((hasUnspentPoints and level_Dynamic) or not level_Dynamic) then
-            showUnspent = true
-        end
-    end          
-    if lvl == 50 then
-        if string.match(level_DisplayPreferenceMax, "Character Level") then
-            lvlText = string.format(lvl)
-        end
-        if string.match(level_DisplayPreferenceMax, "Champion Points") then
-            lvlText = string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceMax, "Character Level%/Champion Points") then
-            lvlText = string.format(lvl).."/"..string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceMax, "%(Unspent Points%)") and ((hasUnspentPoints and level_Dynamic) or not level_Dynamic) then
-            showUnspent = true
-        end        
-    end
-    
-    if showUnspent then
-        lvlText = lvlText .. " ("
-        if unspentWarrior > 0 or not level_Dynamic then
-            lvlText = lvlText .. "|CD6660C|t18:18:esoui/art/champion/champion_points_health_icon.dds|t"..string.format(unspentWarrior)
-        end
-        if unspentThief > 0 or not level_Dynamic then
-            lvlText = lvlText .."|C51AB0D|t18:18:esoui/art/champion/champion_points_stamina_icon.dds|t"..string.format(unspentThief)
-        end
-        if unspentMage > 0 or not level_Dynamic then
-            lvlText = lvlText .."|C1970C9|t18:18:esoui/art/champion/champion_points_magicka_icon.dds|t"..string.format(unspentMage)
-        end
-        lvlText = lvlText .."|CCCCCCC)"
-    end
-    
 end
 
 ------------------------------------------------------
@@ -3251,7 +3079,268 @@ function TEB.UpdateGold()
             gold = goldBankUnformatted + trackedGold
         end
     end
+
+    if gadgetText["Gold"] then
+        TEBTopGold:SetText(gold)
+    else
+        TEBTopGold:SetText("")
+    end
 end
+
+------------------------------------------------------
+-- UpdateAP
+------------------------------------------------------    
+function TEB.UpdateAP()
+    ap = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+
+    ap_Session = ap - ap_SessionStartPoints
+    ap_Hour = 0
+    if os.time() - ap_SessionStart > 0 then
+        if os.time() - ap_SessionStart < 3600 then
+            ap_Hour = math.floor(ap_Session)
+        else
+            ap_Hour = math.floor(ap_Session / ((os.time() - ap_SessionStart) / 3600))
+        end            
+    end
+
+    if thousandsSeparator then
+        ap = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap))
+        ap_Session = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Session))
+        ap_Hour = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Hour))
+    else
+        ap = string.format(ap) 
+        ap_Session = string.format(ap_Session) 
+        ap_Hour = string.format(ap_Hour) 
+    end
+    
+    if ap_DisplayPreference == "Total Points" then
+        apString = ap
+    end
+    if ap_DisplayPreference == "Session Points" then
+        apString = ap_Session
+    end
+    if ap_DisplayPreference == "Points Per Hour" then
+        apString = ap_Hour
+    end
+    if ap_DisplayPreference == "Total Points/Points Per Hour" then
+        apString = ap.."/"..ap_Hour
+    end
+    if ap_DisplayPreference == "Session Points/Points Per Hour" then
+        apString = ap_Session.."/"..ap_Hour
+    end
+    if ap_DisplayPreference == "Total Points/Session Points" then
+        apString = ap.."/"..ap_Session
+    end
+    if ap_DisplayPreference == "Total Points/Session Points (Points Per Hour)" then
+        apString = ap.."/"..ap_Session.." ("..ap_Hour..")"
+    end
+    if ap_DisplayPreference == "Total Points/Session Points/Points Per Hour" then
+        apString = ap.."/"..ap_Session.."/"..ap_Hour
+    end
+       
+    if gadgetText["Alliance Points"] then
+        TEBTopAP:SetText(apString) 
+    else
+        TEBTopAP:SetText("")
+    end   
+end
+
+------------------------------------------------------
+-- UpdateTelvar
+------------------------------------------------------    
+function TEB.UpdateTelvar()
+    telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
+    telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
+    telvar = telvarc + telvarb
+
+    if thousandsSeparator then
+        telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(telvar))
+    else
+        telvar = string.format(telvar)        
+    end
+    
+    if gadgetText["Tel Var Stones"] then
+        TEBTopTelvar:SetText(string.format(telvar))   
+    else
+        TEBTopTelvar:SetText("")   
+    end
+end
+
+------------------------------------------------------
+-- UpdateWritVouchers
+------------------------------------------------------   
+function TEB.UpdateWritVouchers()
+    writs = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
+
+    if thousandsSeparator then
+        writs = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(writs))
+    else
+        writs = string.format(writs) 
+    end
+    
+    if gadgetText["Writ Vouchers"] then
+        TEBTopWrit:SetText(string.format(writs))  
+    else
+        TEBTopWrit:SetText("")
+    end
+end
+
+------------------------------------------------------
+-- UpdateTransmuteCrystals
+------------------------------------------------------    
+function TEB.UpdateTransmutateCrystals()
+    crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
+
+    if thousandsSeparator then
+        crystal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(crystal))
+    else
+        crystal = string.format(crystal) 
+    end
+
+    if gadgetText["Transmute Crystals"] then
+        TEBTopTC:SetText(string.format(crystal))   
+    else
+        TEBTopTC:SetText("")   
+    end
+end
+------------------------------------------------------
+-- UpdateEventTickets
+------------------------------------------------------
+function TEB.UpdateEventTickets()
+    eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
+    maxeventtickets = 12
+
+    if eventtickets > 0 then
+        etHasTickets = true
+    else
+        etHasTickets = false
+    end
+    
+    local etIcon = "normal"
+    local etColor = "|ccccccc"
+    if eventtickets >= et_Warning then
+        etColor = "|cffdf00"
+        etIcon = "warning"
+    end
+    if eventtickets >= et_Danger then
+        etColor = "|ccc0000"
+        etIcon = "danger"
+    end
+    TEB.SetIcon("Event Tickets", etIcon)
+    
+    eventtickets = etColor..string.format(eventtickets)
+    if et_DisplayPreference == "tickets/max" then
+        eventtickets = eventtickets.."/12"
+    end
+      
+    if gadgetText["Event Tickets"] then
+        TEBTopET:SetText(eventtickets)
+    else
+        TEBTopET:SetText("")
+    end                                  
+end
+
+------------------------------------------------------
+-- UpdateAllCurrency
+------------------------------------------------------  
+function TEB.UpdateAllCurrency()
+    TEB.UpdateGold()
+    TEB.UpdateAP()
+    TEB.UpdateTelvar()
+    TEB.UpdateWritVouchers()
+    TEB.UpdateTransmutateCrystals()
+    TEB.UpdateEventTickets()
+end
+
+------------------------------------------------------
+-- UpdateLevel
+------------------------------------------------------  
+function TEB.UpdateLevel()
+
+    lvl = GetUnitLevel("player")
+    cp = GetPlayerChampionPointsEarned()
+    
+    local cp_Over_Soft_Cap = cp - champion_Points_Soft_Cap
+    local cp_modulus = cp % 3
+    local cp_dividend = (cp_Over_Soft_Cap - cp_modulus) / 3
+
+    lvlText = ""
+    local cp_Over_Soft_Cap_Warrior = 0
+    local cp_Over_Soft_Cap_Thief = 0
+    local cp_Over_Soft_Cap_Mage = 0
+
+    if cp > champion_Points_Soft_Cap then
+        if cp_modulus >= 1 then 
+            cp_Over_Soft_Cap_Warrior = cp_dividend + 1
+        end
+        if cp_modulus == 2 then
+            cp_Over_Soft_Cap_Thief = cp_dividend + 1
+        end
+        cp_Over_Soft_Cap_Mage = cp_dividend
+    end
+
+	unspentWarrior = GetNumUnspentChampionPoints( 1 ) - cp_Over_Soft_Cap_Warrior
+	unspentMage = GetNumUnspentChampionPoints( 2 ) - cp_Over_Soft_Cap_Mage
+    unspentThief = GetNumUnspentChampionPoints( 3 ) - cp_Over_Soft_Cap_Thief
+    unspentTotal = unspentWarrior + unspentMage + unspentThief
+	local hasUnspentPoints = false
+	if unspentTotal > 0 then
+    	hasUnspentPoints = true
+    end
+    
+    local showUnspent = false
+    
+    if lvl < 50 then
+        if string.match(level_DisplayPreferenceNotMax, "Character Level") then
+            lvlText = string.format(lvl)
+        end
+        if string.match(level_DisplayPreferenceNotMax, "Champion Points") then
+            lvlText = string.format(cp)
+        end
+        if string.match(level_DisplayPreferenceNotMax, "Character Level%/Champion Points") then
+            lvlText = string.format(lvl).."/"..string.format(cp)
+        end
+        if string.match(level_DisplayPreferenceNotMax, "%(Unspent Points%)") and ((hasUnspentPoints and level_Dynamic) or not level_Dynamic) then
+            showUnspent = true
+        end
+    end          
+    if lvl == 50 then
+        if string.match(level_DisplayPreferenceMax, "Character Level") then
+            lvlText = string.format(lvl)
+        end
+        if string.match(level_DisplayPreferenceMax, "Champion Points") then
+            lvlText = string.format(cp)
+        end
+        if string.match(level_DisplayPreferenceMax, "Character Level%/Champion Points") then
+            lvlText = string.format(lvl).."/"..string.format(cp)
+        end
+        if string.match(level_DisplayPreferenceMax, "%(Unspent Points%)") and ((hasUnspentPoints and level_Dynamic) or not level_Dynamic) then
+            showUnspent = true
+        end        
+    end
+    
+    if showUnspent then
+        lvlText = lvlText .. " ("
+        if unspentWarrior > 0 or not level_Dynamic then
+            lvlText = lvlText .. "|CD6660C|t18:18:esoui/art/champion/champion_points_health_icon.dds|t"..string.format(unspentWarrior)
+        end
+        if unspentThief > 0 or not level_Dynamic then
+            lvlText = lvlText .."|C51AB0D|t18:18:esoui/art/champion/champion_points_stamina_icon.dds|t"..string.format(unspentThief)
+        end
+        if unspentMage > 0 or not level_Dynamic then
+            lvlText = lvlText .."|C1970C9|t18:18:esoui/art/champion/champion_points_magicka_icon.dds|t"..string.format(unspentMage)
+        end
+        lvlText = lvlText .."|CCCCCCC)"
+    end
+    
+    if gadgetText["Level"] then
+        TEBTopLevel:SetText(string.format(lvlText)) 
+    else
+        TEBTopLevel:SetText("")
+    end   
+
+end
+
 ------------------------------------------------------
 -- mounttimer
 ------------------------------------------------------    
@@ -4701,7 +4790,6 @@ end
 function TEB.OnUpdate()
     if refreshTimer > 19 then
         TEB.playername()
-        TEB.balance()
         TEB.skyshards()
         TEB.bags()
         TEB.mounttimer()
@@ -4734,36 +4822,6 @@ function TEB.OnUpdate()
        --gold = "737,011"
         --lvlText="734"
         --skyShardsInfo="1/11"
-        if gadgetText["Gold"] then
-            TEBTopGold:SetText(gold)
-        else
-            TEBTopGold:SetText("")
-        end
-        if gadgetText["Tel Var Stones"] then
-            TEBTopTelvar:SetText(string.format(telvar))   
-        else
-            TEBTopTelvar:SetText("")   
-        end
-        if gadgetText["Transmute Crystals"] then
-            TEBTopTC:SetText(string.format(crystal))   
-        else
-            TEBTopTC:SetText("")   
-        end
-        if gadgetText["Writ Vouchers"] then
-            TEBTopWrit:SetText(string.format(writs))  
-        else
-            TEBTopWrit:SetText("")
-        end   
-        if gadgetText["Alliance Points"] then
-            TEBTopAP:SetText(apString) 
-        else
-            TEBTopAP:SetText("")
-        end   
-        if gadgetText["Level"] then
-            TEBTopLevel:SetText(string.format(lvlText)) 
-        else
-            TEBTopLevel:SetText("")
-        end   
         if gadgetText["Bag Space"] then
             TEBTopBag:SetText(string.format(bagInfo))
         else
@@ -4873,12 +4931,7 @@ function TEB.OnUpdate()
             TEBTopMail:SetText(unread_mail)
         else
             TEBTopMail:SetText("")
-        end  
-        if gadgetText["Event Tickets"] then
-            TEBTopET:SetText(eventtickets)
-        else
-            TEBTopET:SetText("")
-        end                                  
+        end
         if gadgetText["Food Buff Timer"] then
             TEBTopFood:SetText(food)
         else
@@ -7452,7 +7505,10 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBl
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_COMBAT_STATE, TEB.CombatColor)
 
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MONEY_UPDATE, TEB.UpdateGold)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CURRENCY_UPDATE, TEB.balance)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_LEVEL_UPDATE, TEB.UpdateLevel)
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHAMPION_POINT_UPDATE, TEB.UpdateLevel)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
