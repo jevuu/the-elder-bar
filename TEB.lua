@@ -4548,7 +4548,6 @@ end
 --====================================================
 function TEB.OnUpdate()
     if refreshTimer > 19 then
-        TEB.playername()
         TEB.balance()
         TEB.skyshards()
         TEB.bags()
