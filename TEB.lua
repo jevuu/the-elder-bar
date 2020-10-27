@@ -3273,13 +3273,16 @@ function TEB.UpdateLevel()
     local cp_Over_Soft_Cap_Mage = 0
 
     if cp > champion_Points_Soft_Cap then
+        cp_Over_Soft_Cap_Warrior = cp_dividend
+        cp_Over_Soft_Cap_Thief = cp_dividend
+        cp_Over_Soft_Cap_Mage = cp_dividend
+        
         if cp_modulus >= 1 then 
-            cp_Over_Soft_Cap_Warrior = cp_dividend + 1
+            cp_Over_Soft_Cap_Warrior = cp_Over_Soft_Cap_Warrior + 1
         end
         if cp_modulus == 2 then
-            cp_Over_Soft_Cap_Thief = cp_dividend + 1
+            cp_Over_Soft_Cap_Thief = cp_Over_Soft_Cap_Thief + 1
         end
-        cp_Over_Soft_Cap_Mage = cp_dividend
     end
 
 	unspentWarrior = GetNumUnspentChampionPoints( 1 ) - cp_Over_Soft_Cap_Warrior
