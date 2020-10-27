@@ -4477,8 +4477,8 @@ end
 ------------------------------------------------------
 -- Mail
 ------------------------------------------------------
-function TEB.mail()
-    unread_mail = GetNumUnreadMail()
+function TEB.mail(eventCode, numUnread)
+    unread_mail = numUnread --GetNumUnreadMail()
     
     if unread_mail > 0 then
         if not mailUnread then
@@ -4500,7 +4500,12 @@ function TEB.mail()
         end
     end
     if mail_Good and unread_mail > 0 then unread_mail = "|c00e900"..string.format(unread_mail) end    
-    
+                
+    if gadgetText["Unread Mail"] then
+        TEBTopMail:SetText(unread_mail)
+    else
+        TEBTopMail:SetText("")
+    end
 end
 
 ------------------------------------------------------
@@ -4820,7 +4825,6 @@ function TEB.OnUpdate()
         TEB.recall()
         TEB.pvp()
         TEB.enlightenment()
-        TEB.mail()
         TEB.buffs()
         TEB.bounty()
 
@@ -4932,11 +4936,6 @@ function TEB.OnUpdate()
             TEBTopEnlightenment:SetText(enlightenment)
         else
             TEBTopEnlightenment:SetText("")
-        end            
-        if gadgetText["Unread Mail"] then
-            TEBTopMail:SetText(unread_mail)
-        else
-            TEBTopMail:SetText("")
         end
         if gadgetText["Food Buff Timer"] then
             TEBTopFood:SetText(food)
@@ -7517,6 +7516,8 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_LEVEL_UPDATE, TEB.UpdateLevel)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHAMPION_POINT_UPDATE, TEB.UpdateLevel)
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ZONE_CHANGED, TEB.getZone)
+
+EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MAIL_NUM_UNREAD_CHANGED, TEB.mail)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
