@@ -901,6 +901,7 @@ function TEB:RebuildBar()
             end  
             if gadgetList[i] == "Weapon Charge" then
                 lastGadget, firstGadgetAdded = TEB:RebuildWC(lastGadget, firstGadgetAdded)
+                TEB.weaponcharge()
             end  
             if gadgetList[i] == "Location" then
                 lastGadget, firstGadgetAdded = TEB:RebuildLocation(lastGadget, firstGadgetAdded)
@@ -3836,7 +3837,11 @@ function TEB.weaponcharge()
         end
     end
 
-
+    if gadgetText["Weapon Charge"] then
+        TEBTopWC:SetText(weaponCharge)
+    else
+        TEBTopWC:SetText("")
+    end  
 end
 
 function getpoisoncount(slotNum)
@@ -4830,7 +4835,6 @@ function TEB.OnUpdate()
         TEB.bank()
         TEB.latency()
         TEB.fps()
-        TEB.weaponcharge()
         TEB.memory()
         TEB.recall()
         TEB.pvp()
@@ -4911,12 +4915,7 @@ function TEB.OnUpdate()
             TEBTopFPS:SetText(fps)
         else
             TEBTopFPS:SetText("")
-        end            
-        if gadgetText["Weapon Charge"] then
-            TEBTopWC:SetText(weaponCharge)
-        else
-            TEBTopWC:SetText("")
-        end    
+        end   
         if gadgetText["Thief's Tools"] then
             TEBTopTT:SetText(tt)
         else
@@ -7504,6 +7503,9 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bags)
 EVENT_MANAGER:AddFilterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+EVENT_MANAGER:RegisterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.weaponcharge)
+EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
+EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
