@@ -664,7 +664,6 @@ function TEB:Initialize()
     TEB.LockUnlockGadgets(gadgetsLocked)
 
     TEB.ConvertGadgetSettings()
-    TEB.CalculateBagItems()    
     TEB:SetBackdropOpacity()
     TEB:SetBarPosition()
     TEB:SetBarWidth()
@@ -828,6 +827,9 @@ function TEB:RebuildBar()
 
         EVENT_MANAGER:UnregisterForUpdate("TEBZone")
         TEB.getZone()
+
+        TEB.bags()
+        TEB.CalculateBagItems()    
 
         TEB.UpdateAllCurrency()
         TEB.UpdateLevel()
@@ -3589,6 +3591,12 @@ function TEB.bags()
     if bag_DisplayPreference == "free%" then    
         bagInfo = bagColor..string.format(bagPercentFree).."%%"
     end
+
+    if gadgetText["Bag Space"] then
+        TEBTopBag:SetText(string.format(bagInfo))
+    else
+        TEBTopBag:SetText("")
+    end  
 end
 
 ------------------------------------------------------
@@ -4811,7 +4819,6 @@ end
 function TEB.OnUpdate()
     if refreshTimer > 19 then
         TEB.skyshards()
-        TEB.bags()
         TEB.mounttimer()
         TEB.experience()
         TEB.currenttime()
@@ -4839,12 +4846,7 @@ function TEB.OnUpdate()
 
        --gold = "737,011"
         --lvlText="734"
-        --skyShardsInfo="1/11"
-        if gadgetText["Bag Space"] then
-            TEBTopBag:SetText(string.format(bagInfo))
-        else
-            TEBTopBag:SetText("")
-        end         
+        --skyShardsInfo="1/11"      
         if gadgetText["Mount Timer"] then
             TEBTopMount:SetText(string.format(mountlbltxt))
         else
@@ -7500,6 +7502,8 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
+EVENT_MANAGER:RegisterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bags)
+EVENT_MANAGER:AddFilterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
