@@ -829,6 +829,8 @@ function TEB:RebuildBar()
         EVENT_MANAGER:UnregisterForUpdate("TEBMemory")
         EVENT_MANAGER:UnregisterForUpdate("TEBFPS")
         EVENT_MANAGER:UnregisterForUpdate("TEBLatency")
+        EVENT_MANAGER:UnregisterForUpdate("TEBClock")
+
         TEB.getZone()
 
         TEB.bags()
@@ -879,6 +881,7 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Clock" then
                 lastGadget, firstGadgetAdded = TEB:RebuildClock(lastGadget, firstGadgetAdded)
+                EVENT_MANAGER:RegisterForUpdate("TEBClock", 1000, TEB.currenttime)
             end
             if gadgetList[i] == "Sky Shards" then
                 lastGadget, firstGadgetAdded = TEB:RebuildSkyShards(lastGadget, firstGadgetAdded)
@@ -3467,6 +3470,12 @@ function TEB.currenttime()
     if clock_DisplayPreference == "local time/ingame time" then
         clock = currentTime.."/"..ingameTime
     end
+         
+    if gadgetText["Clock"] then
+        TEBTopTime:SetText(clock)
+    else
+        TEBTopTime:SetText("")
+    end  
 end
 
 ------------------------------------------------------
@@ -4869,7 +4878,7 @@ function TEB.OnUpdate()
     if refreshTimer > 19 then
         TEB.skyshards()
         TEB.mounttimer()
-        TEB.currenttime()
+        --TEB.currenttime()
         TEB.blacksmithing()
         TEB.clothing()
         TEB.woodworking()
@@ -4896,12 +4905,7 @@ function TEB.OnUpdate()
             TEBTopMount:SetText(string.format(mountlbltxt))
         else
             TEBTopMount:SetText("")
-        end     
-        if gadgetText["Clock"] then
-            TEBTopTime:SetText(clock)
-        else
-            TEBTopTime:SetText("")
-        end   
+        end 
         if gadgetText["Soul Gems"] then
             TEBTopSoulGems:SetText(soulGemInfo)
         else
