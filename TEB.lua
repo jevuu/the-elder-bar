@@ -871,6 +871,7 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Experience" then
                 lastGadget, firstGadgetAdded = TEB:RebuildXP(lastGadget, firstGadgetAdded)
+                TEB.experience()
             end
             if gadgetList[i] == "Clock" then
                 lastGadget, firstGadgetAdded = TEB:RebuildClock(lastGadget, firstGadgetAdded)
@@ -3500,6 +3501,11 @@ function TEB.experience()
         gxpString = gxp.."/"..gmaxxp
     end
 
+    if gadgetText["Experience"] then
+        TEBTopXP:SetText(gxpString)
+    else
+        TEBTopXP:SetText("")
+    end   
 end
 
 ------------------------------------------------------
@@ -4832,7 +4838,6 @@ function TEB.OnUpdate()
     if refreshTimer > 19 then
         TEB.skyshards()
         TEB.mounttimer()
-        TEB.experience()
         TEB.currenttime()
         TEB.blacksmithing()
         TEB.clothing()
@@ -4862,11 +4867,6 @@ function TEB.OnUpdate()
         else
             TEBTopMount:SetText("")
         end     
-        if gadgetText["Experience"] then
-            TEBTopXP:SetText(gxpString)
-        else
-            TEBTopXP:SetText("")
-        end   
         if gadgetText["Clock"] then
             TEBTopTime:SetText(clock)
         else
@@ -7539,6 +7539,8 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHAMPION_POINT_UPDATE, TEB.Update
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ZONE_CHANGED, TEB.getZone)
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MAIL_NUM_UNREAD_CHANGED, TEB.mail)
+
+EVENT_MANAGER:RegisterForEvent("TEBExperience", EVENT_EXPERIENCE_UPDATE, TEB.experience)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
