@@ -1,7 +1,7 @@
 TEB = {} 
 TEB.name = "TEB"
 TEB.settingsRev = 6
-TEB.version = "10.0.3"
+TEB.version = "10.0.3-P"
 
 local LAM2 = LibAddonMenu2
 local LFDB = LIB_FOOD_DRINK_BUFF
