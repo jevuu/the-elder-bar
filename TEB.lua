@@ -826,6 +826,9 @@ function TEB:RebuildBar()
         end         
 
         EVENT_MANAGER:UnregisterForUpdate("TEBZone")
+        EVENT_MANAGER:UnregisterForUpdate("TEBMemory")
+        EVENT_MANAGER:UnregisterForUpdate("TEBFPS")
+        EVENT_MANAGER:UnregisterForUpdate("TEBLatency")
         TEB.getZone()
 
         TEB.bags()
@@ -841,6 +844,7 @@ function TEB:RebuildBar()
             
             if gadgetList[i] == "Latency" then
                 lastGadget, firstGadgetAdded = TEB:RebuildLatency(lastGadget, firstGadgetAdded)
+                EVENT_MANAGER:RegisterForUpdate("TEBLatency", 500, TEB.latency)
             end
             if gadgetList[i] == "Level" then
                 lastGadget, firstGadgetAdded = TEB:RebuildLevel(lastGadget, firstGadgetAdded)
@@ -900,6 +904,7 @@ function TEB:RebuildBar()
             end  
             if gadgetList[i] == "FPS" then
                 lastGadget, firstGadgetAdded = TEB:RebuildFPS(lastGadget, firstGadgetAdded)
+                EVENT_MANAGER:RegisterForUpdate("TEBFPS", 500, TEB.fps)
             end  
             if gadgetList[i] == "Weapon Charge" then
                 lastGadget, firstGadgetAdded = TEB:RebuildWC(lastGadget, firstGadgetAdded)
@@ -914,6 +919,7 @@ function TEB:RebuildBar()
             end                              
             if gadgetList[i] == "Memory Usage" then
                 lastGadget, firstGadgetAdded = TEB:RebuildMemory(lastGadget, firstGadgetAdded)
+                EVENT_MANAGER:RegisterForUpdate("TEBMemory", 1000, TEB.memory)
             end                              
             if gadgetList[i] == "Fast Travel Timer" and (ftTimerRunning or not ft_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildFT(lastGadget, firstGadgetAdded)
@@ -2865,6 +2871,12 @@ end
 ------------------------------------------------------
 function TEB.memory()
     memory = string.format(math.floor(collectgarbage("count") / 1024 + 0.5)).."MB"
+               
+    if gadgetText["Memory Usage"] then
+        TEBTopMemory:SetText(memory)
+    else
+        TEBTopMemory:SetText("")
+    end   
 end
 
 ------------------------------------------------------
@@ -3698,6 +3710,12 @@ function TEB.latency()
     else
         TEB.SetIcon("Latency", "normal")
     end  	
+           
+    if gadgetText["Latency"] then
+        TEBTopLatency:SetText(latency)
+    else
+        TEBTopLatency:SetText("")
+    end
 end
 
 ------------------------------------------------------
@@ -3730,6 +3748,12 @@ function TEB.fps()
     else
         TEB.SetIcon("FPS", "normal")
     end     	
+         
+    if gadgetText["FPS"] then
+        TEBTopFPS:SetText(fps)
+    else
+        TEBTopFPS:SetText("")
+    end   
 end
 
 ------------------------------------------------------
@@ -4850,9 +4874,9 @@ function TEB.OnUpdate()
         TEB.woodworking()
         TEB.jewelrycrafting()
         TEB.bank()
-        TEB.latency()
-        TEB.fps()
-        TEB.memory()
+        --TEB.latency()
+        --TEB.fps()
+        --TEB.memory()
         TEB.recall()
         TEB.pvp()
         TEB.buffs()
@@ -4911,27 +4935,12 @@ function TEB.OnUpdate()
             TEBTopBank:SetText(bankInfo)
         else
             TEBTopBank:SetText("")
-        end           
-        if gadgetText["Latency"] then
-            TEBTopLatency:SetText(latency)
-        else
-            TEBTopLatency:SetText("")
-        end     
-        if gadgetText["FPS"] then
-            TEBTopFPS:SetText(fps)
-        else
-            TEBTopFPS:SetText("")
-        end   
+        end
         if gadgetText["Thief's Tools"] then
             TEBTopTT:SetText(tt)
         else
             TEBTopTT:SetText("")
-        end               
-        if gadgetText["Memory Usage"] then
-            TEBTopMemory:SetText(memory)
-        else
-            TEBTopMemory:SetText("")
-        end   
+        end
         if gadgetText["Fast Travel Timer"] then
             TEBTopFT:SetText(ft)
         else
