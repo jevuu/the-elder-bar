@@ -933,6 +933,7 @@ function TEB:RebuildBar()
             end 
             if gadgetList[i] == "Unread Mail" and (mailUnread or not mail_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildMail(lastGadget, firstGadgetAdded)
+                TEB.mail()
             end 
             if gadgetList[i] == "Event Tickets" and (etHasTickets or not et_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildET(lastGadget, firstGadgetAdded)
@@ -4536,8 +4537,8 @@ end
 ------------------------------------------------------
 -- Mail
 ------------------------------------------------------
-function TEB.mail(eventCode, numUnread)
-    unread_mail = numUnread --GetNumUnreadMail()
+function TEB.mail()
+    unread_mail = GetNumUnreadMail()
     
     if unread_mail > 0 then
         if not mailUnread then
