@@ -880,6 +880,7 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Durability" then
                 lastGadget, firstGadgetAdded = TEB:RebuildDurability(lastGadget, firstGadgetAdded)
+                TEB.durability()
             end
             if gadgetList[i] == "Blacksmithing Research Timer" and (blackSmithingTimerRunning or not research_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildBlacksmithingResearchTimer(lastGadget, firstGadgetAdded)
@@ -4023,7 +4024,13 @@ function TEB.durability()
     end    
     if durability_DisplayPreference == "most damanaged/repair cost" then
         durabilityInfo = durabilityColor..string.format(mostDamagedItem).."/"..string.format(mostDamagedCost).."g"
-    end            
+    end 
+    
+    if gadgetText["Durability"] then
+        TEBTopDurability:SetText(durabilityInfo)
+    else
+        TEBTopDurability:SetText("")
+    end  
 end
 
 ------------------------------------------------------
@@ -4827,7 +4834,6 @@ function TEB.OnUpdate()
         TEB.mounttimer()
         TEB.experience()
         TEB.currenttime()
-        TEB.durability()
         TEB.blacksmithing()
         TEB.clothing()
         TEB.woodworking()
@@ -4875,12 +4881,7 @@ function TEB.OnUpdate()
             TEBTopSkyShards:SetText(skyShardsInfo)
         else
             TEBTopSkyShards:SetText("")
-        end
-        if gadgetText["Durability"] then
-            TEBTopDurability:SetText(durabilityInfo)
-        else
-            TEBTopDurability:SetText("")
-        end              
+        end            
         if gadgetText["Blacksmithing Research Timer"] then
             TEBTopResearchBlacksmithing:SetText(blackSmithingInfo)
         else
@@ -7506,6 +7507,12 @@ EVENT_MANAGER:AddFilterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, R
 EVENT_MANAGER:RegisterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.weaponcharge)
 EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
+EVENT_MANAGER:RegisterForEvent("TEBDurability", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.durability)
+EVENT_MANAGER:AddFilterForEvent("TEBDurability", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
+EVENT_MANAGER:AddFilterForEvent("TEBDurability", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DURABILITY_CHANGE)
+EVENT_MANAGER:RegisterForEvent("TEBDurabilityGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.durability)
+EVENT_MANAGER:AddFilterForEvent("TEBDurabilityGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
+EVENT_MANAGER:AddFilterForEvent("TEBDurabilityGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
