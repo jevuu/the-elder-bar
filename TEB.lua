@@ -904,6 +904,7 @@ function TEB:RebuildBar()
             end  
             if gadgetList[i] == "Bank Space" then
                 lastGadget, firstGadgetAdded = TEB:RebuildBank(lastGadget, firstGadgetAdded)
+                TEB.bank()
             end  
             if gadgetList[i] == "FPS" then
                 lastGadget, firstGadgetAdded = TEB:RebuildFPS(lastGadget, firstGadgetAdded)
@@ -4882,7 +4883,6 @@ function TEB.OnUpdate()
         TEB.clothing()
         TEB.woodworking()
         TEB.jewelrycrafting()
-        TEB.bank()
         TEB.recall()
         TEB.pvp()
         TEB.buffs()
@@ -7514,6 +7514,11 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
 EVENT_MANAGER:RegisterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bags)
 EVENT_MANAGER:AddFilterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+
+EVENT_MANAGER:RegisterForEvent("TEBBank", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bank)
+EVENT_MANAGER:AddFilterForEvent("TEBBank", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BANK)
+EVENT_MANAGER:RegisterForEvent("TEBBankESOPlus", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bank)
+EVENT_MANAGER:AddFilterForEvent("TEBBankESOPlus", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_SUBSCRIBER_BANK)
 
 EVENT_MANAGER:RegisterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.weaponcharge)
 EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
