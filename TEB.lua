@@ -923,6 +923,7 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Enlightenment" and (enlightenmentVisible or not enlightenment_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildEnlightenment(lastGadget, firstGadgetAdded)
+                TEB.enlightenment()
             end 
             if gadgetList[i] == "Unread Mail" and (mailUnread or not mail_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildMail(lastGadget, firstGadgetAdded)
@@ -2918,7 +2919,12 @@ function TEB.enlightenment()
     else
         TEB.SetIcon("Enlightenment", "normal")
     end
-    
+      
+    if gadgetText["Enlightenment"] then
+        TEBTopEnlightenment:SetText(enlightenment)
+    else
+        TEBTopEnlightenment:SetText("")
+    end
 end
 
 
@@ -4849,7 +4855,7 @@ function TEB.OnUpdate()
         TEB.memory()
         TEB.recall()
         TEB.pvp()
-        TEB.enlightenment()
+        --TEB.enlightenment()
         TEB.buffs()
         TEB.bounty()
 
@@ -4936,11 +4942,6 @@ function TEB.OnUpdate()
             TEBTopKills:SetText(killCount)
         else
             TEBTopKills:SetText("")
-        end  
-        if gadgetText["Enlightenment"] then
-            TEBTopEnlightenment:SetText(enlightenment)
-        else
-            TEBTopEnlightenment:SetText("")
         end
         if gadgetText["Food Buff Timer"] then
             TEBTopFood:SetText(food)
@@ -7541,6 +7542,7 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ZONE_CHANGED, TEB.getZone)
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MAIL_NUM_UNREAD_CHANGED, TEB.mail)
 
 EVENT_MANAGER:RegisterForEvent("TEBExperience", EVENT_EXPERIENCE_UPDATE, TEB.experience)
+EVENT_MANAGER:RegisterForEvent("TEBEnlightenment", EVENT_EXPERIENCE_UPDATE, TEB.enlightenment)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
