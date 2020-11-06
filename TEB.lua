@@ -4855,7 +4855,6 @@ function TEB.OnUpdate()
         TEB.memory()
         TEB.recall()
         TEB.pvp()
-        --TEB.enlightenment()
         TEB.buffs()
         TEB.bounty()
 
