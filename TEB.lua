@@ -926,9 +926,12 @@ function TEB:RebuildBar()
                 lastGadget, firstGadgetAdded = TEB:RebuildMemory(lastGadget, firstGadgetAdded)
                 EVENT_MANAGER:RegisterForUpdate("TEBMemory", 1000, TEB.memory)
             end                              
-            if gadgetList[i] == "Fast Travel Timer" and (ftTimerRunning or not ft_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildFT(lastGadget, firstGadgetAdded)
+            if gadgetList[i] == "Fast Travel Timer" then
                 TEB.recallRegister()
+                if (ftTimerRunning or not ft_Dynamic or not gadgetsLocked) then
+                    lastGadget, firstGadgetAdded = TEB:RebuildFT(lastGadget, firstGadgetAdded)
+                    TEB.recallRegister()
+                end
             end   
             if gadgetList[i] == "Kill Counter" then
                 lastGadget, firstGadgetAdded = TEB:RebuildKillCounter(lastGadget, firstGadgetAdded)
@@ -2996,6 +2999,7 @@ function TEB.recall()
     if remain > 0 then 
         ftTimerRunning = true
     else
+        EVENT_MANAGER:UnregisterForUpdate("TEBRecall")
         ftTimerRunning = false
     end
     
