@@ -830,6 +830,7 @@ function TEB:RebuildBar()
         EVENT_MANAGER:UnregisterForUpdate("TEBFPS")
         EVENT_MANAGER:UnregisterForUpdate("TEBLatency")
         EVENT_MANAGER:UnregisterForUpdate("TEBClock")
+        EVENT_MANAGER:UnregisterForUpdate("TEBRecall")
 
         TEB.getZone()
 
@@ -927,6 +928,7 @@ function TEB:RebuildBar()
             end                              
             if gadgetList[i] == "Fast Travel Timer" and (ftTimerRunning or not ft_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildFT(lastGadget, firstGadgetAdded)
+                TEB.recallRegister()
             end   
             if gadgetList[i] == "Kill Counter" then
                 lastGadget, firstGadgetAdded = TEB:RebuildKillCounter(lastGadget, firstGadgetAdded)
@@ -3008,7 +3010,7 @@ function TEB.recall()
     
     seconds = math.floor(remain / 1000)
     
-    timeLeft = TEB.ConvertSeconds("simple", seconds)   
+    timeLeft = TEB.ConvertSeconds(ft_TimerDisplayPreference, seconds)   
     if thousandsSeparator then
         cost = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(cost)) 
     else
@@ -3026,6 +3028,16 @@ function TEB.recall()
     if ft_DisplayPreference == "time left/cost" then
         ft = timeLeft.."/"..cost.."g"
     end
+
+    if gadgetText["Fast Travel Timer"] then
+        TEBTopFT:SetText(ft)
+    else
+        TEBTopFT:SetText("")
+    end   
+end
+
+function TEB.recallRegister()
+    EVENT_MANAGER:RegisterForUpdate("TEBRecall", 1000, TEB.recall)
 end
 
 ------------------------------------------------------
@@ -4883,7 +4895,7 @@ function TEB.OnUpdate()
         TEB.clothing()
         TEB.woodworking()
         TEB.jewelrycrafting()
-        TEB.recall()
+        --TEB.recall()
         TEB.pvp()
         TEB.buffs()
         TEB.bounty()
@@ -4941,12 +4953,7 @@ function TEB.OnUpdate()
             TEBTopTT:SetText(tt)
         else
             TEBTopTT:SetText("")
-        end
-        if gadgetText["Fast Travel Timer"] then
-            TEBTopFT:SetText(ft)
-        else
-            TEBTopFT:SetText("")
-        end          
+        end     
         if gadgetText["Kill Counter"] then
             TEBTopKills:SetText(killCount)
         else
@@ -7558,6 +7565,8 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MAIL_NUM_UNREAD_CHANGED, TEB.mail
 
 EVENT_MANAGER:RegisterForEvent("TEBExperience", EVENT_EXPERIENCE_UPDATE, TEB.experience)
 EVENT_MANAGER:RegisterForEvent("TEBEnlightenment", EVENT_EXPERIENCE_UPDATE, TEB.enlightenment)
+
+EVENT_MANAGER:RegisterForEvent("TEBRecallRegister", EVENT_END_FAST_TRAVEL_INTERACTION, TEB.recallRegister)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
