@@ -927,7 +927,7 @@ function TEB:RebuildBar()
                 EVENT_MANAGER:RegisterForUpdate("TEBMemory", 1000, TEB.memory)
             end                              
             if gadgetList[i] == "Fast Travel Timer" then
-                TEB.recallRegister()
+                --TEB.recallRegister()
                 if (ftTimerRunning or not ft_Dynamic or not gadgetsLocked) then
                     lastGadget, firstGadgetAdded = TEB:RebuildFT(lastGadget, firstGadgetAdded)
                     TEB.recallRegister()
@@ -7571,7 +7571,7 @@ EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MAIL_NUM_UNREAD_CHANGED, TEB.mail
 EVENT_MANAGER:RegisterForEvent("TEBExperience", EVENT_EXPERIENCE_UPDATE, TEB.experience)
 EVENT_MANAGER:RegisterForEvent("TEBEnlightenment", EVENT_EXPERIENCE_UPDATE, TEB.enlightenment)
 
-EVENT_MANAGER:RegisterForEvent("TEBRecallRegister", EVENT_END_FAST_TRAVEL_INTERACTION, TEB.recallRegister)
+EVENT_MANAGER:RegisterForEvent("TEBRecallRegister", EVENT_PLAYER_ACTIVATED, TEB.recallRegister)
 
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
 ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
