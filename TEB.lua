@@ -3656,7 +3656,9 @@ end
 -- bank
 ------------------------------------------------------
 function TEB.bank()
-  	usedSlots, maxSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BANK)
+    usedSlots, maxSlots = GetNumBagUsedSlots(BAG_BANK), GetBagUseableSize(BAG_BANK) --PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+    usedSlots = usedSlots + GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK)
+    maxSlots = maxSlots + GetBagUseableSize(BAG_SUBSCRIBER_BANK)
 
   	local bankPercentUsed = math.floor((usedSlots / maxSlots) * 100)
   	local bankPercentFree = math.floor(((maxSlots - usedSlots) / maxSlots) * 100)
