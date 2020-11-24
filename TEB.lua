@@ -3594,7 +3594,7 @@ end
 -- bags
 ------------------------------------------------------
 function TEB.bags()
-  	bagUsedSlots, bagMaxSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+    bagUsedSlots, bagMaxSlots = GetNumBagUsedSlots(BAG_BACKPACK), GetBagUseableSize(BAG_BACKPACK) --PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
   	
   	local bagPercentUsed = math.floor((bagUsedSlots / bagMaxSlots) * 100)
   	local bagPercentFree = math.floor(((bagMaxSlots - bagUsedSlots) / bagMaxSlots) * 100)
