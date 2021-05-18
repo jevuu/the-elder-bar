@@ -179,7 +179,8 @@ local vampirism_StageColor = {
     [4] = "red"
 }
 local font = "Univers57"
-local champion_Points_Soft_Cap = 810
+local champion_Points_Soft_Cap = 3600
+local unread_mail = 0
 
 local gadgetSettings = {}
 local mount_Tracker = {}
@@ -667,7 +668,7 @@ function TEB:Initialize()
     TEB:SetBackdropOpacity()
     TEB:SetBarPosition()
     TEB:SetBarWidth()
-    TEB:RebuildBar()
+    TEB:RebuildBar(true)
     TEB:UpdateControlsPosition()
     TEB.ResizeBar()
 
@@ -802,7 +803,10 @@ end
 ------------------------------------------------------
 -- RebuildBar
 ------------------------------------------------------
-function TEB:RebuildBar()
+function TEB:RebuildBar(fullRebuild)
+    d("rebuild called")
+    local fullRebuild = fullRebuild or false
+
     if addonInitialized then
 
         TEB.DefragGadgets()
@@ -825,20 +829,25 @@ function TEB:RebuildBar()
             end
         end         
 
-        EVENT_MANAGER:UnregisterForUpdate("TEBZone")
-        EVENT_MANAGER:UnregisterForUpdate("TEBMemory")
-        EVENT_MANAGER:UnregisterForUpdate("TEBFPS")
-        EVENT_MANAGER:UnregisterForUpdate("TEBLatency")
-        EVENT_MANAGER:UnregisterForUpdate("TEBClock")
-        EVENT_MANAGER:UnregisterForUpdate("TEBRecall")
+        if fullRebuild then
+            d("fullrebuild")
+            EVENT_MANAGER:UnregisterForUpdate("TEBZone")
+            EVENT_MANAGER:UnregisterForUpdate("TEBMemory")
+            EVENT_MANAGER:UnregisterForUpdate("TEBFPS")
+            EVENT_MANAGER:UnregisterForUpdate("TEBLatency")
+            EVENT_MANAGER:UnregisterForUpdate("TEBClock")
+            EVENT_MANAGER:UnregisterForUpdate("TEBRecall")
 
-        TEB.getZone()
+            TEB.getZone()
 
-        TEB.bags()
-        TEB.CalculateBagItems()    
+            TEB.bags()
+            TEB.CalculateBagItems()    
 
-        TEB.UpdateAllCurrency()
-        TEB.UpdateLevel()
+            TEB.UpdateAllCurrency()
+            TEB.UpdateLevel()
+            --TEB.enlightenment()
+            TEB.mail(false)
+        end
 
         for i=1, #defaultGadgets do
             if gadgetList[i] ~= "(None)" then
@@ -938,11 +947,9 @@ function TEB:RebuildBar()
             end
             if gadgetList[i] == "Enlightenment" and (enlightenmentVisible or not enlightenment_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildEnlightenment(lastGadget, firstGadgetAdded)
-                TEB.enlightenment()
             end 
             if gadgetList[i] == "Unread Mail" and (mailUnread or not mail_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildMail(lastGadget, firstGadgetAdded)
-                TEB.mail()
             end 
             if gadgetList[i] == "Event Tickets" and (etHasTickets or not et_Dynamic or not gadgetsLocked) then
                 lastGadget, firstGadgetAdded = TEB:RebuildET(lastGadget, firstGadgetAdded)
@@ -1916,7 +1923,7 @@ function TEB.LockUnlockGadgets(newValue)
     for k,v in pairs(gadgetReference) do
         gadgetReference[k][1]:SetMovable(not newValue)
     end
-    TEB:RebuildBar()
+    TEB:RebuildBar(true)
     if lockMessage then
         if newValue then
             d("|c2A8FEEThe Elder Bar gadgets are now |cFFFFFFLOCKED.")
@@ -1995,7 +2002,7 @@ function TEB.UpdateGadgetList(gadgetName, whichBar)
         end               
     end
     
-    TEB:RebuildBar()
+    TEB:RebuildBar(true)
 end
 
 function TEB.ConvertGadgetSettings()
@@ -4382,14 +4389,18 @@ function TEB.buffs()
         TEB.SetIcon("Food Buff Timer", "normal")
     end
     
+    --[[
     if foodTimerRunning and not foodTimerVisible then
         foodTimerVisible = true
+        d("foodbuff")
         TEB:RebuildBar()
     end
     if not foodTimerRunning and foodTimerVisible then
         foodTimerVisible = false
+        d("foodbuff")
         TEB:RebuildBar()
-    end       
+    end 
+    ]]      
         
     foodTooltip = TEB.ConvertSeconds(food_DisplayPreference, timeLeftInSeconds)
     food = foodColor..foodTooltip 
@@ -4565,18 +4576,37 @@ end
 ------------------------------------------------------
 -- Mail
 ------------------------------------------------------
-function TEB.mail()
-    unread_mail = GetNumUnreadMail()
-    
+function TEB.mail(rebuild)
+    local rebuild = rebuild or true
+
+    -- EVENT_MAIL_NUM_UNREAD_CHANGED triggers twice after loading. The first
+    -- time it's triggered, it returns 0 for unread mail. The 2nd time it's
+    -- triggered it returns the actual number of unread mail. This causes 
+    -- TEB:RebuildBar to be called twice because mail was 0 and then !0.
+
+    -- The following block of code checks if new_unread_mail is 0. Since you
+    -- can only read 1 mail at a time, it doesn't make sense for new_unread_mail
+    -- to be 0 if unread_mail wasn't 1. If new_unread_mail is 0 and unread_mail 
+    -- is not 1, it will return and skip the rest of the function. The only 
+    -- issue is that this function will always rebuild the bar twice when
+    -- unread_mail is 1.
+    --d("Unread mail " .. string.format(unread_mail))
+    new_unread_mail = GetNumUnreadMail()
+    --d("New unread mail " .. string.format(new_unread_mail))
+    if new_unread_mail == 0 and unread_mail ~= 1 then
+        return
+    end
+    unread_mail = new_unread_mail
+
     if unread_mail > 0 then
         if not mailUnread then
             mailUnread = true
-            TEB:RebuildBar()
+            if rebuild then TEB:RebuildBar() end
         end
     else
         if mailUnread then
             mailUnread = false
-            TEB:RebuildBar()
+            if rebuild then TEB:RebuildBar() end
         end
     end
 
@@ -4587,6 +4617,7 @@ function TEB.mail()
             TEB.SetIcon("Unread Mail", "normal")        
         end
     end
+
     if mail_Good and unread_mail > 0 then unread_mail = "|c00e900"..string.format(unread_mail) end    
                 
     if gadgetText["Unread Mail"] then
@@ -4594,6 +4625,10 @@ function TEB.mail()
     else
         TEBTopMail:SetText("")
     end
+end
+
+function TEB.mailChecker()
+
 end
 
 ------------------------------------------------------
@@ -4895,6 +4930,7 @@ end
 --====================================================
 function TEB.OnUpdate()
     if refreshTimer > 19 then
+        TEB.enlightenment()
         TEB.skyshards()
         TEB.mounttimer()
         TEB.blacksmithing()
