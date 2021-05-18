@@ -1,209 +1,300 @@
-TEB = {} 
-TEB.name = "TEB"
-TEB.settingsRev = 6
-TEB.version = "10.0.3-P"
-
-local LAM2 = LibAddonMenu2
-local LFDB = LIB_FOOD_DRINK_BUFF
-local screenWidth = GuiRoot:GetWidth()
-local screenHeight = GuiRoot:GetHeight()
-local lockMessage = true
-local blacksmithTimerVisible = false
-local jewelryTimerVisible = false
-local woodworkingTimerVisible = false
-local clothingTimerVisible = false
-local bountyTimerVisible = false
-local bountyTimerRunning = false
-local isVampire = false
-local ftTimerVisible = false
-local etHasTickets = false
-local mailUnread = false
-local enlightenmentVisible = false
-local mountTimerVisible = false
-local addonInitialized = false
-local inCombat = false
-local combatAlpha = 0
-local pulseType = "fade out"
-local combatIndicator = true
-local refreshTimer = 99
-local centerTimer = 60 * 1000 * 5
-local pulseTimer = 120
-local pulseList = {}
-local barAlpha = 1
-local hideBar = false
-local topBarAlphaList = {}
-local lastTopBarAlpha = 1
-local showCombatOpacity = 0
-local pvpMode = false
-local kills = 0
-local killingBlows = 0
-local deaths = 0
-local movingGadget = ""
-local movingGadgetName = ""
-local playerName = GetUnitName("player")
-local foodBuffWasActive = false
-local foodTimerRunning = false
-local foodTimerVisible = false
-account = GetDisplayName("player")
-local trackerDropdown = {}
-local coordinates = ""
-local zoneNameDisplay = ""
-
-local backdropOpacity = 0
-local combatOpacity = 0
-local barPosition = "top"
-local barWidth = "dynamic"
-local barY = 0
-local controlsPosition = ""
-local bumpCompass = true
-local bumpActionBar = true
-local gadgets = {}
-local highestFPS = 0
-local lowestFPS = 10000
-local barLocked = true
-local gadgetsLocked = true
-local ap_SessionStart = os.time()
-local ap_SessionStartPoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-local scale = 100
-local barLayer = 0
-local ignoreReticleUpdate = false
-
-local pulseWhenCritical = false
-local clock_TwentyFourHourClock = true
-local clock_DisplayPreference = "local time"
-local soulgems_DisplayPreference = "total filled/empty"
-local soulgems_ColorCrown = false
-local soulgems_ColorNormal = false
-local skyshards_DisplayPreference = "collected/unspent points"
-local durability_DisplayPreference = "durability %"
-local durability_Warning = 50
-local durability_Danger = 25
-local durability_Critical = 10
-local durability_Good = true
-local research_DisplayPreference = "simple"
-local research_Dynamic = true
-local research_DisplayAllSlots = true
-local research_ShowShortest = false
-local research_FreeText = "--"
-local gold_DisplayPreference = "gold on character"
-local latency_Warning = 100
-local latency_Danger = 500
-local latency_Good = true
-local latency_Fixed = false
-local latency_FixedLength = 100
-local fps_Warning = 30
-local fps_Danger = 15
-local fps_Good = true
-local fps_Fixed = false
-local fps_FixedLength = 100
-local level_DisplayPreferenceMax = "[CP Icon] Champion Points (Unspent Points)"
-local level_DisplayPreferenceNotMax = "[Class Icon] Character Level"
-local bag_DisplayPreference = "slots used/total slots"
-local bag_Good = true
-local bag_Warning = 50
-local bag_Danger = 75
-local bag_Critical = 90
-local bank_DisplayPreference = "slots used/total slots"
-local bank_Good = true
-local bank_Warning = 50
-local bank_Danger = 75
-local bank_Critical = 90
-local enlightenment_Warning = 200000
-local enlightenment_Danger = 100000
-local enlightenment_Critical = 50000
-local enlightenment_Dynamic = false
-local experience_DisplayPreference = "% towards next level/CP"
-local autohide_GameMenu = true
-local autohide_Chatter = true
-local autohide_Crafting = true
-local autohide_Bank = true
-local autohide_GuildBank = true
-local wc_Good = true
-local wc_Warning = 50
-local wc_Danger = 25
-local wc_Critical = 10
-local wc_AutoPoison = true
-local wc_PoisonWarning = 20
-local wc_PoisonDanger = 10
-local wc_PoisonCritical = 5
-local wc_NoPoisonBad = false
-local location_DisplayPreference = "(x, y) Zone Name"
-local tt_Danger = 10
-local tt_Warning = 25
-local tt_Good = true
-local tt_DisplayPreference = "stolen treasures/stolen goods (lockpicks)"
-local memory_Good = true
-local memory_Warning = 512
-local memory_Danger = 768
-local tt_InvWarning = 50
-local tt_InvDanger = 75
-local ft_DisplayPreference = "time left/cost"
-local ft_TimerDisplayPreference = "simple"
-local ft_Dynamic = true
-local ft_Good = false
-local thousandsSeparator = true
-local kc_DisplayPreference = "Killing Blows/Deaths (Kill Ratio)"
-local ap_DisplayPreference = "Total Points"
-local level_Dynamic = true
-local et_Dynamic = true
-local et_DisplayPreference = "tickets"
-local et_Warning = 9
-local et_Danger = 12
-local food_Dynamic = true
-local food_Warning = 15
-local food_Danger = 7
-local food_Critical = 2
-local food_PulseAfter = true
-local food_Dynamic = true
-local food_DisplayPreference = "simple"
-local bounty_Dynamic = true
-local bounty_DisplayPreference = "simple"
-local mount_DisplayPreference = "simple"
-local mount_Dynamic = true
-local mount_Good = false
-local mount_Critical = false
-local mail_Dynamic = true
-local mail_Good = false
-local mail_Critical = false
-local bounty_Warning = "yellow"
-local bounty_Danger = "orange"
-local bounty_Critical = "red"
-local bounty_Good = "normal"
-local vampirism_DisplayPreference = "Stage (Timer)"
-local vampirism_TimerPreference = "simple"
-local vampirism_Dynamic = true
-local vampirism_StageColor = {
-    [1] = "normal",
-    [2] = "yellow",
-    [3] = "orange",
-    [4] = "red"
+TEB = {
+    name = "TEB",
+    displayName = "The Elder Bar |cff8040Reloaded|r",
+    author = "SimonIllyan",
+    website = "",
+    version = "11.0.2",
+    debug = ""
 }
-local font = "Univers57"
-local champion_Points_Soft_Cap = 3600
-local unread_mail = 0
 
-local gadgetSettings = {}
-local mount_Tracker = {}
-local gold_Tracker = {}
+-- libraries
+local LAM2 = LibAddonMenu2
+local LSV = LibSavedVars
 
-local icons_Mode = "White"
-local gadgetText = {}
-local iconIndicator = {}
+-- globals of this addon
+local G = {
+    addonInitialized = false,
+    LFDB = LIB_FOOD_DRINK_BUFF,
+    ap_SessionStart = os.time(),
+    ap_SessionStartPoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER),
+    barAlpha = 1,
+    centerTimer = 300000, -- 5 min in ms
+    combatAlpha = 0,
+    deaths = 0,
+    goldBankUnformatted = 0,
+    goldBank = "",
+    highestFPS = 0,
+    killingBlows = 0,
+    kills = 0,
+    lastTopBarAlpha = 1,
+    lowestFPS = 10000,
+    lvl = 0,
+    movingGadget = "",
+    movingGadgetName = "",
+    original = { },
+    pulseList = { },
+    pulseTimer = 0,
+    refreshTimer = 99,
+    screenHeight = GuiRoot:GetHeight(),
+    screenWidth = GuiRoot:GetWidth(),
+    showCombatOpacity = 0,
+    spacer = 15,
+    topBarAlphaList = { },
+    trackerDropdown = { },
+}
+TEB.G = G
 
-local mundusStoneReference ={
-    ["001"] = "Warrior",
-    ["002"] = "Mage",
-    ["003"] = "Thief",
-    ["004"] = "Serpent",
-    ["005"] = "Lady",
-    ["006"] = "Steed",
-    ["007"] = "Lord",
-    ["008"] = "Apprentice",
-    ["009"] = "Atronach",
-    ["010"] = "Ritual",
-    ["011"] = "Lover",
-    ["012"] = "Shadow",
-    ["013"] = "Tower"
+local LIGHTBLUE = "|c00ddff"
+local OFFWHITE = "|ccccccc"
+
+local gadgetReference
+local gadgetSettings = { }
+local settings
+
+-- default values for settings
+local defaults = {
+    ap = {
+        ["DisplayPreference"] = "Total Points",
+    },
+    autohide = {
+        ["Bank"] = true,
+        ["Chatter"] = true,
+        ["Crafting"] = true,
+        ["GameMenu"] = true,
+        ["GuildBank"] = true,
+    },
+    bag = {
+        ["DisplayPreference"] = "slots used/total slots",
+        ["good"] = true,
+        ["critical"] = 90,
+        ["danger"] = 75,
+        ["warning"] = 50,
+        ["UsageAsPercentage"] = true,
+    },
+    bank = {
+        ["DisplayPreference"] = "slots used/total slots",
+        ["good"] = true,
+        ["critical"] = 90,
+        ["danger"] = 75,
+        ["warning"] = 50,
+        ["UsageAsPercentage"] = true,
+    },
+    bar = {
+        Layer = 0,
+        Locked = true,
+        Position = "top",
+        Width = "dynamic",
+        Y = 0,
+        backgroundOpacity = 100,
+        bumpActionBar = true,
+        bumpCompass = true,
+        colors = {
+            critical = "|cff0000",
+            danger =   "|cff0000",  
+            warning =  "|cff8000", 
+            caution =  "|cffff00", 
+            normal =   "|ccccccc",
+        },
+        combatIndicator = true,
+        combatOpacity = 100,
+        controlsPosition = "center",
+        customColor = ZO_ColorDef:New("ffcccccc"),
+        font = "Univers57",
+        gadgetsLocked = true,
+        iconsMode = "color",
+        lockMessage = true,
+        opacity = 100,
+        pulseType = "fade out",
+        pulseWhenCritical = false,
+        scale = 100,
+        thousandsSeparator = true,
+    },
+    bounty = {
+        ["critical"] = "red",
+        ["danger"] = "orange",
+        ["DisplayPreference"] = "simple",
+        ["Dynamic"] = true,
+        ["good"] = "normal",
+        ["warning"] = "yellow",
+    },
+    clock = {
+        DisplayPreference = "local time",
+        Type = "24h",
+        DateFormat = "%Y-%m-%d",
+    },
+    durability = {
+        ["critical"] = 10,
+        ["danger"] = 25,
+        ["DisplayPreference"] = "durability %",
+        ["good"] = true,
+        ["warning"] = 50,
+    },
+    enlightenment = {
+        ["critical"] = 500000,
+        ["danger"] = 100000,
+        ["Dynamic"]    = false,
+        ["warning"] = 200000,
+    },
+    et = {
+        ["danger"] = 12,
+        ["DisplayPreference"] = "tickets",
+        ["Dynamic"] = true,
+        ["warning"] = 9,
+    },
+    experience = {
+        ["DisplayPreference"] = "% towards next level/CP",
+    },
+    food = {
+        ["critical"] = 120,
+        ["danger"] = 300,
+        ["DisplayPreference"] = "simple",
+        ["Dynamic"] = true,
+        ["PulseAfter"] = false,
+        ["warning"] = 600,
+    },
+    fps = {
+        ["caution"] = 40,
+        ["danger"] = 15,
+        ["Fixed"] = false,
+        ["FixedLength"] = 20,
+        ["good"] = true,
+        ["warning"] = 30,
+    },
+    ft = {
+        ["DisplayPreference"] = "time left/cost",
+        ["Dynamic"] = true,
+        ["good"] = false,
+        ["TimerDisplayPreference"] = "simple",
+    },
+    gadgetText = { },
+    gadgets_pve = { "Level", "Experience", "Bag Space", "Gold", "Mount Timer", "Durability",
+        "Weapon Charge/Poison", "Bounty/Heat Timer"},
+    gadgets_pvp = { "Level", "Experience", "Bag Space", "Gold", "Mount Timer",
+        "Durability", "Weapon Charge/Poison"},
+    gold = {
+        ["DisplayPreference"] = "gold on character",
+        ["high"] = {
+            ["danger"] = 999999999,
+            ["warning"] = 999999999,
+        },
+        ["low"] = {
+            ["danger"] = 0,
+            ["warning"] = 0,
+        },
+        Tracker = {},
+    },
+    iconIndicator = { },
+    kc = {
+        ["DisplayPreference"] = "Killing Blows/Deaths (Kill Ratio)",
+    },
+    latency = {
+        ["caution"] = 100,
+        ["danger"] = 500,
+        ["Fixed"] = false,
+        ["FixedLength"] = 30,
+        ["good"] = true,
+        ["warning"] = 200,
+    },
+    level = {
+        notmax = {
+            icon = 1,
+            cp = false,
+            DisplayPreference = 1,
+            Dynamic = true,
+        },
+        max = {
+            icon = 1,
+            cp = true,
+            DisplayPreference = 3,
+            Dynamic = true,
+        },
+    },
+    location = {
+        ["DisplayPreference"] = "(x, y) Zone Name",
+    },
+    mail = {
+        ["critical"] = false,
+        ["Dynamic"] = true,
+        ["good"] = false,
+    },
+    memory = {
+        danger = 768,
+        good = true,
+        warning = 512,
+    },
+    mount = {
+        ["critical"] = false,
+        ["DisplayPreference"] = "simple",
+        ["Dynamic"] = true,
+        ["good"] = false,
+        ["Tracker"] = { },
+    },
+    mundus = {
+        DisplayPreference = "Full",
+    },
+    research = {
+        ["DisplayAllSlots"] = true,
+        ["DisplayPreference"] = "simple",
+        ["Dynamic"] = true,
+        ["FreeText"] = "--",
+        ["ShowShortest"] = false,
+    },
+    skyshards = {
+        ["DisplayPreference"] = "collected/unspent points",
+    },
+    soulgems = {
+        ["ColorCrown"] = true,
+        ["ColorNormal"] = true,
+        ["DisplayPreference"] = "total filled/empty",
+    },
+    tt = {
+        ["danger"] = 10,
+        ["DisplayPreference"] = "stolen treasures/stolen goods (lockpicks)",
+        ["good"] = true,
+        ["InvDanger"] = 75,
+        ["InvWarning"] = 50,
+        ["warning"] = 25,
+    },
+    vampirism = {
+        ["TimerPreference"] = "simple",
+        ["DisplayPreference"] = "Stage (Timer)",
+        ["Dynamic"] = true,
+        ["StageColor"] = {
+            "green",
+            "yellow",
+            "orange",
+            "red",
+        },
+    },
+    wc = {
+        ["AutoPoison"] = true,
+        ["critical"] = 10,
+        ["danger"] = 25,
+        ["good"] = true,
+        ["PoisonCritical"] = 5,
+        ["PoisonDanger"] = 10,
+        ["PoisonWarning"] = 20,
+        ["warning"] = 50,
+    },
+}
+
+local Vampirism_StageColors = {
+         green  = { "|c00ff00", "good", },
+         yellow = { "|cffff00", "caution", },
+         orange = { "|cff8000", "warning", },
+         red    = { "|cff0000", "danger", },
+    }
+
+local mundusStoneReference = {
+    Full = {
+        "Warrior", "Mage", "Thief", "Serpent", "Lady", "Steed", "Lord",
+        "Apprentice", "Atronach", "Ritual", "Lover", "Shadow", "Tower",
+    },
+    Abbreviated = {
+        "Warr", "Mage", "Thf", "Serp", "Lady", "Std", "Lord",
+        "Appr", "Atro", "Rit", "Lvr", "Shad", "Twr",
+    },
+
 }
 
 local equipSlotReference = {
@@ -213,795 +304,522 @@ local equipSlotReference = {
     [6] = "waist",
     [8] = "legs",
     [9] = "feet",
-    [16] = "hands"
+    [16] = "hands",
+}
+
+local ClassNames = {
+    "Dragon Knight", "Sorcerer", "Night Blade", "Warden", "Necromancer", "Templar",
+}
+
+local timeFormats = {
+    ["24h"] = "%H:%M",
+    ["24h with seconds"] = "%H:%M:%S",
+    ["12h"] = "%I:%M %p",
+    ["12h no leading zero"] = "%I:%M %p",
+    ["12h with seconds"] = "%I:%M:%S %p",
 }
 
 local traitReference = {
-    [18] = "Divines",
-    [17] = "Exploration",
-    [12] = "Inpenetrable",
-    [16] = "Infused",
-    [20] = "Intricate",
-    [25] = "Nirnhoned",
-    [19] = "Ornate",
-    [17] = "Invigorating",
-    [13] = "Reinforced",
-    [11] = "Sturdy",
-    [15] = "Training",
-    [14] = "Well Fitted",
-    [22] = "Arcane",
-    [31] = "Bloodthirsty",
-    [29] = "Harmony",
-    [21] = "Healthy",
-    [33] = "Infused",
-    [27] = "Intricate",
-    [24] = "Ornate",
-    [32] = "Protective",
-    [23] = "Robust",
-    [28] = "Swift",
-    [30] = "Triune",
-    [2] = "Charged",
-    [8] = "Decisive",
-    [5] = "Defending",
-    [4] = "Infused",
-    [9] = "Intricate",
-    [26] = "Nirnhoned",
-    [10] = "Ornate",
     [1] = "Powered",
+    [2] = "Charged",
     [3] = "Precise",
+    [4] = "Infused",
+    [5] = "Defending",
+    [6] = "Training",
     [7] = "Sharpened",
-    [6] = "Training"
+    [8] = "Decisive",
+    [9] = "Intricate",
+    [10] = "Ornate",
+    [11] = "Sturdy",
+    [12] = "Inpenetrable",
+    [13] = "Reinforced",
+    [14] = "Well Fitted",
+    [15] = "Training",
+    [16] = "Infused",
+    [17] = "Invigorating",
+    [18] = "Divines",
+    [19] = "Ornate",
+    [20] = "Intricate",
+    [21] = "Healthy",
+    [22] = "Arcane",
+    [23] = "Robust",
+    [24] = "Ornate",
+    [25] = "Nirnhoned",
+    [26] = "Nirnhoned",
+    [27] = "Intricate",
+    [28] = "Swift",
+    [29] = "Harmony",
+    [30] = "Triune",
+    [31] = "Bloodthirsty",
+    [32] = "Protective",
+    [33] = "Infused",
 }
+
 local iconReference = {
-    ["TEBTopLatencyIcon"] = "Latency",
-    ["TEBTopLevelIcon"] = "Level",
-    ["TEBTopGoldIcon"] = "Gold",
-    ["TEBTopTelvarIcon"] = "Tel Var Stones",
-    ["TEBTopTCIcon"] = "Transmute Crystals",
-    ["TEBTopWritIcon"] = "Writ Vouchers",
-    ["TEBTopSoulGemsIcon"] = "Soul Gems",
     ["TEBTopAPIcon"] = "Alliance Points",
     ["TEBTopBagIcon"] = "Bag Space",
-    ["TEBTopMountIcon"] = "Mount Timer",
-    ["TEBTopXPIcon"] = "Experience",
-    ["TEBTopTimeIcon"] = "Clock",
-    ["TEBTopSkyShardsIcon"] = "Sky Shards",
-    ["TEBTopDurabilityIcon"] = "Durability",
-    ["TEBTopResearchBlacksmithingIcon"] = "Blacksmithing Research Timer",
-    ["TEBTopResearchWoodworkingIcon"] = "Woodworking Research Timer",
-    ["TEBTopResearchClothingIcon"] = "Clothing Research Timer",
-    ["TEBTopResearchJewelryCraftingIcon"] = "Jewelry Crafting Research Timer",
     ["TEBTopBankIcon"] = "Bank Space",
-    ["TEBTopFPSIcon"] = "FPS",
-    ["TEBTopWCIcon"] = "Weapon Charge",
-    ["TEBTopLocationIcon"] = "Location",
-    ["TEBTopTTIcon"] = "Thief's Tools",
-    ["TEBTopMemoryIcon"] = "Memory Usage",
-    ["TEBTopFTIcon"] = "Fast Travel Timer",
-    ["TEBTopKillsIcon"] = "Kill Counter",
+    ["TEBTopBountyIcon"] = "Bounty/Heat Timer",
+    ["TEBTopDurabilityIcon"] = "Durability",
     ["TEBTopEnlightenmentIcon"] = "Enlightenment",
-    ["TEBTopMailIcon"] = "Unread Mail",
     ["TEBTopETIcon"] = "Event Tickets",
     ["TEBTopFoodIcon"] = "Food Buff Timer",
+    ["TEBTopFPSIcon"] = "FPS",
+    ["TEBTopFTIcon"] = "Fast Travel Timer",
+    ["TEBTopGoldIcon"] = "Gold",
+    ["TEBTopKillsIcon"] = "Kill Counter",
+    ["TEBTopLatencyIcon"] = "Latency",
+    ["TEBTopLevelIcon"] = "Level",
+    ["TEBTopLocationIcon"] = "Location",
+    ["TEBTopMailIcon"] = "Unread Mail",
+    ["TEBTopMemoryIcon"] = "Memory Usage",
+    ["TEBTopMountIcon"] = "Mount Timer",
     ["TEBTopMundusIcon"] = "Mundus Stone",
-    ["TEBTopBountyIcon"] = "Bounty Timer",
-    ["TEBTopVampirismIcon"] = "Vampirism" 
+    ["TEBTopResearchBlacksmithingIcon"] = "Blacksmithing Research Timer",
+    ["TEBTopResearchClothingIcon"] = "Clothing Research Timer",
+    ["TEBTopResearchJewelryCraftingIcon"] = "Jewelry Crafting Research Timer",
+    ["TEBTopResearchWoodworkingIcon"] = "Woodworking Research Timer",
+    ["TEBTopSkyShardsIcon"] = "Sky Shards",
+    ["TEBTopSoulGemsIcon"] = "Soul Gems",
+    ["TEBTopTCIcon"] = "Transmute Crystals",
+    ["TEBTopTelvarIcon"] = "Tel Var Stones",
+    ["TEBTopTimeIcon"] = "Clock",
+    ["TEBTopTTIcon"] = "Thief's Tools",
+    ["TEBTopVampirismIcon"] = "Vampirism",
+    ["TEBTopWCIcon"] = "Weapon Charge/Poison",
+    ["TEBTopWritIcon"] = "Writ Vouchers",
+    ["TEBTopXPIcon"] = "Experience",
 }
 
-local gadgetReference = {
+local conditionsTable
+local defaultGadgets = {
+    "Level", "Gold", "Tel Var Stones", "Transmute Crystals", "Writ Vouchers", "Soul Gems",
+    "Alliance Points", "Bag Space", "Mount Timer", "Experience", "Clock", "Sky Shards",
+    "Durability", "Blacksmithing Research Timer", "Clothing Research Timer",
+    "Woodworking Research Timer", "Jewelry Crafting Research Timer", "Bank Space",
+    "Latency", "FPS", "Weapon Charge/Poison", "Location", "Thief's Tools", "Memory Usage",
+    "Fast Travel Timer", "Kill Counter", "Enlightenment", "Unread Mail", "Event Tickets",
+    "Food Buff Timer", "Mundus Stone", "Bounty/Heat Timer", "Vampirism",
 }
 
-local defaultGadgets = {"Level", "Gold", "Tel Var Stones", "Transmute Crystals", "Writ Vouchers", "Soul Gems", "Alliance Points", "Bag Space", "Mount Timer", "Experience", "Clock", "Sky Shards", "Durability", "Blacksmithing Research Timer", "Clothing Research Timer", "Woodworking Research Timer", "Jewelry Crafting Research Timer", "Bank Space", "Latency", "FPS", "Weapon Charge", "Location", "Thief's Tools", "Memory Usage", "Fast Travel Timer", "Kill Counter", "Enlightenment", "Unread Mail", "Event Tickets", "Food Buff Timer", "Mundus Stone", "Bounty Timer", "Vampirism" }
-
-for i=1, #defaultGadgets do
-    local gadgetName = defaultGadgets[i]
-    gadgetText[gadgetName] = true
-    iconIndicator[gadgetName] = false
-end
-
-local originalCompassTop = 0
-local originalTargetUnitFrameTop = 0
-
-------------------------------------------------------
--- OnAddOnLoaded
-------------------------------------------------------
+-- it all begins here…
 function TEB.OnAddOnLoaded(event, addOnName)
-    if addOnName ~= TEB.name then return end
-    if addOnName == TEB.name then
-        ZO_CreateStringId("SI_BINDING_NAME_RUN_TEB", GetString(SI_CWA_KEY_BINDING))        
-        TEB:Initialize()
+    if addOnName == TEB.name and not G.addonInitialized then
+        TEB.Initialize()
     end
 end
 
-------------------------------------------------------
--- Initialize
-------------------------------------------------------
-function TEB:Initialize()
+function TEB.Initialize()
+    local events = {
+        [EVENT_INVENTORY_SINGLE_SLOT_UPDATE] = TEB.CalculateBagItems,
+        [EVENT_OPEN_BANK] = TEB.BankHideBar,
+        [EVENT_CLOSE_BANK] = TEB.ShowBar,
+        [EVENT_CHATTER_BEGIN] = TEB.ChatterHideBar,
+        [EVENT_CHATTER_END] = TEB.ShowBar,
+        [EVENT_CRAFTING_STATION_INTERACT] = TEB.CraftingHideBar,
+        [EVENT_END_CRAFTING_STATION_INTERACT] = TEB.ShowBar,
+        [EVENT_OPEN_GUILD_BANK] = TEB.GuildBankHideBar,
+        [EVENT_CLOSE_GUILD_BANK] = TEB.ShowBar,
+        [EVENT_JUSTICE_STOLEN_ITEMS_REMOVED] = TEB.CalculateBagItems,
+        [EVENT_COMBAT_EVENT] = TEB.UpdateKillingBlows,
+        [EVENT_PLAYER_DEAD] = TEB.UpdateDeaths,
+        [EVENT_PLAYER_ACTIVATED] = TEB.FinishInitialization,
+    }
+
+    TEB.debug = TEB.debug .. "Initialize\n"
+    for k, f in pairs(events) do
+        EVENT_MANAGER:RegisterForEvent(TEB.name, k, f)
+    end
+
+    EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+
+    ZO_CreateStringId("SI_BINDING_NAME_RUN_TEB", GetString(SI_CWA_KEY_BINDING))
+    ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
+    ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
+
+    TEBTop:SetWidth(G.screenWidth)
+    TEBTop:SetHidden(false)
     TEBTooltip:SetHidden(true)
-    
-    originalTargetUnitFrameTop = ZO_TargetUnitFramereticleover:GetTop()
-    originalCompassTop = ZO_CompassFrame:GetTop()
-    originalActionBarTop = ZO_ActionBar1:GetTop()
-    originalHealthTop = ZO_PlayerAttributeHealth:GetTop()
-    originalMagickaTop = ZO_PlayerAttributeMagicka:GetTop()
-    originalStaminaTop = ZO_PlayerAttributeStamina:GetTop()
-    originalMountStaminaTop = ZO_PlayerAttributeMountStamina:GetTop()
-    originalBountyTop = ZO_HUDInfamyMeter:GetTop()
-    
-    
+
+    G.account = GetDisplayName("player")
+    G.characterName = GetUnitName("player")
+    G.playerClass = GetUnitClassId("player")
+    -- for TEB.SetBarPosition
+    G.original.TargetUnitFrameTop = ZO_TargetUnitFramereticleover:GetTop()
+    G.original.CompassTop = ZO_CompassFrame:GetTop()
+    G.original.ActionBarTop = ZO_ActionBar1:GetTop()
+    G.original.HealthTop = ZO_PlayerAttributeHealth:GetTop()
+    G.original.MagickaTop = ZO_PlayerAttributeMagicka:GetTop()
+    G.original.StaminaTop = ZO_PlayerAttributeStamina:GetTop()
+    G.original.MountStaminaTop = ZO_PlayerAttributeMountStamina:GetTop()
+    G.original.BountyTop = ZO_HUDInfamyMeter:GetTop()
+
+    -- default: all gadgets on
+    for _, gadgetName in ipairs(defaultGadgets) do
+        defaults.gadgetText[gadgetName] = true
+        defaults.iconIndicator[gadgetName] = true
+    end
+
     -- 1. Icon Object (object)
     -- 2. Text Object (object)
     -- 3. Icon File Base (string)
     -- 4. Icon Object (string)
     -- 5. Current Icon Texture (string)
     -- 6. Gadget Is Pulsing
+    -- 7. Function providing value
+
     gadgetReference = {
-        ["Alliance Points"] = {TEBTopAPIcon, TEBTopAP, "ap", "TEBTopAPIcon", "", false},
-        ["Bag Space"] = {TEBTopBagIcon, TEBTopBag, "bag", "TEBTopBagIcon", "", false},
-        ["Bank Space"] = {TEBTopBankIcon, TEBTopBank, "bank", "TEBTopBankIcon", "", false},
-        ["Blacksmithing Research Timer"] = {TEBTopResearchBlacksmithingIcon, TEBTopResearchBlacksmithing, "blacksmithing", "TEBTopResearchBlacksmithingIcon", "", false},
-        ["Bounty Timer"] = {TEBTopBountyIcon, TEBTopBounty, "bounty", "TEBTopBountyIcon", "", false},
-        ["Clock"] = {TEBTopTimeIcon, TEBTopTime, "clock", "TEBTopTimeIcon", "", false},
-        ["Clothing Research Timer"] = {TEBTopResearchClothingIcon, TEBTopResearchClothing, "clothing", "TEBTopResearchClothingIcon", "", false},
-        ["Durability"] = {TEBTopDurabilityIcon, TEBTopDurability, "durability", "TEBTopDurabilityIcon", "", false},
-        ["Enlightenment"] = {TEBTopEnlightenmentIcon, TEBTopEnlightenment, "enlightenment", "TEBTopEnlightenmentIcon", "", false},
-        ["Event Tickets"] = {TEBTopETIcon, TEBTopET, "eventtickets", "TEBTopETIcon", "", false},
-        ["Experience"] = {TEBTopXPIcon, TEBTopXP, "experience", "TEBTopXPIcon", "", false},
-        ["Fast Travel Timer"] = {TEBTopFTIcon, TEBTopFT, "ft", "TEBTopFTIcon", "", false},
-        ["Food Buff Timer"] = {TEBTopFoodIcon, TEBTopFood, "foodbuff", "TEBTopFoodIcon", "", false},
-        ["FPS"] = {TEBTopFPSIcon, TEBTopFPS, "fps", "TEBTopFPSIcon", "", false},
-        ["Gold"] = {TEBTopGoldIcon, TEBTopGold, "gold", "TEBTopGoldIcon", "", false},
-        ["Kill Counter"] = {TEBTopKillsIcon, TEBTopKills, "kc", "TEBTopKillsIcon", "", false},
-        ["Latency"] = {TEBTopLatencyIcon, TEBTopLatency, "latency", "TEBTopLatencyIcon", "", false},
-        ["Level"] = {TEBTopLevelIcon, TEBTopLevel, "cp", "TEBTopLevelIcon", "", false},
-        ["Location"] = {TEBTopLocationIcon, TEBTopLocation, "location", "TEBTopLocationIcon", "", false},
-        ["Jewelry Crafting Research Timer"] = {TEBTopResearchJewelryCraftingIcon, TEBTopResearchJewelryCrafting, "jewelry", "TEBTopResearchJewelryCraftingIcon", "", false},
-        ["Memory Usage"] = {TEBTopMemoryIcon, TEBTopMemory, "ram", "TEBTopMemoryIcon", "", false},
-        ["Mount Timer"] = {TEBTopMountIcon, TEBTopMount, "mount", "TEBTopMountIcon", "", false},
-        ["Mundus Stone"] = {TEBTopMundusIcon, TEBTopMundus, "mundus", "TEBTopMundusIcon", "", false},
-        ["Sky Shards"] = {TEBTopSkyShardsIcon, TEBTopSkyShards, "skyshards", "TEBTopSkyShardsIcon", "", false},
-        ["Soul Gems"] = {TEBTopSoulGemsIcon, TEBTopSoulGems, "soulgem", "TEBTopSoulGemsIcon", "", false},
-        ["Tel Var Stones"] = {TEBTopTelvarIcon, TEBTopTelvar, "telvar", "TEBTopTelvarIcon", "", false},
-        ["Thief's Tools"] = {TEBTopTTIcon, TEBTopTT, "tt", "TEBTopTTIcon", "", false},
-        ["Transmute Crystals"] = {TEBTopTCIcon, TEBTopTC, "transmute", "TEBTopTCIcon", "", false},
-        ["Unread Mail"] = {TEBTopMailIcon, TEBTopMail, "mail", "TEBTopMailIcon", "", false},
-        ["Vampirism"] = {TEBTopVampirismIcon, TEBTopVampirism, "vampirism", "TEBTopVampirismIcon", "", false},
-        ["Weapon Charge"] = {TEBTopWCIcon, TEBTopWC, "wc", "TEBTopWCIcon", "", false},
-        ["Woodworking Research Timer"] = {TEBTopResearchWoodworkingIcon, TEBTopResearchWoodworking, "woodworking", "TEBTopResearchWoodworkingIcon", "", false},
-        ["Writ Vouchers"] = {TEBTopWritIcon, TEBTopWrit, "writs", "TEBTopWritIcon", "", false},
-    }    
-    
-    local defaults = {
-        backdropOpacity = 100,
-        barPosition = "top",
-        barWidth = "dynamic",
-        barY = 0,
-        barLocked = true,
-        pulseType = "fade out",
-        gadgetsLocked = true,
-        lockMessage = true,
-        controlsPosition = "center",
-        bumpCompass = true,
-        gadgets = {"Level", "Experience", "Bag Space", "Gold", "Mount Timer", "Durability", "Weapon Charge", "Bounty Timer"},  
-        gadgets_pvp = {"Level", "Experience", "Bag Space", "Gold", "Mount Timer", "Durability", "Weapon Charge"},
-        mount_Tracker = { },
-        gold_Tracker = { },
-        clock_TwentyFourHourClock = true,
-        clock_DisplayPreference = "local time",
-        soulgems_DisplayPreference = "total filled/empty",      
-        soulgems_ColorCrown = true,
-        soulgems_ColorNormal = true,
-        skyshards_DisplayPreference = "collected/unspent points",
-        durability_DisplayPreference = "durability %",
-        durability_Warning = 50,
-        durability_Danger = 25,
-        durability_Critical = 10,
-        durability_Good = true,
-        research_DisplayPreference = "simple",
-        research_Dynamic = true,
-        research_DisplayAllSlots = true,
-        research_ShowShortest = false,
-        research_FreeText = "--",
-        gold_DisplayPreference = "gold on character",
-        latency_Warning = 100,
-        latency_Danger = 500,
-        latency_Good = true,
-        latency_Fixed = false,
-        latency_FixedLength = 100,
-        combatIndicator = true,
-        fps_Warning = 30,
-        fps_Danger = 15,
-        fps_Good = true,
-        fps_Fixed = false,
-        fps_FixedLength = 100,
-        level_DisplayPreferenceMax = "[CP Icon] Champion Points (Unspent Points)",
-        level_DisplayPreferenceNotMax = "[Class Icon] Character Level (Unspent Points)",
-        bag_DisplayPreference = "slots used/total slots",
-        bag_Good = true,
-        bag_Warning = 50,
-        bag_Danger = 75,   
-        bag_Critical = 90,                    
-        bank_DisplayPreference = "slots used/total slots",
-        bank_Good = true,
-        bank_Warning = 50,
-        bank_Danger = 75,
-        bank_Critical = 90,
-        enlightenment_Warning = 200000,
-        enlightenment_Danger = 100000,
-        enlightenment_Critical = 500000,
-        enlightenment_Dynamic = false,
-        experience_DisplayPreference = "% towards next level/CP",
-        autohide_GameMenu = true,
-        autohide_Chatter = true,
-        autohide_Crafting = true,
-        autohide_Bank = true,
-        autohide_GuildBank = true,
-        bumpActionBar = true,
-        combatOpacity = 100,
-        wc_Good = true,
-        wc_Warning = 50,
-        wc_Danger = 25,
-        wc_Critical = 10,
-        wc_AutoPoison = true,
-        wc_PoisonWarning = 20,
-        wc_PoisonDanger = 10,
-        wc_PoisonCritical = 5,       
-        location_DisplayPreference = "(x, y) Zone Name",
-        tt_Danger = 10,
-        tt_Warning = 25,
-        tt_Good = true,
-        tt_DisplayPreference = "stolen treasures/stolen goods (lockpicks)",
-        memory_Good = true,
-        memory_Warning = 512,
-        memory_Danger = 768,
-        tt_InvDanger = 75,
-        tt_InvWarning = 50,
-        ft_DisplayPreference = "time left/cost",
-        ft_TimerDisplayPreference = "simple",
-        ft_Dynamic = true,
-        ft_Good = false,
-        thousandsSeparator = true,
-        kc_DisplayPreference = "Killing Blows/Deaths (Kill Ratio)",
-        ap_DisplayPreference = "Total Points",
-        scale = 100,
-        level_Dynamic = true,
-        mount_Dynamic = true,
-        mount_DisplayPreference = "simple",
-        mount_Good = false,     
-        mount_Critical = false,
-        mount_Tracker = {},   
-        gold_Tracker = { },
-        mail_Dynamic = true,
-        mail_Good = false,
-        mail_Critical = false,        
-        icons_Mode = "white",
-        gadgetText = gadgetText,
-        et_Dynamic = true,
-        et_DisplayPreference = "tickets",
-        et_Warning = 9,
-        et_Danger = 12,       
-        iconIndicator = iconIndicator,
-        food_Dynamic = true,
-        food_Warning = 15,
-        food_Danger = 7,
-        food_Critical = 2,
-        food_PulseAfter = false,
-        food_Dynamic = true,
-        food_DisplayPreference = "simple",
-        bounty_Dynamic = true,
-        bounty_DisplayPreference = "simple",
-        bounty_Warning = "yellow",
-        bounty_Danger = "orange",
-        bounty_Critical = "red",
-        bounty_Good = "normal",
-        vampirism_DisplayPreference = "Stage (Timer)",
-        vampirism_TimerPreference = "simple",
-        vampirism_StageColor = {
-            [1] = "normal",
-            [2] = "yellow",
-            [3] = "orange",
-            [4] = "red"
-        },
-        vampirism_Dynamic = true,
-        font = "Univers57",
-        pulseWhenCritical = false,
-        barLayer = 0
+        ["Alliance Points"] = { TEBTopAPIcon, TEBTopAP, "ap", "TEBTopAPIcon", "", false, function() return G.apString end, },
+        ["Bag Space"] = { TEBTopBagIcon, TEBTopBag, "bag", "TEBTopBagIcon", "", false, function() return G.bagInfo end, },
+        ["Bank Space"] = { TEBTopBankIcon, TEBTopBank, "bank", "TEBTopBankIcon", "", false, function() return G.bankInfo end, },
+        ["Blacksmithing Research Timer"] = { TEBTopResearchBlacksmithingIcon, TEBTopResearchBlacksmithing, "blacksmithing", "TEBTopResearchBlacksmithingIcon", "", false, function() return G.blackSmithingInfo end, },
+        ["Bounty/Heat Timer"] = { TEBTopBountyIcon, TEBTopBounty, "bounty", "TEBTopBountyIcon", "", false, function() return G.bounty end, },
+        ["Clock"] = { TEBTopTimeIcon, TEBTopTime, "clock", "TEBTopTimeIcon", "", false, function() return G.clockString end, },
+        ["Clothing Research Timer"] = { TEBTopResearchClothingIcon, TEBTopResearchClothing, "clothing", "TEBTopResearchClothingIcon", "", false, function() return G.clothingInfo end, },
+        ["Durability"] = { TEBTopDurabilityIcon, TEBTopDurability, "durability", "TEBTopDurabilityIcon", "", false, function() return G.durabilityInfo end, },
+        ["Enlightenment"] = { TEBTopEnlightenmentIcon, TEBTopEnlightenment, "enlightenment", "TEBTopEnlightenmentIcon", "", false, function() return G.enlightenment end, },
+        ["Event Tickets"] = { TEBTopETIcon, TEBTopET, "eventtickets", "TEBTopETIcon", "", false, function() return G.eventtickets end, },
+        ["Experience"] = { TEBTopXPIcon, TEBTopXP, "experience", "TEBTopXPIcon", "", false, function() return G.gxpString end, },
+        ["FPS"] = { TEBTopFPSIcon, TEBTopFPS, "fps", "TEBTopFPSIcon", "", false, function() return G.fps end, },
+        ["Fast Travel Timer"] = { TEBTopFTIcon, TEBTopFT, "ft", "TEBTopFTIcon", "", false, function() return G.ft end, },
+        ["Food Buff Timer"] = { TEBTopFoodIcon, TEBTopFood, "foodbuff", "TEBTopFoodIcon", "", false, function() return G.food end, },
+        ["Gold"] = { TEBTopGoldIcon, TEBTopGold, "gold", "TEBTopGoldIcon", "", false, function() return G.gold end, },
+        ["Jewelry Crafting Research Timer"] = { TEBTopResearchJewelryCraftingIcon, TEBTopResearchJewelryCrafting, "jewelry", "TEBTopResearchJewelryCraftingIcon", "", false, function() return G.jewelryCraftingInfo end, },
+        ["Kill Counter"] = { TEBTopKillsIcon, TEBTopKills, "kc", "TEBTopKillsIcon", "", false, function() return G.killCount end, },
+        ["Latency"] = { TEBTopLatencyIcon, TEBTopLatency, "latency", "TEBTopLatencyIcon", "", false, function() return G.latency end, },
+        ["Level"] = { TEBTopLevelIcon, TEBTopLevel, "cp", "TEBTopLevelIcon", "", false, function() return G.lvlText end, },
+        ["Location"] = { TEBTopLocationIcon, TEBTopLocation, "location", "TEBTopLocationIcon", "", false, function() return G.location end, },
+        ["Memory Usage"] = { TEBTopMemoryIcon, TEBTopMemory, "ram", "TEBTopMemoryIcon", "", false, function() return G.memory end, },
+        ["Mount Timer"] = { TEBTopMountIcon, TEBTopMount, "mount", "TEBTopMountIcon", "", false, function() return G.mountlbltxt end, },
+        ["Mundus Stone"] = { TEBTopMundusIcon, TEBTopMundus, "mundus", "TEBTopMundusIcon", "", false, function() return mundusStoneReference[settings.mundus.DisplayPreference][G.mundus] end, },
+        ["Sky Shards"] = { TEBTopSkyShardsIcon, TEBTopSkyShards, "skyshards", "TEBTopSkyShardsIcon", "", false, function() return G.skyShardsInfo end, },
+        ["Soul Gems"] = { TEBTopSoulGemsIcon, TEBTopSoulGems, "soulgem", "TEBTopSoulGemsIcon", "", false, function() return G.soulGemInfo end, },
+        ["Tel Var Stones"] = { TEBTopTelvarIcon, TEBTopTelvar, "telvar", "TEBTopTelvarIcon", "", false, function() return G.telvar end, },
+        ["Thief's Tools"] = { TEBTopTTIcon, TEBTopTT, "tt", "TEBTopTTIcon", "", false, function() return G.tt end, },
+        ["Transmute Crystals"] = { TEBTopTCIcon, TEBTopTC, "transmute", "TEBTopTCIcon", "", false, function() return G.crystal end, },
+        ["Unread Mail"] = { TEBTopMailIcon, TEBTopMail, "mail", "TEBTopMailIcon", "", false, function() return G.unread_mail end, },
+        ["Vampirism"] = { TEBTopVampirismIcon, TEBTopVampirism, "vampirism", "TEBTopVampirismIcon", "", false, function() return G.vampireText end, },
+        ["Weapon Charge/Poison"] = { TEBTopWCIcon, TEBTopWC, "wc", "TEBTopWCIcon", "", false, function() return G.weaponCharge end, },
+        ["Woodworking Research Timer"] = { TEBTopResearchWoodworkingIcon, TEBTopResearchWoodworking, "woodworking", "TEBTopResearchWoodworkingIcon", "", false, function() return G.woodWorkingInfo end, },
+        ["Writ Vouchers"] = { TEBTopWritIcon, TEBTopWrit, "writs", "TEBTopWritIcon", "", false, function() return G.writs end, },
     }
-    
-    TEB.CreateSettingsWindow()  
-    TEBTop:SetWidth(screenWidth)
-    TEBTop:SetHidden(false)
-    TEB.savedVariables = ZO_SavedVars:NewAccountWide("TEBSavedVariables", TEB.settingsRev, nil, defaults)
-    
-    backdropOpacity = TEB.savedVariables.backdropOpacity
-    combatOpacity = TEB.savedVariables.combatOpacity
-    barPosition = TEB.savedVariables.barPosition
-    barWidth = TEB.savedVariables.barWidth
-    barY = TEB.savedVariables.barY
-    barLocked = TEB.savedVariables.barLocked
-    gadgetsLocked = TEB.savedVariables.gadgetsLocked
-    lockMessage = TEB.savedVariables.lockMessage
 
-    controlsPosition = TEB.savedVariables.controlsPosition
-    bumpCompass = TEB.savedVariables.bumpCompass
-    gadgets = TEB.savedVariables.gadgets
-    gadgets_pvp = TEB.savedVariables.gadgets_pvp
-    pulseType = TEB.savedVariables.pulseType
-        
+    conditionsTable = {
+        ["Mount Timer"]                     = function() return G.mountTimerNotMaxed or not settings.mount.Dynamic end,
+        ["Blacksmithing Research Timer"]    = function() return G.blackSmithingTimerRunning or not settings.research.Dynamic end,
+        ["Clothing Research Timer"]         = function() return G.clothingTimerRunning or not settings.research.Dynamic end,
+        ["Woodworking Research Timer"]      = function() return G.woodWorkingTimerRunning or not settings.research.Dynamic end,
+        ["Jewelry Crafting Research Timer"] = function() return G.jewelryTimerRunning or not settings.research.Dynamic end,
+        ["Fast Travel Timer"]               = function() return G.ftTimerRunning or not settings.ft.Dynamic end,
+        ["Enlightenment"]                   = function() return G.enlightenmentVisible or not settings.enlightenment.Dynamic end,
+        ["Unread Mail"]                     = function() return G.mailUnread or not settings.mail.Dynamic end,
+        ["Event Tickets"]                   = function() return G.etHasTickets or not settings.et.Dynamic end,
+        ["Food Buff Timer"]                 = function() return G.foodTimerRunning or not settings.food.Dynamic or settings.food.PulseAfter and G.foodBuffWasActive end,
+        ["Bounty/Heat Timer"]               = function() return G.bountyTimerRunning or not settings.bounty.Dynamic or not settings.bar.gadgetsLocked end,
+        ["Vampirism"]                       = function() return G.isVampire or not settings.vampirism.Dynamic end,
+    }
+
+    settings = LSV:NewAccountWide(TEB.name .. "SavedVariables", "Account", defaults):
+        MigrateFromAccountWide( { name = TEB.name .. "SavedVariables" } ):
+        -- when changing settings structure:
+        Version(7, TEB.Upgrade_to_7):
+        EnableDefaultsTrimming()
+    --[[
+        -- no LibSavedVars, use ZOS API directly
+        settings = ZO_SavedVars:NewAccountWide("TEBSavedVariables", TEB.settingsRev, nil, defaults)
+    ]]--
+    TEB.settings = settings
+    TEB.debug = TEB.debug .. string.format("LSV done: %d %d\n",
+        TEB.CountKeys(TEB.settings), TEB.CountKeys(defaults))
+    
+    TEB.CreateSettingsWindow()
+    TEB.debug = TEB.debug .. "CreateSettingsWindow done\n"
+
     TEB.DefragGadgets()
-    
-    clock_TwentyFourHourClock = TEB.savedVariables.clock_TwentyFourHourClock
-    clock_DisplayPreference = TEB.savedVariables.clock_DisplayPreference
-    soulgems_DisplayPreference = TEB.savedVariables.soulgems_DisplayPreference
-    soulgems_ColorCrown = TEB.savedVariables.soulgems_ColorCrown
-    soulgems_ColorNormal = TEB.savedVariables.soulgems_ColorNormal
-    skyshards_DisplayPreference = TEB.savedVariables.skyshards_DisplayPreference
-    durability_DisplayPreference = TEB.savedVariables.durability_DisplayPreference
-    durability_Warning = TEB.savedVariables.durability_Warning
-    durability_Danger = TEB.savedVariables.durability_Danger
-    durability_Good = TEB.savedVariables.durability_Good
-    durability_Critical = TEB.savedVariables.durability_Critical
-    research_DisplayPreference = TEB.savedVariables.research_DisplayPreference
-    research_Dynamic = TEB.savedVariables.research_Dynamic
-    research_DisplayAllSlots = TEB.savedVariables.research_DisplayAllSlots
-    research_ShowShortest = TEB.savedVariables.research_ShowShortest
-    research_FreeText = TEB.savedVariables.research_FreeText
-    gold_DisplayPreference = TEB.savedVariables.gold_DisplayPreference
-    if gold_DisplayPreference == "total gold" then
-        gold_DisplayPreference = "character+bank gold"
-        TEB.savedVariables.gold_DisplayPreference = "character+bank gold"
-    end
-    gold_Tracker = TEB.savedVariables.gold_Tracker
-    latency_Warning = TEB.savedVariables.latency_Warning
-    latency_Danger = TEB.savedVariables.latency_Danger
-    latency_Good = TEB.savedVariables.latency_Good
-    latency_Fixed = TEB.savedVariables.latency_Fixed
-    latency_FixedLength = TEB.savedVariables.latency_FixedLength
-    combatIndicator = TEB.savedVariables.combatIndicator
-    fps_Warning = TEB.savedVariables.fps_Warning
-    fps_Danger = TEB.savedVariables.fps_Danger
-    fps_Good = TEB.savedVariables.fps_Good
-    fps_Fixed = TEB.savedVariables.fps_Fixed
-    fps_FixedLength = TEB.savedVariables.fps_FixedLength
-    level_DisplayPreferenceMax = TEB.savedVariables.level_DisplayPreferenceMax
-    level_DisplayPreferenceNotMax = TEB.savedVariables.level_DisplayPreferenceNotMax
-    bag_DisplayPreference = TEB.savedVariables.bag_DisplayPreference
-    bag_Good = TEB.savedVariables.bag_Good
-    bag_Warning = TEB.savedVariables.bag_Warning
-    bag_Danger = TEB.savedVariables.bag_Danger
-    bag_Critical = TEB.savedVariables.bag_Critical
-    bank_DisplayPreference = TEB.savedVariables.bank_DisplayPreference
-    bank_Good = TEB.savedVariables.bank_Good
-    bank_Warning = TEB.savedVariables.bank_Warning
-    bank_Danger = TEB.savedVariables.bank_Danger
-    bank_Critical = TEB.savedVariables.bank_Critical
-    enlightenment_Warning = TEB.savedVariables.enlightenment_Warning
-    enlightenment_Danger = TEB.savedVariables.enlightenment_Danger
-    enlightenment_Critical = TEB.savedVariables.enlightenment_Critical
-    enlightenment_Dynamic = TEB.savedVariables.enlightenment_Dynamic
-    experience_DisplayPreference = TEB.savedVariables.experience_DisplayPreference
-    autohide_GameMenu = TEB.savedVariables.autohide_GameMenu
-    autohide_Chatter = TEB.savedVariables.autohide_Chatter
-    autohide_Crafting = TEB.savedVariables.autohide_Crafting
-    autohide_Bank = TEB.savedVariables.autohide_Bank
-    autohide_GuildBank = TEB.savedVariables.autohide_GuildBank
-    bumpActionBar = TEB.savedVariables.bumpActionBar
-    wc_Good = TEB.savedVariables.wc_Good
-    wc_Warning = TEB.savedVariables.wc_Warning
-    wc_Danger = TEB.savedVariables.wc_Danger
-    wc_Critical = TEB.savedVariables.wc_Critical
-    wc_AutoPoison = TEB.savedVariables.wc_AutoPoison
-    wc_PoisonWarning = TEB.savedVariables.wc_PoisonWarning
-    wc_PoisonDanger = TEB.savedVariables.wc_PoisonDanger
-    wc_PoisonCritical = TEB.savedVariables.wc_PoisonCritical  
-    location_DisplayPreference = TEB.savedVariables.location_DisplayPreference
-    tt_Good = TEB.savedVariables.tt_Good
-    tt_Warning = TEB.savedVariables.tt_Warning
-    tt_Danger = TEB.savedVariables.tt_Danger
-    tt_DisplayPreference = TEB.savedVariables.tt_DisplayPreference
-    memory_Good = TEB.savedVariables.memory_Good
-    memory_Warning = TEB.savedVariables.memory_Warning
-    memory_Danger = TEB.savedVariables.memory_Danger
-    tt_InvWarning = TEB.savedVariables.tt_InvWarning
-    tt_InvDanger = TEB.savedVariables.tt_InvDanger
-    ft_DisplayPreference = TEB.savedVariables.ft_DisplayPreference
-    ft_TimerDisplayPreference = TEB.savedVariables.ft_TimerDisplayPreference
-    ft_Dynamic = TEB.savedVariables.ft_Dynamic
-    ft_Good = TEB.savedVariables.ft_Good
-    et_Dynamic = TEB.savedVariables.et_Dynamic
-    et_DisplayPreference = TEB.savedVariables.et_DisplayPreference
-    et_Warning = TEB.savedVariables.et_Warning
-    et_Danger = TEB.savedVariables.et_Danger
-    thousandsSeparator = TEB.savedVariables.thousandsSeparator
-    kc_DisplayPreference = TEB.savedVariables.kc_DisplayPreference
-    ap_DisplayPreference = TEB.savedVariables.ap_DisplayPreference
-    scale = TEB.savedVariables.scale
-    level_Dynamic = TEB.savedVariables.level_Dynamic
-    mount_DisplayPreference = TEB.savedVariables.mount_DisplayPreference
-    mount_Dynamic = TEB.savedVariables.mount_Dynamic
-    mount_Good = TEB.savedVariables.mount_Good
-    mount_Critical = TEB.savedVariables.mount_Critical
-    mount_Tracker = TEB.savedVariables.mount_Tracker
-    mail_Dynamic = TEB.savedVariables.mail_Dynamic
-    mail_Good = TEB.savedVariables.mail_Good
-    mail_Critical = TEB.savedVariables.mail_Critical
-    icons_Mode = TEB.savedVariables.icons_Mode
-    if icons_Mode == "black \& white" then
-         icons_Mode = "white"
-         TEB.savedVariables.icons_Mode = "white"
-    end
-    gadgetText = TEB.savedVariables.gadgetText
-    iconIndicator = TEB.savedVariables.iconIndicator
-    food_Dynamic = TEB.savedVariables.food_Dynamic
-    food_Warning = TEB.savedVariables.food_Warning
-    food_Danger = TEB.savedVariables.food_Danger
-    food_Critical = TEB.savedVariables.food_Critical
-    food_PulseAfter = TEB.savedVariables.food_PulseAfter
-    food_Dynamic = TEB.savedVariables.food_Dynamic
-    food_DisplayPreference = TEB.savedVariables.food_DisplayPreference 
-    bounty_Dynamic = TEB.savedVariables.bounty_Dynamic
-    bounty_DisplayPreference = TEB.savedVariables.bounty_DisplayPreference
-    bounty_Warning = TEB.savedVariables.bounty_Warning
-    bounty_Danger = TEB.savedVariables.bounty_Danger
-    bounty_Critical = TEB.savedVariables.bounty_Critical    
-    bounty_Good = TEB.savedVariables.bounty_Good
-    vampirism_DisplayPreference = TEB.savedVariables.vampirism_DisplayPreference
-    vampirism_TimerPreference = TEB.savedVariables.vampirism_TimerPreference
-    vampirism_StageColor = TEB.savedVariables.vampirism_StageColor
-    font = TEB.savedVariables.font
-    pulseWhenCritical = TEB.savedVariables.pulseWhenCritical
-    barLayer = TEB.savedVariables.barLayer
-
-    TEB.SetFPSFixed()        
-    TEB.SetLatencyFixed() 
-            
-    addonInitialized = true
-    
+    TEB.SetWidth(settings.latency, TEBTopLatency)
+    TEB.SetWidth(settings.fps, TEBTopFPS)
     TEBTop:ClearAnchors()
-    TEBTop:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 0, barY)
-    
+    TEBTop:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 0, settings.bar.Y)
     TEB.SetBarLayer()
-    TEB.LockUnlockBar(barLocked)
-    TEB.LockUnlockGadgets(gadgetsLocked)
-
+    TEB.LockUnlockBar(settings.bar.Locked)
+    TEB.LockUnlockGadgets(settings.bar.gadgetsLocked)
     TEB.ConvertGadgetSettings()
-    TEB:SetBackdropOpacity()
-    TEB:SetBarPosition()
-    TEB:SetBarWidth()
-    TEB:RebuildBar(true)
-    TEB:UpdateControlsPosition()
+    TEB.CalculateBagItems()
+    TEB.SetOpacity()
+    TEB.SetBarPosition()
+    TEB.SetBarWidth(settings.bar.Width)
+    TEB.RebuildBar()
+    TEB.UpdateControlsPosition()
     TEB.ResizeBar()
-
     TEB.AddToMountDatabase(GetUnitName("player"))
     TEB.AddToGoldDatabase(GetUnitName("player"))
+
+    TEB.debug = TEB.debug .. "Initialize done\n"
 end
 
-------------------------------------------------------
--- SetlatencyFixed
-------------------------------------------------------
-function TEB.SetLatencyFixed()
-    if latency_Fixed then
-        TEBTopLatency:SetHeight(TEBTopLatency:GetHeight())
-        TEBTopLatency:SetWidth(latency_FixedLength)  
-    else
-        if addonInitialized then
-            ReloadUI("ingame")
+-- auxiliary functions
+
+function round(val, decimal)
+    local divisor = 10 ^ (decimal or 0) -- 10 ^ 0 == 1
+    return math.floor( val * divisor + 0.5) / divisor
+end
+
+local function ucfirst(s)
+    return s:gsub("([a-zA-Z])(%w*)", function(a,b) return string.upper(a)..b end)
+end
+
+local function titlecase(first, rest)
+   return first:upper() .. rest:lower()
+end
+
+function TEB.fixname(itemName)
+    return zo_strformat("<<C:1>>", itemName)
+end
+
+function FormatTooltip(left, right)
+    TEBTooltipLeft:SetText(left)
+    TEBTooltipRight:SetText(right)
+    TEBTooltip:SetHeight(TEBTooltipLeft:GetHeight())
+    TEBTooltip:SetWidth(TEBTooltipLeft:GetWidth() + TEBTooltipRight:GetWidth() + G.spacer)
+end
+
+function TEB.CountKeys(s)
+    local count = 0
+    for k, v in pairs(s) do
+        if key ~= "__dataSource" then
+            count = count +1 
         end
+        --[[
+        if type(v) == "table" then
+            count = count + TEB.CountKeys(v)
+        else
+            count = count +1
+        end
+        ]]--
+    end
+    return count
+end
+
+-- called from TEB.Initialize
+
+function TEB.FinishInitialization(eventCode)
+    if not G.addonInitialized then
+        -- needs to be done at first player activation only
+        df("%s v. %s initialized.", TEB.displayName, TEB.version)
+        G.addonInitialized = true
     end
 end
 
-------------------------------------------------------
--- SetFPSFixed
-------------------------------------------------------
-function TEB.SetFPSFixed()
-    if fps_Fixed then
-        TEBTopFPS:SetHeight(TEBTopFPS:GetHeight())
-        TEBTopFPS:SetWidth(fps_FixedLength)  
-    else
-        if addonInitialized then
-            ReloadUI("ingame")
+function TEB.Upgrade_to_7(sv_data)
+    local move_to_bar_subtable = {
+        backdropOpacity = "backgroundOpacity",
+        barLayer = "Layer",
+        barLocked = "Locked",
+        barPosition = "Position",
+        barY = "Y",
+        bumpActionBar = "bumpActionBar",
+        bumpCompass = "bumpCompass",
+        combatIndicator = "combatIndicator",
+        combatOpacity = "combatOpacity",
+        controlsPosition = "controlsPosition",
+        font = "font",
+        gadgetsLocked = "gadgetsLocked",
+        icons_Mode = "iconsMode",
+        lockMessage = "lockMessage",
+        pulseType = "pulseType",
+        pulseWhenCritical = "pulseWhenCritical",
+        scale = "scale",
+        thousandsSeparator = "thousandsSeparator",
+        Width = "Width",
+    }
+    -- create subtables
+    for k, _ in pairs(defaults) do
+        if sv_data[k] == nil then
+            sv_data[k] = { }
+        end
+    end
+    -- analyze the data
+    for old_key, old_v in pairs(sv_data) do
+        TEB.debug = TEB.debug .. string.format("# %s\n", old_key)
+        local new_subkey = move_to_bar_subtable[old_key]
+        if new_subkey then
+            TEB.debug = TEB.debug .. string.format("BAR.%s = %s\n", new_subkey, old_key)
+            sv_data.bar[new_subkey] = old_v
+            sv_data[old_key] = nil
+        elseif old_key == "gadgets" then 
+            sv_data["gadgets_pve"] = old_v
+            sv_data[old_key] = nil
+        else            
+            for k, _ in pairs(defaults) do
+                local c_start, c_end = string.find(old_key, k)
+                if c_start and c_start == 1 and c_end < #old_key then
+                    -- remove prefix (including _ if present)
+                    new_subkey = old_key:sub(c_end+1, c_end+1) == '_' and
+                        old_key:sub(c_end+2, -1) or old_key:sub(c_end+1, -1)
+                    if new_subkey == "Critical" or new_subkey == "Danger" or
+                        new_subkey == "Warning" or new_subkey == "Caution" then
+                        new_subkey = string.lower(new_subkey)
+                    end
+                    sv_data[k][new_subkey] = old_v
+                    TEB.debug = TEB.debug .. string.format("%s.%s = %s\n", k, new_subkey, old_key)
+                    sv_data[old_key] = nil
+                end
+            end
+        end
+        for old, new in pairs({ ["Bounty Timer"] = "Bounty/Heat Timer",
+                                ["Weapon Charge"] = "Weapon Charge/Poison" }) do
+            for _, submenu in ipairs({"gadgetText", "iconIndicator"}) do
+                sv_data[submenu][new] = sv_data[submenu][old]
+                sv_data[submenu][old] = nil
+            end
+            for _, submenu in ipairs({"gadgets_pve", "gadgets_pvp"}) do
+                for i = 1, #sv_data[submenu] do
+                    if sv_data[submenu][i] == old then
+                        sv_data[submenu][i] = new
+                    end                        
+                end
+            end
         end
     end
 end
+    
+function TEB.SetWidth(setting, gadget)
+    if setting.Fixed then
+        gadget:SetWidth(setting.FixedLength)
+    else
+        local x = gadget:GetTextWidth()
+        gadget:SetWidth(x)
+    end
+end
 
-------------------------------------------------------
--- SetBarLayer
-------------------------------------------------------
 function TEB.SetBarLayer()
-    TEBTop:SetDrawLayer(barLayer)
+    TEBTop:SetDrawLayer(settings.bar.Layer)
     TEBTooltip:SetDrawLayer(4)
 end
-------------------------------------------------------
--- HideBar
-------------------------------------------------------
-function TEB.HideBar(eventCode, reticleHidden)
-    if reticleHidden == true and ignoreReticleUpdate == false then
-        if autohide_GameMenu and not(HUD_UI_SCENE:IsShowing() or GetInteractionType() == 14 or LOOT_SCENE:IsShowing()) then
-            -- Reticle Hidebar detected menu, chat or lootscreen, and autohide_GameMenu is true
-            hideBar = true
-        else
-            -- Did not detect menu, or chat, or lootscreen, or autohide is disabled
-            hideBar = false
-        end
-    elseif reticleHidden == false and ignoreReticleUpdate == false then
-        hideBar = false
-    else 
-        ignoreReticleUpdate = false
+
+function TEB.HideBar()
+    if settings.autohide.GameMenu then
+        G.hideBar = true
     end
-    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
 end
 
-------------------------------------------------------
--- ShowBar
-------------------------------------------------------
 function TEB.ShowBar()
-    local reticleHidden = ZO_ReticleContainerReticle:IsHidden()
-    if not reticleHidden or LOOT_SCENE:IsShowing() then
-        hideBar = false
-        ignoreReticleUpdate = false
-    end
-    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
+    G.hideBar = false
 end
 
-------------------------------------------------------
--- ChatterHideBar
-------------------------------------------------------
 function TEB.ChatterHideBar()
-    if autohide_Chatter then 
-        hideBar = true
-    else
-        hideBar = false 
-    end
-    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
+    if settings.autohide.Chatter then G.hideBar = true end
 end
 
-------------------------------------------------------
--- CraftingHideBar
-------------------------------------------------------
 function TEB.CraftingHideBar()
-    ignoreReticleUpdate = true -- This is needed due to the reticle update event being called after the crafting event
-    if autohide_Crafting then 
-        hideBar = true
-    else
-        hideBar = false 
-    end
-    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
+    if settings.autohide.Crafting then G.hideBar = true end
 end
 
-------------------------------------------------------
--- BankHideBar
-------------------------------------------------------
 function TEB.BankHideBar()
-    if autohide_Bank then 
-        hideBar = true
-    else
-        hideBar = false 
-    end
-    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
+    if settings.autohide.Bank then G.hideBar = true end
 end
 
-------------------------------------------------------
--- GuildBankHideBar
-------------------------------------------------------
 function TEB.GuildBankHideBar()
-    if autohide_GuildBank then 
-        hideBar = true
+    if settings.autohide.GuildBank then G.hideBar = true end
+end
+
+function TEB.SetOpacity()
+    TEBTop:SetAlpha(settings.bar.opacity/100)
+    TEBTopBG:SetAlpha(settings.bar.backgroundOpacity/100)
+end
+
+function TEB.RebuildGadget(gadget, icon, lastGadget, firstGadgetAdded)
+    gadget:SetHidden(false)
+    icon:SetHidden(false)
+    if firstGadgetAdded then
+        icon:SetAnchor(LEFT, lastGadget, RIGHT, 20, 0)
     else
-        hideBar = false 
+        icon:SetAnchor(LEFT, lastGadget, RIGHT, 0, 0)
+        firstGadgetAdded = true
+   end
+    gadget:SetAnchor(TOPLEFT, icon, TOPRIGHT, 0, 0)
+    gadget:SetAnchor(BOTTOMLEFT, icon, BOTTOMRIGHT, 0, 0)
+    gadget:SetWrapMode(TEXT_WRAP_MODE_TRUNCATE)
+    gadget:SetMaxLineCount(1)
+    -- gadget:SetWidth(gadget:GetTextWidth())
+    lastGadget = gadget
+    return lastGadget, firstGadgetAdded
+end
+
+local classTexture = {
+    "dragonknight", "sorcerer", "nightblade", "warden", "necromancer", "templar",
+}
+
+function TEB.RebuildLevel(lastGadget, firstGadgetAdded)
+    local iconType = G.lvl < 50 and settings.level.notmax.icon or settings.level.max.icon
+    local texturePath =  iconType == 1 and
+            string.format("TEB/Images/class_%s_%s.dds",
+            classTexture[G.playerClass], settings.bar.iconsMode )
+            or
+            string.format("TEB/Images/cp_%s.dds",
+            settings.bar.iconsMode )
+    TEBTopLevelIcon:SetNormalTexture(texturePath)
+    return TEB.RebuildGadget(TEBTopLevel, TEBTopLevelIcon, lastGadget, firstGadgetAdded)
+end
+
+function TEB.RebuildBar()
+    TEB.DefragGadgets()
+    if G.pvpMode then
+        gadgetList = settings.gadgets_pvp
+    else
+        gadgetList = settings.gadgets_pve
     end
-    EVENT_MANAGER:RegisterForUpdate("TEBHideBarFade", 20, TEB.HideBarFade)
-end
-
-------------------------------------------------------
--- SetBackdropOpacity
-------------------------------------------------------
-function TEB:SetBackdropOpacity()
-    local alpha = backdropOpacity/100
-    TEBTopBG:SetAlpha(alpha)
-end
-
-------------------------------------------------------
--- RebuildBar
-------------------------------------------------------
-function TEB:RebuildBar(fullRebuild)
-    d("rebuild called")
-    local fullRebuild = fullRebuild or false
-
-    if addonInitialized then
-
-        TEB.DefragGadgets()
-
-        if pvpMode then
-            gadgetList = gadgets_pvp
-        else
-            gadgetList = gadgets
+    local lastGadget = TEBTopInfoAnchor
+    local firstGadgetAdded = false
+    for k, v in pairs(gadgetReference) do
+        if ignoreGadget ~= gadgetReference[k][4] then
+            for i = 1, 2 do
+                gadgetReference[k][i]:ClearAnchors()
+                gadgetReference[k][i]:SetHidden(true)
+            end
         end
-        
-        local lastGadget = TEBTopInfoAnchor
-        local firstGadgetAdded = false
-    
-        for k, v in pairs(gadgetReference) do
-            if ignoreGadget ~= gadgetReference[k][4] then
-                gadgetReference[k][1]:ClearAnchors()
-                gadgetReference[k][2]:ClearAnchors()
-                gadgetReference[k][1]:SetHidden(true)
-                gadgetReference[k][2]:SetHidden(true)            
-            end
-        end         
-
-        if fullRebuild then
-            d("fullrebuild")
-            EVENT_MANAGER:UnregisterForUpdate("TEBZone")
-            EVENT_MANAGER:UnregisterForUpdate("TEBMemory")
-            EVENT_MANAGER:UnregisterForUpdate("TEBFPS")
-            EVENT_MANAGER:UnregisterForUpdate("TEBLatency")
-            EVENT_MANAGER:UnregisterForUpdate("TEBClock")
-            EVENT_MANAGER:UnregisterForUpdate("TEBRecall")
-
-            TEB.getZone()
-
-            TEB.bags()
-            TEB.CalculateBagItems()    
-
-            TEB.UpdateAllCurrency()
-            TEB.UpdateLevel()
-            --TEB.enlightenment()
-            TEB.mail(false)
-        end
-
-        for i=1, #defaultGadgets do
-            if gadgetList[i] ~= "(None)" then
-                TEB.SetIcon(gadgetList[i], "normal")                                                             
-            end               
-            
-            if gadgetList[i] == "Latency" then
-                lastGadget, firstGadgetAdded = TEB:RebuildLatency(lastGadget, firstGadgetAdded)
-                EVENT_MANAGER:RegisterForUpdate("TEBLatency", 500, TEB.latency)
-            end
-            if gadgetList[i] == "Level" then
-                lastGadget, firstGadgetAdded = TEB:RebuildLevel(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Gold" then
-                lastGadget, firstGadgetAdded = TEB:RebuildGold(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Tel Var Stones" then
-                lastGadget, firstGadgetAdded = TEB:RebuildTelvarStones(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Transmute Crystals" then
-                lastGadget, firstGadgetAdded = TEB:RebuildTC(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Writ Vouchers" then
-                lastGadget, firstGadgetAdded = TEB:RebuildWrit(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Soul Gems" then
-                lastGadget, firstGadgetAdded = TEB:RebuildSoulGems(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Alliance Points" then
-                lastGadget, firstGadgetAdded = TEB:RebuildAP(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Bag Space" then
-                lastGadget, firstGadgetAdded = TEB:RebuildBag(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Mount Timer" and (mountTimerNotMaxed or not mount_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildMountTimer(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Experience" then
-                lastGadget, firstGadgetAdded = TEB:RebuildXP(lastGadget, firstGadgetAdded)
-                TEB.experience()
-            end
-            if gadgetList[i] == "Clock" then
-                lastGadget, firstGadgetAdded = TEB:RebuildClock(lastGadget, firstGadgetAdded)
-                EVENT_MANAGER:RegisterForUpdate("TEBClock", 1000, TEB.currenttime)
-            end
-            if gadgetList[i] == "Sky Shards" then
-                lastGadget, firstGadgetAdded = TEB:RebuildSkyShards(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Durability" then
-                lastGadget, firstGadgetAdded = TEB:RebuildDurability(lastGadget, firstGadgetAdded)
-                TEB.durability()
-            end
-            if gadgetList[i] == "Blacksmithing Research Timer" and (blackSmithingTimerRunning or not research_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildBlacksmithingResearchTimer(lastGadget, firstGadgetAdded)
-            end        
-            if gadgetList[i] == "Clothing Research Timer" and (clothingTimerRunning or not research_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildClothingResearchTimer(lastGadget, firstGadgetAdded)
-            end  
-            if gadgetList[i] == "Woodworking Research Timer" and (woodWorkingTimerRunning or not research_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildWoodworkingResearchTimer(lastGadget, firstGadgetAdded)
-            end  
-            if gadgetList[i] == "Jewelry Crafting Research Timer" and (jewelryTimerRunning or not research_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildJewelryResearchTimer(lastGadget, firstGadgetAdded)
-            end  
-            if gadgetList[i] == "Bank Space" then
-                lastGadget, firstGadgetAdded = TEB:RebuildBank(lastGadget, firstGadgetAdded)
-                TEB.bank()
-            end  
-            if gadgetList[i] == "FPS" then
-                lastGadget, firstGadgetAdded = TEB:RebuildFPS(lastGadget, firstGadgetAdded)
-                EVENT_MANAGER:RegisterForUpdate("TEBFPS", 500, TEB.fps)
-            end  
-            if gadgetList[i] == "Weapon Charge" then
-                lastGadget, firstGadgetAdded = TEB:RebuildWC(lastGadget, firstGadgetAdded)
-                TEB.weaponcharge()
-            end  
-            if gadgetList[i] == "Location" then
-                lastGadget, firstGadgetAdded = TEB:RebuildLocation(lastGadget, firstGadgetAdded)
-                EVENT_MANAGER:RegisterForUpdate("TEBZone", 500, TEB.zone)
-            end
-            if gadgetList[i] == "Thief's Tools" then
-                lastGadget, firstGadgetAdded = TEB:RebuildTT(lastGadget, firstGadgetAdded)
-            end                              
-            if gadgetList[i] == "Memory Usage" then
-                lastGadget, firstGadgetAdded = TEB:RebuildMemory(lastGadget, firstGadgetAdded)
-                EVENT_MANAGER:RegisterForUpdate("TEBMemory", 1000, TEB.memory)
-            end                              
-            if gadgetList[i] == "Fast Travel Timer" then
-                --TEB.recallRegister()
-                if (ftTimerRunning or not ft_Dynamic or not gadgetsLocked) then
-                    lastGadget, firstGadgetAdded = TEB:RebuildFT(lastGadget, firstGadgetAdded)
-                    TEB.recallRegister()
-                end
-            end   
-            if gadgetList[i] == "Kill Counter" then
-                lastGadget, firstGadgetAdded = TEB:RebuildKillCounter(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Enlightenment" and (enlightenmentVisible or not enlightenment_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildEnlightenment(lastGadget, firstGadgetAdded)
-            end 
-            if gadgetList[i] == "Unread Mail" and (mailUnread or not mail_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildMail(lastGadget, firstGadgetAdded)
-            end 
-            if gadgetList[i] == "Event Tickets" and (etHasTickets or not et_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildET(lastGadget, firstGadgetAdded)
-            end   
-            if gadgetList[i] == "Food Buff Timer" and ((foodTimerRunning or not food_Dynamic or not gadgetsLocked) or (food_PulseAfter and foodBuffWasActive)) then
-                lastGadget, firstGadgetAdded = TEB:RebuildFood(lastGadget, firstGadgetAdded)
-            end   
-            if gadgetList[i] == "Mundus Stone" then
-                lastGadget, firstGadgetAdded = TEB:RebuildMundus(lastGadget, firstGadgetAdded)
-            end
-            if gadgetList[i] == "Bounty Timer" and (bountyTimerRunning or not bounty_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildBountyTimer(lastGadget, firstGadgetAdded)
-            end   
-            if gadgetList[i] == "Vampirism" and (isVampire or not vampirism_Dynamic or not gadgetsLocked) then
-                lastGadget, firstGadgetAdded = TEB:RebuildVampirism(lastGadget, firstGadgetAdded)
-            end                               
-        end
-    
-        TEBTopEndingAnchor:ClearAnchors()
-        TEBTopEndingAnchor:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0)
-        
     end
-    
-    TEB:UpdateControlsPosition()
+    for _, name in ipairs(gadgetList) do
+        if name ~= "(None)" then
+            TEB.SetIcon(name, "normal")
+            local icon, gadget = unpack(gadgetReference[name])
+            -- condition is a function or nil
+            local condition = conditionsTable[name]
+            -- df("%s %s %s", name, tostring(gadget), tostring(condition))
+            if name == "Level" then
+                lastGadget, firstGadgetAdded = TEB.RebuildLevel(lastGadget, firstGadgetAdded)
+            -- gadget shouldn't be shown if locked and condition() returns false
+            elseif not settings.bar.gadgetsLocked or not condition or
+                condition and condition() then
+                lastGadget, firstGadgetAdded = TEB.RebuildGadget(gadget, icon, lastGadget, firstGadgetAdded)
+            end
+        end
+    end
+    TEBTopEndingAnchor:ClearAnchors()
+    TEBTopEndingAnchor:SetAnchor(LEFT, lastGadget, RIGHT, 0, 0)
+    TEB.UpdateControlsPosition()
 end
 
-------------------------------------------------------
--- AddToGoldDatabase
-------------------------------------------------------
 function TEB.AddToGoldDatabase(character)
     local foundCharacter = false
-    for k, v in pairs(gold_Tracker) do
+    for k, v in pairs(settings.gold.Tracker) do
         if k == character then
             foundCharacter = true
         end
     end
     local goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
 
-    if not foundCharacter then       
-        gold_Tracker[character] = {true, goldCharacter} 
+    if not foundCharacter then
+        settings.gold.Tracker[character] = { true, goldCharacter }
     else
-        local characterTracked = gold_Tracker[character][1]
-        gold_Tracker[character] = {characterTracked, goldCharacter}
+        local characterTracked = settings.gold.Tracker[character][1]
+        settings.gold.Tracker[character] = { characterTracked, goldCharacter }
     end
 end
 
-------------------------------------------------------
--- AddToMountDatabase
-------------------------------------------------------
 function TEB.AddToMountDatabase(character)
     local foundCharacter = false
-    for k, v in pairs(mount_Tracker) do
+    for k, v in pairs(settings.mount.Tracker) do
         if k == character then
             foundCharacter = true
         end
@@ -1010,886 +828,176 @@ function TEB.AddToMountDatabase(character)
     local trainTime = os.time() + mountTimeLeft
 
     if not foundCharacter then
-        if not STABLE_MANAGER:IsRidingSkillMaxedOut() then        
-            mount_Tracker[character] = {true, trainTime}
-        end  
+        if not STABLE_MANAGER:IsRidingSkillMaxedOut() then
+            settings.mount.Tracker[character] = {true, trainTime}
+        end
     else
-        local characterTracked = mount_Tracker[character][1]
-        local savedTrainTime = mount_Tracker[character][2]
-        if not STABLE_MANAGER:IsRidingSkillMaxedOut() and savedTrainTime ~= -1 then        
-            mount_Tracker[character] = {characterTracked, trainTime}
+        local characterTracked = settings.mount.Tracker[character][1]
+        local savedTrainTime = settings.mount.Tracker[character][2]
+        if not STABLE_MANAGER:IsRidingSkillMaxedOut() and savedTrainTime ~= -1 then
+            settings.mount.Tracker[character] = {characterTracked, trainTime}
         else
-            mount_Tracker[character] = {false, -1}
-        end                      
+            settings.mount.Tracker[character] = {false, -1}
+        end
     end
 end
 
-------------------------------------------------------
--- RebuildMountTrackerList
-------------------------------------------------------
 function TEB.RebuildMountTrackerList()
-    trackerDropdown = {}
-    trackerDropdown[1] = "(choose a character)"
+    G.trackerDropdown = {}
+    G.trackerDropdown[1] = "(choose a character)"
     local index = 2
-    for k, v in pairs(mount_Tracker) do
+    for k, v in pairs(settings.mount.Tracker) do
         if v[2] ~= -1 then
-            if v[1] then               
-                trackerDropdown[index] = k.." (tracked)"
-            else
-                trackerDropdown[index] = k.." (untracked)"
-            end
+            G.trackerDropdown[index] = string.format("%s (%stracked)", k, v[1] and "" or "un")
             index = index + 1
         end
     end
 end
 
-------------------------------------------------------
--- DisableMountTracker
-------------------------------------------------------
 function TEB.DisableMountTracker()
-    if mount_Tracker[playerName] then
-        return false
-    else
-        return true
-    end
+    return not settings.mount.Tracker[G.characterName]
 end
 
-------------------------------------------------------
--- DisableGoldTracker
-------------------------------------------------------
 function TEB.DisableGoldTracker()
-    if gold_Tracker[playerName] then
-        return false
-    else
-        return true
-    end
+    return not settings.gold.Tracker[G.characterName]
 end
 
-------------------------------------------------------
--- GetCharacterGoldTracked
-------------------------------------------------------
 function TEB.GetCharacterGoldTracked()
-    if gold_Tracker[playerName] then
-        return gold_Tracker[playerName][1]
-    else
-        return false
-    end
+    return settings.gold.Tracker[G.characterName] and
+        settings.gold.Tracker[G.characterName][1] or false
 end
 
-------------------------------------------------------
--- GetCharacterMountTracked
-------------------------------------------------------
 function TEB.GetCharacterMountTracked()
-    if mount_Tracker[playerName] then
-        return mount_Tracker[playerName][1]
-    else
-        return false
-    end
+    return settings.mount.Tracker[G.characterName] and
+        settings.mount.Tracker[G.characterName][1] or false
 end
 
-------------------------------------------------------
--- SetCharacterMountTracked
-------------------------------------------------------
 function TEB.SetCharacterMountTracked(track)
-    if mount_Tracker[playerName] then
+    if settings.mount.Tracker[G.characterName] then
         local mountTimeLeft = GetTimeUntilCanBeTrained() / 1000
         local trainTime = os.time() + mountTimeLeft
-        mount_Tracker[playerName][1] = track
-        mount_Tracker[playerName][2] = trainTime
+        settings.mount.Tracker[G.characterName] = { track, trainTime }
     end
 end
 
-------------------------------------------------------
--- SetCharacterGoldTracked
-------------------------------------------------------
 function TEB.SetCharacterGoldTracked(track)
-    if gold_Tracker[playerName] then
+    if settings.gold.Tracker[G.characterName] then
         local goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-        gold_Tracker[playerName][1] = track
-        gold_Tracker[playerName][2] = goldCharacter
+        settings.gold.Tracker[G.characterName] = { track, goldCharacter }
     end
 end
 
-------------------------------------------------------
--- SetIcon
-------------------------------------------------------
 function TEB.SetIcon(gadgetName, iconStyle)
-    if addonInitialized then
-        gadgetData = gadgetReference[gadgetName]
-        local colorTag = ""
-        if iconStyle == "normal" then
-            if icons_Mode == "white" then colorTag = "white" end
-            if icons_Mode == "color" then colorTag = "color" end
-        else
-            colorTag = iconStyle
-        end
-        local fileName = gadgetData[3].."_"..colorTag..".dds"
-        if TEB.IconDifferent(gadgetName, fileName) then
-            gadgetData[1]:SetNormalTexture("TEB/Images/"..fileName)
-            gadgetReference[gadgetName][5] = fileName
-        end
+    gadgetData = gadgetReference[gadgetName]
+    iconStyle = string.lower(iconStyle)
+    -- bar.iconsMode : white, color
+    -- iconStyle: green, caution, warning, danger
+    local colorTag
+    if iconStyle == "normal" then
+        colorTag = settings.bar.iconsMode
+    elseif iconStyle == "critical" then
+        colorTag = "danger"
+    else
+        colorTag = iconStyle
+    end
+    local fileName =
+        string.format("%s_%s.dds", gadgetData[3], string.lower(colorTag))
+    if TEB.IconDifferent(gadgetName, fileName) then
+        gadgetData[1]:SetNormalTexture("TEB/Images/"..fileName)
+        gadgetData[5] = fileName
     end
 end
 
-------------------------------------------------------
--- IconDifferent
-------------------------------------------------------
+function TEB.SetIconByIndicator(gadgetName, iconStyle)
+    if settings.iconIndicator[gadgetName] and iconStyle ~= "normal" then
+        TEB.SetIcon(gadgetName, iconStyle)
+    else
+        TEB.SetIcon(gadgetName, "normal")
+    end
+end
+
 function TEB.IconDifferent(gadgetName, fileName)
-    if gadgetReference[gadgetName][5] ~= fileName then
-        return true
-    else
-        return false
-    end
+    return gadgetReference[gadgetName][5] ~= fileName
 end
 
-------------------------------------------------------
--- RebuildLatency
-------------------------------------------------------
-function TEB:RebuildLatency(lastGadget, firstGadgetAdded)
-    TEBTopLatencyIcon:SetHidden(false)
-    TEBTopLatency:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopLatencyIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopLatencyIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopLatency:SetAnchor(TOPLEFT, TEBTopLatencyIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopLatency
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildVampirism
-------------------------------------------------------
-function TEB:RebuildVampirism(lastGadget, firstGadgetAdded)
-    TEBTopVampirismIcon:SetHidden(false)
-    TEBTopVampirism:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopVampirismIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopVampirismIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopVampirism:SetAnchor(TOPLEFT, TEBTopVampirismIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopVampirism
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildLevel
-------------------------------------------------------
-function TEB:RebuildLevel(lastGadget, firstGadgetAdded)
-    
-    -- 1 = Dragon Knight
-    -- 2 = Sorcerer
-    -- 3 = Night Blade
-    -- 4 = Warden
-    -- 5 = Necromancer
-    -- 6 = Templar
-    
-    local classIconObject = ""
-    local playerClass = GetUnitClassId("player")
-    local showClassIcon = false
-    
-    if lvl == 50 then    
-        if string.match(level_DisplayPreferenceMax, "%[CP Icon%]") then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/cp_white.dds")
-        else
-            showClassIcon = true
-        end
-    end
-    if lvl < 50 then    
-        if string.match(level_DisplayPreferenceNotMax, "%[CP Icon%]") then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/cp_color.dds")
-        else
-            showClassIcon = true
-        end
-    end
-    
-    if playerClass == 1 then playerClassName = "Dragon Knight" end
-    if playerClass == 3 then playerClassName = "Night Blade" end
-    if playerClass == 2 then playerClassName = "Sorcerer" end
-    if playerClass == 6 then playerClassName = "Templar" end
-    if playerClass == 4 then playerClassName = "Warden" end
-    if playerClass == 5 then playerClassName = "Necromancer" end
-
-    if showClassIcon then
-        local colorTag = "white"
-        if icons_Mode == "color" then colorTag = "color" end
-        if playerClass == 1 then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/class_dragonknight_"..icons_Mode..".dds")
-        end
-        if playerClass == 3 then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/class_nightblade_"..icons_Mode..".dds")
-        end
-        if playerClass == 2 then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/class_sorcerer_"..icons_Mode..".dds")
-        end
-        if playerClass == 6 then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/class_templar_"..icons_Mode..".dds")
-        end
-        if playerClass == 4 then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/class_warden_"..icons_Mode..".dds")
-        end
-        if playerClass == 5 then
-            TEBTopLevelIcon:SetNormalTexture("TEB/Images/class_necromancer_"..icons_Mode..".dds")
-        end        
-    end
-    
-    TEBTopLevelIcon:SetHidden(false)
-    TEBTopLevel:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopLevelIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopLevelIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopLevel:SetAnchor(TOPLEFT, TEBTopLevelIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopLevel   
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildGold
-------------------------------------------------------
-function TEB:RebuildGold(lastGadget, firstGadgetAdded)
-    TEBTopGoldIcon:SetHidden(false)
-    TEBTopGold:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopGoldIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopGoldIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopGold:SetAnchor(TOPLEFT, TEBTopGoldIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopGold     
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildMundus
-------------------------------------------------------
-function TEB:RebuildMundus(lastGadget, firstGadgetAdded)
-    TEBTopMundusIcon:SetHidden(false)
-    TEBTopMundus:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopMundusIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopMundusIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopMundus:SetAnchor(TOPLEFT, TEBTopMundusIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopMundus     
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildTelvarStones
-------------------------------------------------------
-function TEB:RebuildTelvarStones(lastGadget, firstGadgetAdded)
-    TEBTopTelvarIcon:SetHidden(false)
-    TEBTopTelvar:SetHidden(false)
-
-    if not firstGadgetAdded then
-        TEBTopTelvarIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopTelvarIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopTelvar:SetAnchor(TOPLEFT, TEBTopTelvarIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopTelvar     
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildTC
-------------------------------------------------------
-function TEB:RebuildTC(lastGadget, firstGadgetAdded)
-    TEBTopTCIcon:SetHidden(false)
-    TEBTopTC:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopTCIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopTCIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopTC:SetAnchor(TOPLEFT, TEBTopTCIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopTC     
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildWrit
-------------------------------------------------------
-function TEB:RebuildWrit(lastGadget, firstGadgetAdded)
-    TEBTopWritIcon:SetHidden(false)
-    TEBTopWrit:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopWritIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopWritIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopWrit:SetAnchor(TOPLEFT, TEBTopWritIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopWrit     
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildSoulGems
-------------------------------------------------------
-function TEB:RebuildSoulGems(lastGadget, firstGadgetAdded)
-    TEBTopSoulGemsIcon:SetHidden(false)
-    TEBTopSoulGems:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopSoulGemsIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopSoulGemsIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopSoulGems:SetAnchor(TOPLEFT, TEBTopSoulGemsIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopSoulGems
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildAP
-------------------------------------------------------
-function TEB:RebuildAP(lastGadget, firstGadgetAdded)
-    TEBTopAPIcon:SetHidden(false)
-    TEBTopAP:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopAPIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopAPIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopAP:SetAnchor(TOPLEFT, TEBTopAPIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopAP
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildBag
-------------------------------------------------------
-function TEB:RebuildBag(lastGadget, firstGadgetAdded)
-    TEBTopBagIcon:SetHidden(false)
-    TEBTopBag:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopBagIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopBagIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopBag:SetAnchor(TOPLEFT, TEBTopBagIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopBag
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildBank
-------------------------------------------------------
-function TEB:RebuildBank(lastGadget, firstGadgetAdded)
-    TEBTopBankIcon:SetHidden(false)
-    TEBTopBank:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopBankIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopBankIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopBank:SetAnchor(TOPLEFT, TEBTopBankIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopBank
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildFPS
-------------------------------------------------------
-function TEB:RebuildFPS(lastGadget, firstGadgetAdded)
-    TEBTopFPSIcon:SetHidden(false)
-    TEBTopFPS:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopFPSIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopFPSIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopFPS:SetAnchor(TOPLEFT, TEBTopFPSIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopFPS
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildMountTimer
-------------------------------------------------------
-function TEB:RebuildMountTimer(lastGadget, firstGadgetAdded)
-    TEBTopMountIcon:SetHidden(false)
-    TEBTopMount:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopMountIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopMountIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopMount:SetAnchor(TOPLEFT, TEBTopMountIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopMount
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildXP
-------------------------------------------------------
-function TEB:RebuildXP(lastGadget, firstGadgetAdded)
-    TEBTopXPIcon:SetHidden(false)
-    TEBTopXP:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopXPIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopXPIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopXP:SetAnchor(TOPLEFT, TEBTopXPIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopXP
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildClock
-------------------------------------------------------
-function TEB:RebuildClock(lastGadget, firstGadgetAdded)
-    TEBTopTimeIcon:SetHidden(false)
-    TEBTopTime:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopTimeIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopTimeIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopTime:SetAnchor(TOPLEFT, TEBTopTimeIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopTime
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildSkyShards
-------------------------------------------------------
-function TEB:RebuildSkyShards(lastGadget, firstGadgetAdded)
-    TEBTopSkyShardsIcon:SetHidden(false)
-    TEBTopSkyShards:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopSkyShardsIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopSkyShardsIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopSkyShards:SetAnchor(TOPLEFT, TEBTopSkyShardsIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopSkyShards
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildDurability
-------------------------------------------------------
-function TEB:RebuildDurability(lastGadget, firstGadgetAdded)
-    TEBTopDurabilityIcon:SetHidden(false)
-    TEBTopDurability:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopDurabilityIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopDurabilityIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopDurability:SetAnchor(TOPLEFT, TEBTopDurabilityIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopDurability
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildBlacksmithingResearchTimer
-------------------------------------------------------
-function TEB:RebuildBlacksmithingResearchTimer(lastGadget, firstGadgetAdded)
-    TEBTopResearchBlacksmithingIcon:SetHidden(false)
-    TEBTopResearchBlacksmithing:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopResearchBlacksmithingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopResearchBlacksmithingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopResearchBlacksmithing:SetAnchor(TOPLEFT, TEBTopResearchBlacksmithingIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopResearchBlacksmithing
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildClothinggResearchTimer
-------------------------------------------------------
-function TEB:RebuildClothingResearchTimer(lastGadget, firstGadgetAdded)
-    TEBTopResearchClothingIcon:SetHidden(false)
-    TEBTopResearchClothing:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopResearchClothingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopResearchClothingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopResearchClothing:SetAnchor(TOPLEFT, TEBTopResearchClothingIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopResearchClothing
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildWoodworkingResearchTimer
-------------------------------------------------------
-function TEB:RebuildWoodworkingResearchTimer(lastGadget, firstGadgetAdded)
-    TEBTopResearchWoodworkingIcon:SetHidden(false)
-    TEBTopResearchWoodworking:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopResearchWoodworkingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopResearchWoodworkingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopResearchWoodworking:SetAnchor(TOPLEFT, TEBTopResearchWoodworkingIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopResearchWoodworking
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildJewelryResearchTimer
-------------------------------------------------------
-function TEB:RebuildJewelryResearchTimer(lastGadget, firstGadgetAdded)
-    TEBTopResearchJewelryCraftingIcon:SetHidden(false)
-    TEBTopResearchJewelryCrafting:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopResearchJewelryCraftingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopResearchJewelryCraftingIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopResearchJewelryCrafting:SetAnchor(TOPLEFT, TEBTopResearchJewelryCraftingIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopResearchJewelryCrafting
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildWC
-------------------------------------------------------
-function TEB:RebuildWC(lastGadget, firstGadgetAdded)
-    TEBTopWCIcon:SetHidden(false)
-    TEBTopWC:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopWCIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopWCIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopWC:SetAnchor(TOPLEFT, TEBTopWCIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopWC
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildLocation
-------------------------------------------------------
-function TEB:RebuildLocation(lastGadget, firstGadgetAdded)
-    TEBTopLocationIcon:SetHidden(false)
-    TEBTopLocation:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopLocationIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopLocationIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopLocation:SetAnchor(TOPLEFT, TEBTopLocationIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopLocation
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildTT
-------------------------------------------------------
-function TEB:RebuildTT(lastGadget, firstGadgetAdded)
-    TEBTopTTIcon:SetHidden(false)
-    TEBTopTT:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopTTIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopTTIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopTT:SetAnchor(TOPLEFT, TEBTopTTIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopTT
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildMemory
-------------------------------------------------------
-function TEB:RebuildMemory(lastGadget, firstGadgetAdded)
-    TEBTopMemoryIcon:SetHidden(false)
-    TEBTopMemory:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopMemoryIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopMemoryIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopMemory:SetAnchor(TOPLEFT, TEBTopMemoryIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopMemory
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildFT
-------------------------------------------------------
-function TEB:RebuildFT(lastGadget, firstGadgetAdded)
-    TEBTopFTIcon:SetHidden(false)
-    TEBTopFT:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopFTIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopFTIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopFT:SetAnchor(TOPLEFT, TEBTopFTIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopFT
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildKillCounter
-------------------------------------------------------
-function TEB:RebuildKillCounter(lastGadget, firstGadgetAdded)
-    TEBTopKillsIcon:SetHidden(false)
-    TEBTopKills:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopKillsIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopKillsIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopKills:SetAnchor(TOPLEFT, TEBTopKillsIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopKills
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildEnlightenment
-------------------------------------------------------
-function TEB:RebuildEnlightenment(lastGadget, firstGadgetAdded)
-    TEBTopEnlightenmentIcon:SetHidden(false)
-    TEBTopEnlightenment:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopEnlightenmentIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopEnlightenmentIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopEnlightenment:SetAnchor(TOPLEFT, TEBTopEnlightenmentIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopEnlightenment
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildMail
-------------------------------------------------------
-function TEB:RebuildMail(lastGadget, firstGadgetAdded)
-    TEBTopMailIcon:SetHidden(false)
-    TEBTopMail:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopMailIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopMailIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopMail:SetAnchor(TOPLEFT, TEBTopMailIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopMail
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildET
-------------------------------------------------------
-function TEB:RebuildET(lastGadget, firstGadgetAdded)
-    TEBTopETIcon:SetHidden(false)
-    TEBTopET:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopETIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopETIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopET:SetAnchor(TOPLEFT, TEBTopETIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopET
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildFood
-------------------------------------------------------
-function TEB:RebuildFood(lastGadget, firstGadgetAdded)
-    TEBTopFoodIcon:SetHidden(false)
-    TEBTopFood:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopFoodIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopFoodIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopFood:SetAnchor(TOPLEFT, TEBTopFoodIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopFood
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- RebuildBountyTimer
-------------------------------------------------------
-function TEB:RebuildBountyTimer(lastGadget, firstGadgetAdded)
-    TEBTopBountyIcon:SetHidden(false)
-    TEBTopBounty:SetHidden(false)
-    if not firstGadgetAdded then
-        TEBTopBountyIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 0, 0) 
-        firstGadgetAdded = true
-    else
-        TEBTopBountyIcon:SetAnchor(TOPLEFT, lastGadget, TOPRIGHT, 20, 0) 
-    end
-    TEBTopBounty:SetAnchor(TOPLEFT, TEBTopBountyIcon, TOPRIGHT, 0, 0) 
-    lastGadget = TEBTopBounty
-    return lastGadget, firstGadgetAdded
-end
-
-------------------------------------------------------
--- UpdateControlsPosition
-------------------------------------------------------
-function TEB:UpdateControlsPosition()
-    
+function TEB.UpdateControlsPosition()
     local controlsWidth = TEBTopEndingAnchor:GetLeft() - TEBTopInfoAnchor:GetLeft()
-    local controlsWidthHalf = controlsWidth / 2
-    local newX = ( screenWidth / 2 ) - controlsWidthHalf
-    if controlsPosition == "left" then
+    local newX
+    if settings.bar.controlsPosition == "left" then
         newX = 20
+    elseif settings.bar.controlsPosition == "right" then
+        newX = G.screenWidth - controlsWidth - 20
+    else
+        newX =  (G.screenWidth - controlsWidth) / 2
     end
-    if controlsPosition == "right" then
-        newX = screenWidth - controlsWidth - 20
-    end
-    TEBTopInfoAnchor:SetAnchor(TOPLEFT, TEBTop, TOPLEFT, newX, newY)    
+    TEBTopInfoAnchor:SetAnchor(LEFT, TEBTop, LEFT, newX, 0)
 end
 
-------------------------------------------------------
--- ResizeBar
-------------------------------------------------------
 function TEB.ResizeBar()
-    local fontPath = "EsoUI/Common/Fonts/"..font..".otf"
-    local fontSize = 18 * (scale / 100)
+    local fontPath = string.format("EsoUI/Common/Fonts/%s.otf", settings.bar.font)
+    local fontSize = 0.18 * settings.bar.scale
     local fontOutline = "shadow"
-    local barHeight = 22 * (scale / 100)
+    local barHeight = 0.32 * settings.bar.scale
     for k, v in pairs(gadgetReference) do
-        gadgetLabel = gadgetReference[k][2]
-        gadgetIcon = gadgetReference[k][1] 
-        gadgetLabel:SetFont(fontPath .. "|" .. fontSize .. "|" ..  fontOutline)
-        gadgetIcon:SetScale(scale/100)
-    end    
+        gadgetIcon, gadgetLabel = v[1], v[2]
+        gadgetLabel:SetFont(string.format("%s|%s|%s", fontPath, fontSize, fontOutline))
+        -- gadgetLabel:SetHeight(barHeight)
+        gadgetIcon:SetScale(settings.bar.scale / 100)
+    end
     TEBTop:SetHeight(barHeight)
-    if (barWidth == "dynamic") then
-        barWidth = "screen width"
-        TEB:SetBarWidth()
-        barWidth = "dynamic"
-        TEB:SetBarWidth()
-    end
-    
---    local barWidth = (100 / scale) * screenWidth
---    local barScale = (scale / 100)
---    TEBTop:SetScale(barScale)
-    --TEBTop:SetWidth(barWidth)
---    TEBTopCombatBG:SetWidth(barWidth)
+    TEBTopInfoAnchor:SetHeight(barHeight)
+    TEBTopEndingAnchor:SetHeight(barHeight)
+    TEB.SetBarWidth(settings.bar.Width)
 end
 
-------------------------------------------------------
--- SetBarPosition
-------------------------------------------------------
-function TEB:SetBarWidth()
-    if (barWidth == "screen width") then
-        TEBTopBG:SetAnchor(TOPLEFT, TEBTop, TOPLEFT, -5, -7)
-        TEBTopBG:SetAnchor(BOTTOMRIGHT, TEBTop, BOTTOMRIGHT, 5, 7)
-        TEBTopCombatBG:SetAnchor(TOPLEFT, TEBTop, TOPLEFT, -5, -7)
-        TEBTopCombatBG:SetAnchor(BOTTOMRIGHT, TEBTop, BOTTOMRIGHT, 5, 7)  
-    else 
-        TEBTopBG:SetAnchor(TOPLEFT, TEBTopInfoAnchor, TOPLEFT, -20, -7)
-        TEBTopBG:SetAnchor(BOTTOMRIGHT, TEBTopEndingAnchor, TOPRIGHT, 20, TEBTop:GetHeight()+7)
-        TEBTopCombatBG:SetAnchor(TOPLEFT, TEBTopInfoAnchor, TOPLEFT, -20, -7)
-        TEBTopCombatBG:SetAnchor(BOTTOMRIGHT, TEBTopEndingAnchor, TOPRIGHT, 20, TEBTop:GetHeight()+7)
-    end
-end
-
-------------------------------------------------------
--- SetBarPosition
-------------------------------------------------------
-function TEB:SetBarPosition()
-    
-	ZO_CompassFrame:ClearAnchors()
-    ZO_TargetUnitFramereticleover:ClearAnchors()
-    if bumpCompass then
-	    if barPosition == "top" then
-		    ZO_CompassFrame:SetAnchor( TOP, GuiRoot, TOP, 0, originalCompassTop + 24 + barY)
-		    ZO_TargetUnitFramereticleover:SetAnchor( TOP, GuiRoot, TOP, 0, originalTargetUnitFrameTop + 24 + barY)
-	    else
-    		ZO_CompassFrame:SetAnchor( TOP, GuiRoot, TOP, 0, originalCompassTop)
-		    ZO_TargetUnitFramereticleover:SetAnchor( TOP, GuiRoot, TOP, 0, originalTargetUnitFrameTop)
-    
+function TEB.SetBarWidth(Width)
+    for _, g in ipairs({ TEBTopBG, TEBTopCombatBG }) do
+        if Width == "screen width" then
+            -- TEBTop has the full width of screen
+            g:SetAnchor(TOPLEFT, TEBTop, TOPLEFT, -15, 0)
+            g:SetAnchor(BOTTOMRIGHT, TEBTop, BOTTOMRIGHT, 15, 0)
+        else
+            g:SetAnchor(TOPLEFT, TEBTopInfoAnchor, TOPLEFT, -15, 0)
+            g:SetAnchor(BOTTOMRIGHT, TEBTopEndingAnchor, BOTTOMRIGHT, 15, 0)
         end
     end
+end
 
-    if bumpActionBar then
+function TEB.SetBarPosition()
+    ZO_TargetUnitFramereticleover:ClearAnchors()
+    if settings.bar.bumpCompass then
+        local offset = settings.bar.Position == "top"  and 24 + settings.bar.Y or 0
+        ZO_CompassFrame:ClearAnchors()
+        ZO_CompassFrame:SetAnchor( TOP, GuiRoot, TOP, 0, G.original.CompassTop + offset )
+        ZO_TargetUnitFramereticleover:SetAnchor( TOP, GuiRoot, TOP, 0,
+            G.original.TargetUnitFrameTop + offset )
+    end
+    if settings.bar.bumpActionBar then
+        local bottomBump = settings.bar.Position == "bottom" and
+            G.screenHeight - settings.bar.Y + 6 or 0
         ZO_ActionBar1:ClearAnchors()
+        ZO_ActionBar1:SetAnchor( TOP, GuiRoot, TOP, 0, G.original.ActionBarTop - bottomBump )
+        ZO_PlayerAttributeHealth:SetAnchor( TOP, GuiRoot, TOP, 0, G.original.HealthTop - bottomBump )
+        ZO_PlayerAttributeMagicka:SetAnchor( TOPRIGHT, GuiRoot, TOPRIGHT,
+            ZO_PlayerAttributeMagicka:GetRight() - G.screenWidth, G.original.MagickaTop - bottomBump)
+        ZO_PlayerAttributeStamina:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT,
+            ZO_PlayerAttributeStamina:GetLeft(), G.original.StaminaTop - bottomBump)
+        ZO_PlayerAttributeMountStamina:SetAnchor(TOPLEFT, ZO_PlayerAttributeStamina, BOTTOMLEFT, 0, 0)
+        ZO_HUDInfamyMeter:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT,
+            ZO_HUDInfamyMeter:GetLeft(), G.original.BountyTop - bottomBump )
     end
-	
-	local RootWidth	= GuiRoot:GetWidth()
-	
-	local bottomBump = screenHeight - barY 
-	
-    if bumpActionBar then
-        if barPosition == "bottom" then
-            ZO_ActionBar1:SetAnchor( TOP, GuiRoot, TOP, 0, originalActionBarTop - 6 - bottomBump )
-            ZO_PlayerAttributeHealth:SetAnchor( TOP, GuiRoot, TOP, 0, originalHealthTop - 6 - bottomBump )
-            ZO_PlayerAttributeMagicka:SetAnchor( TOPRIGHT, GuiRoot, TOPRIGHT, ZO_PlayerAttributeMagicka:GetRight() - RootWidth, originalMagickaTop - 6 - bottomBump)
-            ZO_PlayerAttributeStamina:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, ZO_PlayerAttributeStamina:GetLeft(), originalStaminaTop - 6 - bottomBump)
-            ZO_PlayerAttributeMountStamina:SetAnchor(TOPLEFT, ZO_PlayerAttributeStamina, BOTTOMLEFT, 0, 0)
-            ZO_HUDInfamyMeter:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, ZO_HUDInfamyMeter:GetLeft(), originalBountyTop - 46 - bottomBump )
-        else
-            ZO_ActionBar1:SetAnchor( TOP, GuiRoot, TOP, 0, originalActionBarTop)
-            ZO_PlayerAttributeHealth:SetAnchor( TOP, GuiRoot, TOP, 0, originalHealthTop)
-            ZO_PlayerAttributeMagicka:SetAnchor( TOPRIGHT, GuiRoot, TOPRIGHT, ZO_PlayerAttributeMagicka:GetRight() - RootWidth, originalMagickaTop)
-            ZO_PlayerAttributeStamina:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, ZO_PlayerAttributeStamina:GetLeft(), originalStaminaTop)
-            ZO_PlayerAttributeMountStamina:SetAnchor(TOPLEFT, ZO_PlayerAttributeStamina, BOTTOMLEFT, 0, 0)
-            ZO_HUDInfamyMeter:SetAnchor( TOPLEFT, GuiRoot, TOPLEFT, ZO_HUDInfamyMeter:GetLeft(), originalBountyTop )
-        end    
-    end
-end 
-
-
-function TEB.StopMovingBar()
-    barY = TEBTop:GetTop()
-    TEB.savedVariables.barY = barY
-    if barY < 72 then barPosition = "top" end
-    if barY > screenHeight - 144 then barPosition = "bottom" end
-    if barY >= 72 and barY <= screenHeight - 144 then barPosition = "middle" end
-    TEB.savedVariables.barPosition = barPosition
-    TEB:SetBarPosition()
 end
 
 function TEB.AddPulseItem(itemName)
     gadgetReference[itemName][6] = true
-    table.insert(pulseList, itemName)
+    table.insert(G.pulseList, itemName)
 end
 
 function TEB.RemovePulseItem(itemName)
     gadgetReference[itemName][6] = false
-    for i=1, #pulseList do
-        if pulseList[i] == itemName then
-            table.remove(pulseList, i)
+    for i=1, #G.pulseList do
+        if G.pulseList[i] == itemName then
+            table.remove(G.pulseList, i)
         end
     end
     gadgetReference[itemName][1]:SetAlpha(1)
@@ -1897,34 +1005,28 @@ function TEB.RemovePulseItem(itemName)
 end
 
 function TEB.KeyLockUnlockBar()
-    TEB.LockUnlockBar(not barLocked)
+    TEB.LockUnlockBar(not settings.bar.Locked)
 end
 
 function TEB.KeyLockUnlockGadgets()
-    TEB.LockUnlockGadgets(not gadgetsLocked)
+    TEB.LockUnlockGadgets(not settings.bar.gadgetsLocked)
 end
 
 function TEB.LockUnlockBar(newValue)
-    TEB.savedVariables.barLocked = newValue
-    barLocked = newValue
+    settings.bar.Locked = newValue
     TEBTop:SetMovable(not newValue)
-    if lockMessage then
-        if newValue then
-            d("|c2A8FEEThe Elder Bar is now |cFFFFFFLOCKED.")
-        else
-            d("|c2A8FEEThe Elder Bar is now |cFFFFFFUNLOCKED.")
-        end
+    if settings.bar.lockMessage then
+        df("|c2A8FEEThe Elder Bar is now |cFFFFFF%s.", newValue and "LOCKED" or "UNLOCKED")
     end
 end
 
 function TEB.LockUnlockGadgets(newValue)
-    TEB.savedVariables.gadgetsLocked = newValue
-    gadgetsLocked = newValue
+    settings.bar.gadgetsLocked = newValue
     for k,v in pairs(gadgetReference) do
         gadgetReference[k][1]:SetMovable(not newValue)
     end
-    TEB:RebuildBar(true)
-    if lockMessage then
+    TEB.RebuildBar()
+    if settings.bar.lockMessage then
         if newValue then
             d("|c2A8FEEThe Elder Bar gadgets are now |cFFFFFFLOCKED.")
         else
@@ -1936,7 +1038,7 @@ end
 function TEB.GetNumberGadgets()
     local lastItem = 0
     for i=1, #defaultGadgets do
-        if gadgets[i] == "(None)" then
+        if settings.gadgets_pve[i] == "(None)" then
             lastItem = i
             break
         end
@@ -1945,110 +1047,128 @@ function TEB.GetNumberGadgets()
 end
 
 function TEB.UpdateGadgetList(gadgetName, whichBar)
-    if whichBar == "Off" then
+    if whichBar == 0 then
         for i=1, #defaultGadgets do
-            if gadgets[i] == gadgetName then
-               gadgets[i] = "(None)"
-               TEB.savedVariables.gadgets[i] = "(None)"
-            end              
-            if gadgets_pvp[i] == gadgetName then
-               gadgets_pvp[i] = "(None)"
-               TEB.savedVariables.gadgets_pvp[i] = "(None)"
-            end              
+            if settings.gadgets_pve[i] == gadgetName then
+               settings.gadgets_pve[i] = "(None)"
+            end
+            if settings.gadgets_pvp[i] == gadgetName then
+               settings.gadgets_pvp[i] = "(None)"
+            end
         end
     end
-    if whichBar == "PvE Bar" then
+    if whichBar == 1 then
         local alreadyOnPVE = false
         for i=1, #defaultGadgets do
-            if gadgets[i] == gadgetName then alreadyOnPVE = true end
-            if gadgets_pvp[i] == gadgetName then
-               gadgets_pvp[i] = "(None)"
-               TEB.savedVariables.gadgets_pvp[i] = "(None)"
-            end                
+            if settings.gadgets_pve[i] == gadgetName then alreadyOnPVE = true end
+            if settings.gadgets_pvp[i] == gadgetName then
+               settings.gadgets_pvp[i] = "(None)"
+            end
         end
         if not alreadyOnPVE then
-            gadgets[TEB.GetNumberGadgets()+1] = gadgetName
-            TEB.savedVariables.gadgets[TEB.GetNumberGadgets()+1] = gadgetName
-        end               
+            settings.gadgets_pve[TEB.GetNumberGadgets()+1] = gadgetName
+        end
     end
-    if whichBar == "PvP Bar" then
+    if whichBar == 2 then
         local alreadyOnPVP = false
         for i=1, #defaultGadgets do
-            if gadgets_pvp[i] == gadgetName then alreadyOnPVP = true end
-            if gadgets[i] == gadgetName then
-               gadgets[i] = "(None)"
-               TEB.savedVariables.gadgets[i] = "(None)"
-            end                
+            if settings.gadgets_pvp[i] == gadgetName then alreadyOnPVP = true end
+            if settings.gadgets_pve[i] == gadgetName then
+               settings.gadgets_pve[i] = "(None)"
+            end
         end
         if not alreadyOnPVP then
-            gadgets_pvp[TEB.GetNumberGadgets()+1] = gadgetName
-            TEB.savedVariables.gadgets_pvp[TEB.GetNumberGadgets()+1] = gadgetName
-        end               
+            settings.gadgets_pvp[TEB.GetNumberGadgets()+1] = gadgetName
+        end
     end
-    if whichBar == "Both Bars" then
+    if whichBar == 3 then
         local alreadyOnPVE = false
         local alreadyOnPVP = false
         for i=1, #defaultGadgets do
-            if gadgets_pvp[i] == gadgetName then alreadyOnPVP = true end
-            if gadgets[i] == gadgetName then alreadyOnPVE = true end               
+            if settings.gadgets_pvp[i] == gadgetName then alreadyOnPVP = true end
+            if settings.gadgets_pve[i] == gadgetName then alreadyOnPVE = true end
         end
         if not alreadyOnPVP then
-            gadgets_pvp[TEB.GetNumberGadgets()+1] = gadgetName
-            TEB.savedVariables.gadgets_pvp[TEB.GetNumberGadgets()+1] = gadgetName
-        end               
+            settings.gadgets_pvp[TEB.GetNumberGadgets()+1] = gadgetName
+        end
         if not alreadyOnPVE then
-            gadgets[TEB.GetNumberGadgets()+1] = gadgetName
-            TEB.savedVariables.gadgets[TEB.GetNumberGadgets()+1] = gadgetName
-        end               
+            settings.gadgets_pve[TEB.GetNumberGadgets()+1] = gadgetName
+        end
     end
-    
-    TEB:RebuildBar(true)
+
+    TEB.RebuildBar()
 end
 
 function TEB.ConvertGadgetSettings()
     gadgetSettings = {}
     for i=1, #defaultGadgets do
         local gadgetName = defaultGadgets[i]
-        gadgetSettings[gadgetName] = "Off"
+        gadgetSettings[gadgetName] = 0
     end
 
-    for i=1, #defaultGadgets do    
-        for k,v in pairs(gadgetReference) do
-            if gadgets[i] == k then gadgetSettings[k] = "PvE Bar" end
-        end
-    end
-    
     for i=1, #defaultGadgets do
         for k,v in pairs(gadgetReference) do
-            if gadgets_pvp[i] == k then
-                if gadgetSettings[k] == "PvE Bar" then
-                    gadgetSettings[k] = "Both Bars"
+            if settings.gadgets_pve[i] == k then gadgetSettings[k] = 1 end
+        end
+    end
+
+    for i=1, #defaultGadgets do
+        for k,v in pairs(gadgetReference) do
+            if settings.gadgets_pvp[i] == k then
+                if gadgetSettings[k] == 1 then
+                    gadgetSettings[k] = 3
                 else
-                    gadgetSettings[k] = "PvP Bar"
+                    gadgetSettings[k] = 2
                 end
             end
         end
-    end            
+    end
 end
 
+local thresholdLevels = { "critical", "danger", "warning", "caution", "normal", }
+
+function TEB.checkThresholds(testval, direction, group)
+--[[
+direction == true -> check testval > threshold (upper limits)
+direction == false -> check testval < threshold (lower limits)
+group is subtree in settings, like settings.food; 
+values of group[x] for x in thresholdLevels must be descending if direction is true,
+ascending otherwise
+]]--
+    local tag
+    if group then
+        for _, tag in ipairs(thresholdLevels) do
+            if group[tag] then
+                if direction and testval > group[tag] or
+                    not direction and testval < group[tag] then
+                    return settings.bar.colors[tag], tag
+                end
+            end
+        end
+        tag = "normal"
+        return settings.bar.colors[tag], tag
+    end
+end
+
+-- self refers to a gadget object
 function TEB.StartMovingGadget(self)
     local gadgetTop = self:GetTop()
     local gadgetLeft = self:GetLeft()
-    movingGadget = self
+    G.movingGadget = self
     ignoreGadget = self:GetName()
     local findGadget = iconReference[ignoreGadget]
-    if pvpMode then
-        gadgetList = gadgets_pvp
+    if G.pvpMode then
+        gadgetList = settings.gadgets_pvp
     else
-        gadgetList = gadgets
-    end    
+        gadgetList = settings.gadgets_pve
+    end
     for i=1, #defaultGadgets do
         if gadgetList[i] == findGadget then
-            movingGadgetName = gadgetList[i]            
+            G.movingGadgetName = gadgetList[i]
             gadgetList[i] = "(None)"
         end
     end
-    TEB:RebuildBar()
+    TEB.RebuildBar()
     self:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, gadgetLeft, gadgetTop)
 end
 
@@ -2056,18 +1176,18 @@ function TEB.StopMovingGadget(self)
     local foundGadget = ""
     local testGadgetObject = ""
     local targetGadgetNumber = 0
-    if pvpMode then
-        gadgetList = gadgets_pvp
+    if G.pvpMode then
+        gadgetList = settings.gadgets_pvp
     else
-        gadgetList = gadgets
-    end     
+        gadgetList = settings.gadgets_pve
+    end
     for i=1, #defaultGadgets do
         for k,v in pairs(gadgetReference) do
             if gadgetList[i] == k then testGadgetObject = gadgetReference[k][2] end
         end
-        
+
         if gadgetList[i] ~= "(None)" then
-            if movingGadget:GetLeft() <= testGadgetObject:GetLeft() and targetGadgetNumber == 0 then
+            if G.movingGadget:GetLeft() <= testGadgetObject:GetLeft() and targetGadgetNumber == 0 then
                 local goodTarget = true
                 if testGadgetObject:IsHidden() then goodTarget = false end
                 if goodTarget then
@@ -2077,438 +1197,263 @@ function TEB.StopMovingGadget(self)
         end
     end
     if targetGadgetNumber == 0 then targetGadgetNumber = TEB.GetNumberGadgets()+1 end
-    
+
     for i=#defaultGadgets-1, targetGadgetNumber, -1 do
-        if pvpMode then
-            gadgets_pvp[i+1] = gadgets_pvp[i]
+        if G.pvpMode then
+            settings.gadgets_pvp[i+1] = settings.gadgets_pvp[i]
         else
-            gadgets[i+1] = gadgets[i]
+            settings.gadgets_pve[i+1] = settings.gadgets_pve[i]
         end
     end
 
-    if pvpMode then
-        gadgets_pvp[targetGadgetNumber] = movingGadgetName
+    if G.pvpMode then
+        settings.gadgets_pvp[targetGadgetNumber] = G.movingGadgetName
     else
-        gadgets[targetGadgetNumber] = movingGadgetName
+        settings.gadgets_pve[targetGadgetNumber] = G.movingGadgetName
     end
     ignoreGadget = ""
-    TEB:RebuildBar()
+    TEB.RebuildBar()
 end
 
 --====================================================
 -- TOOLTIPS
 --====================================================
-------------------------------------------------------
--- Name
-------------------------------------------------------
+
+local function SetToolTip(toolTipLeft, toolTipRight, self)
+    FormatTooltip(toolTipLeft, toolTipRight)
+    if self:GetTop() > G.screenHeight / 2 then
+        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12, -12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
+    else
+        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12, 12)
+    end
+    TEBTooltip:SetHidden(false)
+end
+
+-- self refers to a gadget object
 function TEB.ShowToolTipNameLevel(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = "|cffffff"..playerName.."|ccccccc\n\n"
-    local toolTipRight = "\n\n"
-
-    toolTipLeft = toolTipLeft..playerClassName.." Level\n"
-    toolTipLeft = toolTipLeft.."Champion Points\n\n"
-    toolTipRight = toolTipRight .. string.format(lvl).."\n"
-    toolTipRight = toolTipRight .. string.format(cp).."\n\n"
-
-    toolTipLeft = toolTipLeft .. "Unspent Warrior Points\nUnspent Thief Points\nUnspent Mage Points\nTotal Unspent Points"
-    toolTipRight = toolTipRight .. "|CD6660C|t18:18:esoui/art/champion/champion_points_health_icon.dds|t"..string.format(unspentWarrior).."\n"
-    toolTipRight = toolTipRight .."|C51AB0D|t18:18:esoui/art/champion/champion_points_stamina_icon.dds|t"..string.format(unspentThief).."\n"
-    toolTipRight = toolTipRight .."|C1970C9|t18:18:esoui/art/champion/champion_points_magicka_icon.dds|t"..string.format(unspentMage).."\n"
-    toolTipRight = toolTipRight .."|CFFFFAA|t18:18:TEB/Images/cp_color.dds|t"..string.format(unspentTotal).."|r"
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end
-
+    local left = {
+        string.format("|cffffff%s|ccccccc\n", G.characterName),
+        string.format("%s level", ClassNames[G.playerClass]),
+        "Champion Points\n",
+        "Unspent Craft Points",
+        "Unspent Warfare Points",
+        "Unspent Fitness Points",
+        "Total Unspent Points",
+    }
+    local right = {
+        "\n",
+        string.format("%d", G.lvl),
+        string.format("%d\n", G.cp),
+        string.format("|C51AB0D|t18:18:esoui/art/champion/champion_points_stamina_icon.dds|t%d", unspentThief),
+        string.format("|C1970C9|t18:18:esoui/art/champion/champion_points_magicka_icon.dds|t%d", unspentMage),
+        string.format("|CD6660C|t18:18:esoui/art/champion/champion_points_health_icon.dds|t%d", unspentWarrior),
+        string.format("|CFFFFAA|t18:18:TEB/Images/cp_color.dds|t%s|r", unspentTotal),
+    }
+    local toolTipLeft = table.concat(left, "\n")
+    local toolTipRight = table.concat(right, "\n")
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- Bag
-------------------------------------------------------
 function TEB.ShowToolTipMundus(self)
-    TEBTooltip:SetHidden(false)
-       
-    FormatTooltip("Mundus Stone.\n\n|cffffff"..mundus, "")
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Bag
-------------------------------------------------------
-function TEB.ShowToolTipBag(self)
-    TEBTooltip:SetHidden(false)
-       
-    FormatTooltip("Bag space used / maximum size:\n|cffffff"..bagInfo, "")
-    if bag_DisplayPreference == "used%" then    
-        FormatTooltip("Percentage of bag space used:\n|cffffff"..bagInfo, "")
-    end
-    if bag_DisplayPreference == "slots free/total slots" then    
-        FormatTooltip("Bag space free / maximum size:\n|cffffff"..bagInfo, "")
-    end
-    if bag_DisplayPreference == "slots free" then    
-        FormatTooltip("Bag space free:\n|cffffff"..bagInfo, "")
-    end
-    if bag_DisplayPreference == "free%" then    
-        FormatTooltip("Percentage of bag space free:\n|cffffff"..bagInfo, "")
-    end
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Vampirism
-------------------------------------------------------
-function TEB.ShowToolTipVampirism(self)
-    TEBTooltip:SetHidden(false)
-       
-    FormatTooltip("Stage\nTime until stage expires", vampTooltipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Bank
-------------------------------------------------------
-function TEB.ShowToolTipBank(self)
-    TEBTooltip:SetHidden(false)
-         
-    FormatTooltip("Bank space used / maximum size.", "")
-    if bank_DisplayPreference == "used%" then    
-        FormatTooltip("Percentage of bank space used.", "")
-    end
-    if bank_DisplayPreference == "slots free/total slots" then    
-        FormatTooltip("Bank space free / maximum size.", "")
-    end
-    if bank_DisplayPreference == "slots free" then    
-        FormatTooltip("Bank space free.", "")
-    end
-    if bank_DisplayPreference == "free%" then    
-        FormatTooltip("Percentage of bank space free.", "")
-    end
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Mail
-------------------------------------------------------
-function TEB.ShowToolTipMail(self)
-    TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = "Unread Mail"
-    local toolTipRight = unread_mail
-    
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Food Buff
-------------------------------------------------------
-function TEB.ShowToolTipFood(self)
-    TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = "Food/Drink Buff Remaining"
-    local toolTipRight = food
-    
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Infamy
-------------------------------------------------------
-function TEB.ShowToolTipInfamy(self)
-    TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = "Heat Time Left\nBounty Time Left\nInfamy\nPayoff"
-
-    local toolTipRight = heatTimerText.."\n"..bountyTimerText.."\n"..infamyText.."\n".."|t18:18:TEB/Images/gold_color.dds|t"..string.format(bountyPayoff)
-    
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Latency
-------------------------------------------------------
-function TEB.ShowToolTipLatency(self)
-    TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = "Current network latency"
-    local toolTipRight = latency.."ms"
-    
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
-end
-
-------------------------------------------------------
--- Location
-------------------------------------------------------
-function TEB.ShowToolTipLocation(self)
-    TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = ""
-    if location_DisplayPreference == "(x, y) Zone Name" then
-        toolTipLeft = toolTipLeft .. "(Coordinates) Zone Name.\n\n"
-    elseif location_DisplayPreference == "Zone Name (x, y)" then
-        toolTipLeft = toolTipLeft .. "Zone Name (Coordinates).\n\n"
-    elseif location_DisplayPreference == "Zone Name" then
-        toolTipLeft = toolTipLeft .. "Current Zone Name.\n\n"
-    elseif location_DisplayPreference == "x, y" then
-        toolTipLeft = toolTipLeft .. "Current coordinates.\n\n"
-    end
-    toolTipLeft = toolTipLeft .. zoneNameDisplay.."\n".."("..coordinates..")"    
+    local toolTipLeft = string.format("Mundus Stone.\n\n|cffffff%s",
+        mundusStoneReference["Full"][G.mundus])
     local toolTipRight = ""
-    
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- Thief's Tools
-------------------------------------------------------
+-- used by TEB.ShowToolTipBag and ShowToolTipBank
+local bagToolTips = {
+    ["used%"] = "Percentage of %s space used:\n|cffffff%s",
+    ["slots free/total slots"] = "%s space free / maximum size:\n|cffffff%s",
+    ["slots free"] = "%s space free:\n|cffffff%s",
+    ["free%"] = "Percentage of %s space free:\n|cffffff%s",
+}
+
+function TEB.ShowToolTipBag(self)
+    local fmt = bagToolTips[settings.bag.DisplayPreference] or "%s space used / maximum size:\n|cffffff%s"
+    local toolTipLeft = zo_strformat("<<C:1>>", string.format(fmt, "bag", G.bagInfo))
+    local toolTipRight = ""
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+function TEB.ShowToolTipVampirism(self)
+    local toolTipLeft = "Stage\nTime until stage expires"
+    local toolTipRight = vampTooltipRight
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+function TEB.ShowToolTipBank(self)
+    local fmt = bagToolTips[settings.bank.DisplayPreference] or "%s space used / maximum size:\n|cffffff%s"
+    local toolTipLeft = zo_strformat("<<C:1>>", string.format(fmt, "bank", G.bankInfo))
+    local toolTipRight = ""
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+function TEB.ShowToolTipMail(self)
+    local toolTipLeft = "Unread Mail"
+    local toolTipRight = G.unread_mail
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+function TEB.ShowToolTipFood(self)
+    local toolTipLeft = "Food Buff Remaining"
+    local toolTipRight = G.food
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+function TEB.ShowToolTipInfamy(self)
+    local toolTipLeft = "Heat Time Left\nBounty Time Left\nInfamy\nPayoff"
+    local toolTipRight = string.format("%s\n%s\n%s\n|t18:18:TEB/Images/gold_color.dds|t%s", heatTimerText, bountyTimerText, infamyText, tostring(bountyPayoff))
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+function TEB.ShowToolTipLatency(self)
+    local toolTipLeft = string.format("Current network latency: %sms", G.latency)
+    local toolTipRight = ""
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
+local locationToolTips = {
+    ["(x, y) Zone Name"] = "(Coordinates) Zone Name.\n\n",
+    ["Zone Name (x, y)"] = "Zone Name (Coordinates).\n\n",
+    ["Zone Name"] = "Current zone name.\n\n",
+    ["x, y"] = "Current coordinates.\n\n",
+}
+
+function TEB.ShowToolTipLocation(self)
+    local toolTipLeft, toolTipRight
+    toolTipLeft = locationToolTips[settings.location.DisplayPreference] or ""
+    toolTipLeft = string.format("%s%s\n(%s)", toolTipLeft, zoneName, coordinates)
+    toolTipRight = ""
+    SetToolTip(toolTipLeft, toolTipRight, self)
+end
+
 function TEB.ShowToolTipTT(self)
-    TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = "Thief's Tools.\n\n"
-    local toolTipRight = "\n\n"
-    
-    toolTipLeft = toolTipLeft .. "Lockpicks\n"
-    toolTipRight = toolTipRight .. string.format(lockpicks).."\n"
-    toolTipLeft = toolTipLeft .. "Stolen Treasures\n"
-    toolTipLeft = toolTipLeft .. "Other Stolen Items\n\n"
-    toolTipRight = toolTipRight .. string.format(treasures).."\n"
-    toolTipRight = toolTipRight .. string.format(not_treasures).."\n\n"
-    toolTipLeft = toolTipLeft .. "Fence Interactions\n"
-    toolTipRight = toolTipRight .. string.format(sellsUsed).."/"..string.format(totalSells).."\n"
-    toolTipLeft = toolTipLeft .. "Launder Interactions"
-    toolTipRight = toolTipRight .. string.format(laundersUsed).."/"..string.format(totalLaunders)
-    
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = "Thief's Tools.\n\nLockpicks\nStolen Treasures\nOther Stolen Items\n\nFence Interactions\nLaunder Interactions"
+    local toolTipRight = string.format("\n\n%s\n%s\n%s\n\n%s/%s\n%s/%s",
+        G.lockpicks, G.treasures, G.not_treasures,
+        G.sellsUsed, G.totalSells, G.laundersUsed, G.totalLaunders)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- Gold
-------------------------------------------------------
+local goldToolTips = {
+    ["gold on character"] = "Gold on your character.\n",
+    ["gold on character/gold in bank"] = "Gold on your character/gold in the bank.\n",
+    ["gold on character (gold in bank)"] = "Gold on your character (gold in the bank).\n",
+    ["character+bank gold"] = "Gold on your character + gold in the bank.\n",
+    ["tracked gold"] = "Gold on all tracked characters.\n",
+    ["tracked+bank gold"] = "Gold on all tracked characters + bank.\n",
+}
+
 function TEB.ShowToolTipGold(self)
     TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n"
-
-    if gold_DisplayPreference == "gold on character" then
-        toolTipLeft =  "Gold on your character.\n"
-    end
-    if gold_DisplayPreference == "gold on character/gold in bank" then
-        toolTipLeft = "Gold on your character/gold in the bank.\n\n"
-    end
-    if gold_DisplayPreference == "gold on character (gold in bank)" then
-        toolTipLeft = "Gold on your character (gold in the bank).\n\n"
-    end
-    if gold_DisplayPreference == "character+bank gold" then
-        toolTipLeft = "Gold on your character + gold in the bank.\n\n"
-    end
-    if gold_DisplayPreference == "tracked gold" then
-        toolTipLeft =  "Gold on all tracked characters.\n"
-    end   
-    if gold_DisplayPreference == "tracked+bank gold" then
-        toolTipLeft =  "Gold on all tracked characters + bank.\n"
-    end    
-    
-    local tempKeys = {}
-    for k in pairs(gold_Tracker) do table.insert(tempKeys, k) end
-    table.sort(tempKeys)
-    
     local totalGold = 0
-    
+    local toolTipLeft = { goldToolTips[settings.gold.DisplayPreference] or "" }
+    local toolTipRight = { "\n" }
+    local rowColor, goldAmount
+
+    local tempKeys = {}
+    for k in pairs(settings.gold.Tracker) do
+        table.insert(tempKeys, k)
+    end
+    table.sort(tempKeys)
+
     for _, k in ipairs(tempKeys) do
-        local rowColor = "|cdddddd"
-        v = gold_Tracker[k] 
+        local v = settings.gold.Tracker[k]
         if v[1] and k ~= "LocalPlayer" then
             totalGold = totalGold + v[2]
-            local goldAmount
-            if thousandsSeparator then
-                goldAmount = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(v[2]))         
-            else
-                goldAmount = string.format(v[2])
-            end            
-            if k == playerName then rowColor = "|cffffff" end
-            toolTipLeft = toolTipLeft .. "\n"..rowColor..k
-            toolTipRight = toolTipRight .. "\n"..rowColor..goldAmount
+            goldAmount = settings.bar.thousandsSeparator and
+                zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(v[2])) or
+                tostring(v[2])
+            rowColor = (k == G.characterName) and LIGHTBLUE or OFFWHITE
+            table.insert(toolTipLeft, rowColor .. k)
+            table.insert(toolTipRight, rowColor .. goldAmount)
         end
     end
-        
-    toolTipLeft = toolTipLeft .. "|cdddddd\n\nGold in bank\n______________________\n\n"
-    toolTipLeft = toolTipLeft .. "Total gold"
-    toolTipRight = toolTipRight .. "\n\n"..string.format(goldBank).."\n______\n\n"
-    totalGold = totalGold + goldBankUnformatted
-    if thousandsSeparator then
-        totalGold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(totalGold))         
-    else
-        totalGold = string.format(totalGold)
-    end            
-    toolTipRight = toolTipRight .. string.format(totalGold)
 
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
+    totalGold = totalGold + G.goldBankUnformatted
+    if settings.bar.thousandsSeparator then
+        totalGold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(totalGold))
+    else
+        totalGold = tostring(totalGold)
+    end
+    table.insert(toolTipLeft, OFFWHITE .. "\n\nGold in bank\n______________________\n\nTotal gold")
+    table.insert(toolTipRight,
+        string.format("\n\n%s\n______\n\n%s", G.goldBank, totalGold))
+    FormatTooltip(table.concat(toolTipLeft, "\n"), table.concat(toolTipRight, "\n"))
+    if self:GetTop() > G.screenHeight / 2 then
         TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
     else
         TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    end
 end
 
-------------------------------------------------------
--- FPS
-------------------------------------------------------
 function TEB.ShowToolTipFPS(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-
-    toolTipLeft =  "Current frames per second.\n\n"
-
-    toolTipLeft = toolTipLeft .. "Lowest FPS this session\n"
-    toolTipLeft = toolTipLeft .. "Highest FPS this session"
-    
-    toolTipRight = "\n\n"
-    toolTipRight = toolTipRight .. string.format(lowestFPS).."\n"
-    toolTipRight = toolTipRight .. string.format(highestFPS)
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = "Current frames per second.\n\nLowest FPS this session\nHighest FPS this session"
+    local toolTipRight = string.format("\n\n%d\n%d", G.lowestFPS, G.highestFPS)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- Currencies
-------------------------------------------------------
+-- tables for TEB.ShowToolTipCurrencies
+local currencyTooltips = {
+    ["telvar"] = "Tel Var Stones you own.\n" ,
+    ["writs"]  = "Writ Vouchers you own.\n",
+    ["tc"]     = "Transmute Crystals you own.\n",
+    ["et"]     = "Event Tickets you own.\n",
+    -- ap is separate case
+}
+
+local apTooltips = {
+    ["Total Points"] = "Total Alliance Points.",
+    ["Session Points"] = "Session Alliance Points.",
+    ["Points Per Hour"] = "Alliance Points/hour.",
+    ["Total Points/Points Per Hour"] = "Total Alliance Points/Points hr.",
+    ["Session Points/Points Per Hour"] = "Session Points/Points hr.",
+    ["Total Points/Session Points"] = "Total Alliance Points/Session Points.",
+    ["Total Points/Session Points (Points Per Hour)"] = "Total Points/Session Points (Points/hr).",
+    ["Total Points/Session Points/Points Per Hour"] = "Total Points/Session Points/Points hr.",
+}
+
 function TEB.ShowToolTipCurrencies(self, currentCurrency)
     TEBTooltip:SetHidden(false)
-    
-    local toolTipLeft = ""
-    toolTipRight = "\n\n" 
-        
-    if currentCurrency == "ap" then
-        if ap_DisplayPreference == "Total Points" then
-            toolTipLeft = toolTipLeft .. "Total Alliance Points.\n\n"
-        end
-        if ap_DisplayPreference == "Session Points" then
-            toolTipLeft = toolTipLeft .. "Session Alliance Points.\n\n"
-        end
-        if ap_DisplayPreference == "Points Per Hour" then
-            toolTipLeft = toolTipLeft .. "Alliance Points/hour.\n\n"
-        end
-        if ap_DisplayPreference == "Total Points/Points Per Hour" then
-            toolTipLeft = toolTipLeft .. "Total Alliance Points/Points hr.\n\n"
-        end
-        if ap_DisplayPreference == "Session Points/Points Per Hour" then
-            toolTipLeft = toolTipLeft .. "Session Points/Points hr.\n\n"
-        end
-        if ap_DisplayPreference == "Total Points/Session Points" then
-            toolTipLeft = toolTipLeft .. "Total Alliance Points/Session Points.\n\n"
-        end
-        if ap_DisplayPreference == "Total Points/Session Points (Points Per Hour)" then
-            toolTipLeft = toolTipLeft .. "Total Points/Session Points (Points/hr).\n\n"
-        end
-        if ap_DisplayPreference == "Total Points/Session Points/Points Per Hour" then
-            toolTipLeft = toolTipLeft .. "Total Points/Session Points/Points hr.\n\n"
-        end
-            toolTipLeft = toolTipLeft .. "Points gained this session\n"
-            toolTipLeft = toolTipLeft .. "Points gained per hour\n"
+    local toolTipLeft, toolTipRight
 
-        toolTipRight = toolTipRight .. ap_Session.."\n"
-        toolTipRight = toolTipRight .. ap_Hour.."\n\n"
+    local function currencyColor(currency)
+        return (currency == currentCurrency and LIGHTBLUE or OFFWHITE)
     end
 
+    local telvarColor   = currencyColor("telvar")
+    local tcColor       = currencyColor("tc")
+    local writsColor    = currencyColor("writs")
+    local apColor       = currencyColor("ap")
+    local etColor       = currencyColor("et")
 
-    
-    if currentCurrency == "telvar" then toolTipLeft = "Tel Var Stones in your possession.\n" end
-    if currentCurrency == "writs" then toolTipLeft = "Writ Vouchers earned.\n" end
-    if currentCurrency == "tc" then toolTipLeft = "Transmute Crystals in your possession.\n" end
-    if currentCurrency == "et" then toolTipLeft = "Event Tickets in your possession.\n" end
-    toolTipLeft = toolTipLeft .. "\n"
-
-    local telvarColor = "|ccccccc"
-    local tcColor = "|ccccccc"
-    local writsColor = "|ccccccc"
-    local apColor = "|ccccccc"
-    local etColor = "|ccccccc"
-    if currentCurrency == "telvar" then telvarColor = "|cffffff" end
-    if currentCurrency == "ap" then apColor = "|cffffff" end
-    if currentCurrency == "writs" then writsColor = "|cffffff" end
-    if currentCurrency == "tc" then tcColor = "|cffffff" end
-    if currentCurrency == "et" then etColor = "|cffffff" end
-    
-    toolTipLeft = toolTipLeft .. apColor .. "Alliance Points\n"
-    toolTipLeft = toolTipLeft .. etColor .. "Event Tickets\n"
-    toolTipLeft = toolTipLeft .. telvarColor .. "Telvar Stones\n"
-    toolTipLeft = toolTipLeft .. tcColor .. "Transmute Crystals\n"
-    toolTipLeft = toolTipLeft .. writsColor .. "Writ Vouchers"
-       
-    toolTipRight = toolTipRight .. "|t18:18:TEB/Images/ap_color.dds|t"..apColor..string.format(ap).."\n"
-    toolTipRight = toolTipRight .. "|t18:18:TEB/Images/eventtickets_color.dds|t"..etColor..string.format(eventtickets).."\n"
-    toolTipRight = toolTipRight .. telvarColor .."|t18:18:TEB/Images/telvar_color.dds|t"..string.format(telvar).."\n"
-    toolTipRight = toolTipRight .. tcColor .."|t18:18:TEB/Images/transmute_color.dds|t"..string.format(crystal).."\n"
-    toolTipRight = toolTipRight .. writsColor.."|t18:18:TEB/Images/writs_color.dds|t"..string.format(writs)
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
+    if currentCurrency == "ap" then
+        toolTipLeft = apTooltips[settings.ap.DisplayPreference] .. "\n\nPoints gained this session\nPoints gained per hour\n"
+        toolTipRight = string.format("%s\n%s\n\n", ap_Session, ap_Hour)
     else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+        toolTipLeft = currencyTooltips[currentCurrency] or ""
+        toolTipRight = ""
+    end
+
+    toolTipLeft = table.concat( { toolTipLeft,
+        apColor, "Alliance Points\n",
+        etColor, "Event Tickets\n",
+        telvarColor, "Tel Var Stones\n",
+        tcColor, "Transmute Crystals\n",
+        writsColor, "Writ Vouchers",
+    }, "" )
+    local fmt = "|t18:18:TEB/Images/%s_color.dds|t%s%s" -- 18x18 icons?
+    toolTipRight = table.concat( { toolTipRight,
+        string.format(fmt, "ap", apColor, G.apString),
+        string.format(fmt, "eventtickets", etColor, G.eventtickets),
+        string.format(fmt, "telvar", telvarColor, G.telvar),
+        string.format(fmt, "transmute", tcColor, G.crystal),
+        string.format(fmt, "writs", writsColor, G.writs),
+    }, "\n")
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- Mount Timer
-------------------------------------------------------
 function TEB.ShowToolTipM(self)
     TEBTooltip:SetHidden(false)
 
@@ -2519,1285 +1464,640 @@ function TEB.ShowToolTipM(self)
     toolTipLeft = toolTipLeft .. "|CEEEEEESpeed\n"
     toolTipLeft = toolTipLeft .. "Stamina\n"
     toolTipLeft = toolTipLeft .. "Carry Capacity\n\n"
-    
-    carry, carryMax, stamina, staminaBonus, speed, speedMax = GetRidingStats() 
-    
+
+    carry, carryMax, stamina, staminaBonus, speed, speedMax = GetRidingStats()
+
     toolTipRight = toolTipRight .. string.format(speed).."/60\n"
     toolTipRight = toolTipRight .. string.format(stamina).."/60\n"
     toolTipRight = toolTipRight .. string.format(carry).."/60\n\n"
 
     toolTipLeft = toolTipLeft .. "|c2A8FEEMount Training Tracker:"
-    
+
     local tempKeys = {}
-    for k in pairs(mount_Tracker) do table.insert(tempKeys, k) end
+    for k in pairs(settings.mount.Tracker) do table.insert(tempKeys, k) end
     table.sort(tempKeys)
-    
+
     for _, k in ipairs(tempKeys) do
-        v = mount_Tracker[k] 
+        v = settings.mount.Tracker[k]
         if v[1] and v[2] ~= -1 and k ~= "LocalPlayer" then
-            local timeLeft = v[2] - os.time() 
+            local timeLeft = v[2] - os.time()
             local rowColor = "|ceeeeee"
-            if k == playerName then rowColor = "|cffffff" end
+            if k == G.characterName then rowColor = "|cffffff" end
             if timeLeft <=0 then
                 timeLeft="TRAIN!"
-                rowColor = "|c00ee00"               
-                if k == playerName then rowColor = "|c22ff22" end
+                rowColor = "|c00ee00"
+                if k == G.characterName then rowColor = "|c22ff22" end
             else
-                timeLeft = TEB.ConvertSeconds(mount_DisplayPreference, timeLeft)
+                timeLeft = TEB.ConvertSeconds(settings.mount.DisplayPreference, timeLeft)
             end
             toolTipLeft = toolTipLeft .. "\n"..rowColor..k
             toolTipRight = toolTipRight .. "\n"..rowColor..timeLeft
         end
     end
 
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- Memory
-------------------------------------------------------
 function TEB.ShowToolTipMemory(self)
-    TEBTooltip:SetHidden(false)
-
-    FormatTooltip("Memory usage of all loaded addons.", "")
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft, toolTipRight = "Memory usage of all loaded addons.", ""
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- XP
-------------------------------------------------------
 function TEB.ShowToolTipXP(self)
-    TEBTooltip:SetHidden(false)
-
-    local levelThing = "level"    
-    if lvl == 50 then levelThing = "champion point" end
-
-    if experience_DisplayPreference == "% towards next level/CP" then
-        FormatTooltip("Experience towards next "..levelThing..":\n|cffffff"..gxpString, "")
+    local levelThing = G.lvl == 50 and "champion point" or "level"
+    if settings.experience.DisplayPreference == "% towards next level/CP" then
+        FormatTooltip("Experience towards next "..levelThing..":\n|cffffff"..G.gxpString, "")
     end
-    if experience_DisplayPreference == "% needed for next level/CP" then
-        FormatTooltip("Experience needed for next "..levelThing..":\n|cffffff"..gxpString, "")
+    if settings.experience.DisplayPreference == "% needed for next level/CP" then
+        FormatTooltip("Experience needed for next "..levelThing..":\n|cffffff"..G.gxpString, "")
     end
-    if experience_DisplayPreference == "current XP" then
-        FormatTooltip("Current experience:\n|cffffff"..gxpString, "")
+    if settings.experience.DisplayPreference == "current XP" then
+        FormatTooltip("Current experience:\n|cffffff"..G.gxpString, "")
     end
-    if experience_DisplayPreference == "needed XP" then
-        FormatTooltip("Needed experience for next "..levelThing..":\n|cffffff"..gxpString, "")
+    if settings.experience.DisplayPreference == "needed XP" then
+        FormatTooltip("Needed experience for next "..levelThing..":\n|cffffff"..G.gxpString, "")
     end
-    if experience_DisplayPreference == "current XP/total needed" then
-        FormatTooltip("Current experience/total experience needed:\n|cffffff"..gxpString, "")
+    if settings.experience.DisplayPreference == "current XP/total needed" then
+        FormatTooltip("Current experience/total experience needed:\n|cffffff"..G.gxpString, "")
     end
-    if self:GetTop() > screenHeight / 2 then
+    if self:GetTop() > G.screenHeight / 2 then
         TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
     else
         TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
     end
 end
 
--- Clock
-------------------------------------------------------
 function TEB.ShowToolTipClock(self)
-    TEBTooltip:SetHidden(false)
-
-    FormatTooltip("Current local time:\n|cffffff"..currentTime.."\n\n|cccccccIngame Time:\n|cffffff"..ingameTime, "")
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local tbl = {
+        {"Local date"   , G.earthDate,    },
+        {"Local time"   , G.localTime,    },
+        {"UTC time"     , G.UTCTime,      },
+        {"In-game time" , G.inGameTime,   },
+        {"Imperial date", G.imperialDate, },
+        {"Argonian date", G.argonianDate, },
+    }
+    local left, right = {}, {}
+    for _, r in pairs(tbl) do
+        table.insert(left, string.format("%s:", r[1]))
+        table.insert(right, string.format("|cffffff%s|ccccccc", r[2]))
+    end
+    local toolTipLeft, toolTipRight = table.concat(left, "\n"), table.concat(right, "\n")
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
--- Soul Gems
-------------------------------------------------------
+
 function TEB.ShowToolTipSoulGems(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-
-    if soulgems_DisplayPreference == "total filled/empty" then
-        toolTipLeft = "Total filled / empty soul gems."
-    end
-    if soulgems_DisplayPreference == "total filled (crown)/empty" then
-        toolTipLeft = "Total filled (crown filled) / empty soul gems."
-    end
-    if soulgems_DisplayPreference == "total filled (empty)" then
-        toolTipLeft = "Total filled (empty) soul gems."
-    end
-    if soulgems_DisplayPreference == "regular filled/crown/empty" then
-        toolTipLeft = "Regular filled / crown / empty soul gems."
-    end            
-    if soulgems_DisplayPreference == "total filled" then
-        toolTipLeft = "Total filled soul gems."
-    end
-    if soulgems_DisplayPreference == "regular filled" then
-        toolTipLeft = "Regular filled soul gems."
-    end
-
-    toolTipLeft = toolTipLeft .. "\n"..soulGemsToolTipLeft
-    
-    toolTipRight = "\n"..soulGemsToolTipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = G.soulGemsToolTipLeft
+    local toolTipRight = G.soulGemsToolTipRight
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Sky Shards
-------------------------------------------------------
+local skyshardsToolTips = {
+    ["collected/unspent points"] = "Collected skyshards / unspent skill points.",
+    ["collected"] = "Collected skyshards.",
+    ["collected/total needed (unspent points)"] = "Collected skyshards/total needed for skill point (unspent skill points).",
+    ["needed/unspent points"] = "Needed skyshards / unspent skill points.",
+    ["needed"] = "Needed skyshards.",
+}
+
 function TEB.ShowToolTipSkyShards(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-
-    if skyshards_DisplayPreference == "collected/unspent points" then
-        toolTipLeft = "Collected skyshards / unspent skill points.\n\n"
-    end
-    if skyshards_DisplayPreference == "collected" then
-        toolTipLeft = "Collected skyshards.\n\n"
-    end
-    if skyshards_DisplayPreference == "collected/total needed (unspent points)" then
-        toolTipLeft = "Collected skyshards/total needed for skill point (unspent skill points).\n\n"
-    end
-    if skyshards_DisplayPreference == "needed/unspent points" then
-        toolTipLeft = "Needed skyshards / unspent skill points.\n\n"
-    end
-    if skyshards_DisplayPreference == "needed" then
-        toolTipLeft = "Needed skyshards.\n\n"
-    end
-    
-    toolTipLeft = toolTipLeft .. "Collected Sky Shards\nUnspent Skill Points"
-
-    toolTipRight = "\n\n"..string.format(skyShards).."/3\n"..string.format(availablePoints)
-
-    FormatTooltip(toolTipLeft, toolTipRight)   
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end     
+    local toolTipLeft, toolTipRight =
+        skyshardsToolTips[settings.skyshards.DisplayPreference] or "",
+        string.format("\n\n%d\n%s", G.skyShards, G.availablePoints)
+    toolTipLeft = string.format("%s\n\nCollected Sky Shards\nUnspent Skill Points", toolTipLeft)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Durability
-------------------------------------------------------
 function TEB.ShowToolTipDurability(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n\n"
-
-    toolTipLeft =  "Armor durability.\n"..durabilityTooltipLeft
-    toolTipRight = "\n"..durabilityTooltipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = G.durabilityTooltipLeft
+    local toolTipRight = G.durabilityTooltipRight
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Kill Counter
-------------------------------------------------------
 function TEB.ShowToolTipKills(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = "Kill Counter.\n\n"
-    local toolTipRight = "\n\n"
-
-    toolTipLeft = toolTipLeft .. "Killing Blows\nAssists\nDeaths\n\nKill/Death Ratio"
-    toolTipRight = toolTipRight .. string.format(killingBlows).."\n"..string.format(kills).."\n"..string.format(deaths).."\n\n"..killRatio
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = "Kill Counter.\n\nKilling Blows\nAssists\nDeaths\nKill/Death Ratio"
+    local toolTipRight = string.format("\n\n%s\n%s\n%s\n%s", G.killingBlows, G.kills, G.deaths, G.killRatio)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Enlightenment
-------------------------------------------------------
 function TEB.ShowToolTipEnlightenment(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = "Current enlightenment:\n|cffffff"..enlightenment
+    local toolTipLeft = string.format("Current enlightenment:\n|cffffff%s", G.enlightenment)
     local toolTipRight = ""
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Fast Travel
-------------------------------------------------------
+local ftToolTips = {
+    ["time left"] = "Recall time left until cheapest.\n",
+    ["cost"] = "Recall current cost.\n",
+    ["time left/cost"] = "Recall time left until cheapest/cost.\n",
+}
+
 function TEB.ShowToolTipFT(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
+    local toolTipLeft = ftToolTips[settings.ft.DisplayPreference]  or "\n"
     local toolTipRight = ""
-
-    if ft_DisplayPreference == "time left" then
-        toolTipLeft =  "Recall time left until cheapest.\n"
-    end
-    if ft_DisplayPreference == "cost" then
-        toolTipLeft =  "Recall current cost.\n"
-    end
-    if ft_DisplayPreference == "time left/cost" then
-        toolTipLeft = "Recall time left until cheapest/cost.\n"
-    end
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Weapon Charge
-------------------------------------------------------
 function TEB.ShowToolTipWC(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n\n"
-
-    toolTipLeft =  wcTooltipLeft
-    toolTipRight = wcTooltipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft, toolTipRight = wcTooltipLeft, wcTooltipRight
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Blacksmith Timer
-------------------------------------------------------
 function TEB.ShowToolTipBlacksmith(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n\n"
-
-    toolTipLeft = "Time until blacksmithing research is complete.\n"
-    toolTipLeft = toolTipLeft .. blackSmithToolTipLeft
-    toolTipRight = "\n"..blackSmithToolTipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = "Time until blacksmithing research is complete.\n"
+    local toolTipRight = string.format("\n\n%s", G.blackSmithToolTipRight)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Jewelry Timer
-------------------------------------------------------
 function TEB.ShowToolTipJewelry(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n\n"
-
-    toolTipLeft = "Time until jewelry crafting research is complete.\n"
-    toolTipLeft = toolTipLeft .. jewelryToolTipLeft
-    toolTipRight = "\n"..jewelryToolTipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = string.format("Time until jewelry crafting research is complete.\n%s", G.jewelryToolTipLeft)
+    local toolTipRight = string.format("\n\n\n%s", G.jewelryToolTipRight)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Woodworking Timer
-------------------------------------------------------
 function TEB.ShowToolTipWoodworking(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n\n"
-
-    toolTipLeft = "Time until woodworking research is complete.\n"
-    toolTipLeft = toolTipLeft .. woodWorkingToolTipLeft
-    toolTipRight = "\n"..woodWorkingToolTipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = string.format("Time until woodworking research is complete.\n%s", G.woodWorkingToolTipLeft)
+    local toolTipRight = string.format("\n\n\n%s", G.woodWorkingToolTipRight)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
--- Clothing Timer
-------------------------------------------------------
 function TEB.ShowToolTipClothing(self)
-    TEBTooltip:SetHidden(false)
-
-    local toolTipLeft = ""
-    local toolTipRight = "\n\n"
-
-    toolTipLeft = "Time until clothing research is complete.\n"
-    toolTipLeft = toolTipLeft .. clothingToolTipLeft
-    toolTipRight = "\n"..clothingToolTipRight
-
-    FormatTooltip(toolTipLeft, toolTipRight)
-    if self:GetTop() > screenHeight / 2 then
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,-12 - TEBTop:GetHeight() - TEBTooltip:GetHeight())
-    else
-        TEBTooltip:SetAnchor(TOPLEFT, self, BOTTOMRIGHT, -12,12)
-    end    
+    local toolTipLeft = string.format("Time until clothing research is complete.\n%s", G.woodWorkingToolTipLeft)
+    local toolTipRight = string.format("\n\n\n%s", G.clothingToolTipRight)
+    SetToolTip(toolTipLeft, toolTipRight, self)
 end
 
-------------------------------------------------------
--- HideTooltip
-------------------------------------------------------
-function TEB.HideTooltip(self)
+function TEB.HideTooltip()
     TEBTooltip:SetHidden(true)
-    --ClearTooltip(InformationTooltip)
 end
 
-------------------------------------------------------
--- playername
-------------------------------------------------------
-function TEB.playername()
-    playerName = TEB.fixname(GetUnitName("player"))
+--====================================================
+-- global variable updaters (called from TEB.OnUpdate)
+--====================================================
+
+function TEB.latency()
+    local latencyValue = GetLatency()
+    local latencyColor, iconColor
+    latencyColor, iconColor = TEB.checkThresholds(condition, true, settings.latency)
+    G.latency = string.format("%s%d", latencyColor, latencyValue)
+    TEB.SetIconByIndicator("Latency", iconColor)
 end
 
-------------------------------------------------------
--- memory
-------------------------------------------------------
-function TEB.memory()
-    memory = string.format(math.floor(collectgarbage("count") / 1024 + 0.5)).."MB"
-               
-    if gadgetText["Memory Usage"] then
-        TEBTopMemory:SetText(memory)
-    else
-        TEBTopMemory:SetText("")
-    end   
+function TEB.fps()
+    local fpsColor, iconColor
+    local fpsValue = math.floor(GetFramerate())
+    if fpsValue < G.lowestFPS then G.lowestFPS = fpsValue end
+    if fpsValue > G.highestFPS then G.highestFPS = fpsValue end
+    fpsColor, iconColor = TEB.checkThresholds(fpsValue, false, settings.fps)
+    G.fps = string.format("%s%d", fpsColor, fpsValue)
+    TEB.SetIconByIndicator("FPS", iconColor)
 end
 
-------------------------------------------------------
--- enlightenment
-------------------------------------------------------
-function TEB.enlightenment()
-    local enlightenment_amount = 0
-    if IsEnlightenedAvailableForCharacter() then
-        enlightenment_amount = GetEnlightenedPool()
-        if thousandsSeparator then
-            enlightenment = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(enlightenment_amount))         
-        else
-            enlightenment = string.format(enlightenment_amount)
-        end
-    else
-        enlightenment = "--"
-    end
-    
-    if enlightenment_amount > 0 and not enlightenmentVisible then
-        if not enlightenmentVisible then
-            enlightenmentVisible = true
-            TEB:RebuildBar()
-        end
-    end
-    if enlightenment_amount == 0 and enlightenmentVisible then
-        if enlightenmentVisible then
-            enlightenmentVisible = false
-            TEB:RebuildBar()
-        end
-    end       
-    
-    
-    local enlightenmentColor = "|ccccccc"
-    iconColor = "normal"
-    if enlightenment_amount < enlightenment_Warning then
-        enlightenmentColor = "|cffff00"
-        iconColor = "caution"
-    end
-    if enlightenment_amount < enlightenment_Danger then
-        enlightenmentColor = "|cff8000"
-        iconColor = "warning"
-    end    
-    if enlightenment_amount < enlightenment_Danger then
-        enlightenmentColor = "|cff0000"
-        iconColor = "danger"
-    end    
+local monthNames = {
+    -- Imperial
+    ["I"] = {
+        "Morning Star",
+        "Sun's Dawn",
+        "First Seed",
+        "Rain's Hand",
+        "Second Seed",
+        "Midyear",
+        "Sun's Height",
+        "Last Seed",
+        "Hearthfire",
+        "Frostfall",
+        "Sun's Dusk	",
+        "Evening Star",
+    },
+    -- Argonian
+    ["A"] = {
+        "Vakka",
+        "Xeech",
+        "Sisei",
+        "Hist-Deek",
+        "Hist-Dooka",
+        "Hist-Tsoko",
+        "Thtithil-Gah",
+        "Thtithil",
+        "Nushmeeko",
+        "Shaja-Nushmeeko",
+        "Saxhleel",
+        "Xulomaht",
+    }
+}
 
-    enlightenment = enlightenmentColor .. enlightenment
-
-    if iconIndicator["Enlightenment"] and iconColor ~= "normal" then
-        TEB.SetIcon("Enlightenment", iconColor)
-    else
-        TEB.SetIcon("Enlightenment", "normal")
+function TEB.localTime()
+    local timeFormat = timeFormats[settings.clock.Type]
+    local month
+    local date_format = settings.clock.DateFormat
+    local dp = settings.clock.DisplayPreference
+    -- ingame seconds/day = 20955
+    local inGameTimeSeconds = 86400 * (GetTimeStamp() % 20955) / 20955
+    G.inGameTime = os.date(timeFormat, inGameTimeSeconds)
+    G.localTime = os.date(timeFormat)
+    G.UTCTime = os.date("!" .. timeFormat)
+    if settings.clock.Type == "12h no leading zero" then 
+        if G.inGameTime:sub(1, 1) == "0" then G.inGameTime = G.inGameTime:sub(2, -1) end
+        if G.localTime:sub(1, 1) == "0" then G.localTime = G.localTime:sub(2, -1) end
+        if G.UTCTime:sub(1, 1) == "0" then G.UTCTime = G.UTCTime:sub(2, -1) end
     end
-      
-    if gadgetText["Enlightenment"] then
-        TEBTopEnlightenment:SetText(enlightenment)
+    local d = os.date("*t")
+    -- circumvent the 100034 bug, to be removed
+    local tamrielDateFmt = GetAPIVersion() == 100034 and 
+        "<<1>><<i:1>> <<G:2>>" or "<<i:1>> <<G:2>>"
+    G.argonianDate = ZO_CachedStrFormat(tamrielDateFmt, d.day, monthNames.A[d.month])
+    G.imperialDate = ZO_CachedStrFormat(tamrielDateFmt, d.day, monthNames.I[d.month])
+    G.earthDate = os.date(settings.clock.DateFormat)
+    local translation = date_format:sub(-1, -1)
+    if translation == 'I' then
+        G.localDate = G.imperialDate 
+    elseif translation == 'A' then 
+        G.localDate = G.argonianDate
     else
-        TEBTopEnlightenment:SetText("")
+        G.localDate = G.earthDate
     end
+    G.clockString = dp == "ingame time" and G.inGameTime or
+        dp == "UTC time" and G.UTCTime or dp == "local time" and G.localTime or
+        dp == "local date and time" and string.format("%s %s", G.localDate, G.localTime) or
+        string.format("%s/%s", G.localTime, G.inGameTime)
 end
 
-
-------------------------------------------------------
--- PVP
-------------------------------------------------------
-function TEB.pvp()
-    pvp = IsUnitPvPFlagged("player")
-    if pvp ~= pvpMode then
-        pvpMode = pvp
-        TEB.ShowBar()
-        TEB:RebuildBar()
-        if pvpMode then
-            kills = 0
-            killingBlows = 0
-            deaths = 0
-        end
-    end
-
-    killRatio = 0
-    if deaths == 0 then
-        killRatio = string.format(killingBlows)
-    else
-        killRatio = string.format(round(killingBlows/deaths, 1))..":1"
-    end
-    if kc_DisplayPreference == "Assists/Killing Blows/Deaths (Kill Ratio)" then
-        killCount = string.format(kills).."/"..string.format(killingBlows).."/"..string.format(deaths).." ("..killRatio..")"
-    end
-    if kc_DisplayPreference == "Assists/Killing Blows/Deaths" then
-        killCount = string.format(kills).."/"..string.format(killingBlows).."/"..string.format(deaths)
-    end
-    if kc_DisplayPreference == "Killing Blows/Deaths (Kill Ratio)" then
-        killCount = string.format(killingBlows).."/"..string.format(deaths).." ("..killRatio..")"
-    end
-    if kc_DisplayPreference == "Killing Blows/Deaths" then
-        killCount = string.format(killingBlows).."/"..string.format(deaths)
-    end
-    if kc_DisplayPreference == "Kill Ratio" then
-        killCount = killRatio
-    end
-end
-
-------------------------------------------------------
--- recall
-------------------------------------------------------
-function TEB.recall()
-    local remain, duration = GetRecallCooldown()
-    cost = GetRecallCost()
-    
-    if remain > 0 then 
-        ftTimerRunning = true
-    else
-        EVENT_MANAGER:UnregisterForUpdate("TEBRecall")
-        ftTimerRunning = false
-    end
-    
-    if ftTimerRunning and not ftTimerVisible then
-        ftTimerVisible = true
-        TEB:RebuildBar()
-    end
-    if not ftTimerRunning and ftTimerVisible then
-        ftTimerVisible = false
-        TEB:RebuildBar()
-    end       
-    
-    seconds = math.floor(remain / 1000)
-    
-    timeLeft = TEB.ConvertSeconds(ft_TimerDisplayPreference, seconds)   
-    if thousandsSeparator then
-        cost = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(cost)) 
-    else
-        cost = string.format(cost)
-    end
-    
-    if timeLeft == "" then timeLeft = "--" end
-    
-    if ft_DisplayPreference == "time left" then
-        ft = timeLeft
-    end
-    if ft_DisplayPreference == "cost" then
-        ft = cost.."g"
-    end
-    if ft_DisplayPreference == "time left/cost" then
-        ft = timeLeft.."/"..cost.."g"
-    end
-
-    if gadgetText["Fast Travel Timer"] then
-        TEBTopFT:SetText(ft)
-    else
-        TEBTopFT:SetText("")
-    end   
-end
-
-function TEB.recallRegister()
-    EVENT_MANAGER:RegisterForUpdate("TEBRecall", 1000, TEB.recall)
-end
-
-------------------------------------------------------
--- balance
-------------------------------------------------------
-function TEB.balance(eventCode, currencyType)
-    if currencyType == 1 then
-        TEB.UpdateGold()
-    elseif currencyType == 2 then
-        TEB.UpdateAP()
-    elseif currencyType == 3 then
-        TEB.UpdateTelvar()
-    elseif currencyType == 4 then
-        TEB.UpdateWritVouchers()
-    elseif currencyType == 5 then
-        TEB.UpdateTransmutateCrystals()
-    --elseif currencyType == 6 then
-    --    TEB.UpdateCrownGems()
-    --elseif currencyType == 7 then
-    --    TEB.UpdateCrowns()
-    --elseif currencyType == 8 then
-    --    TEB.UpdateStyleStones()
-    elseif currencyType == 9 then
-        TEB.UpdateEventTickets()
-    --elseif currencyType == 10 then
-        --TEB.UpdateUndauntedKeys()
-    end
-end
-
-------------------------------------------------------
--- UpdateGold
------------------------------------------------------- 
-function TEB.UpdateGold()
-    goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-    goldBank = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
-    goldTotal = goldCharacter + goldBank
-    goldBankUnformatted = goldBank
-
-    if thousandsSeparator then
-        goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
-        goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBank))
-        goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
-    else
-        goldCharacter = string.format(goldCharacter)
-        goldBank = string.format(goldBank)
-        goldTotal = string.format(goldTotal)        
-    end
-
-    local trackedGold = 0
-
-    if gold_DisplayPreference == "gold on character" then
-        gold = goldCharacter
-    end
-    if gold_DisplayPreference == "gold on character/gold in bank" then
-        gold = goldCharacter.."/".. goldBank
-    end
-    if gold_DisplayPreference == "gold on character (gold in bank)" then
-        gold = goldCharacter.." ("..goldBank..")"
-    end
-    if gold_DisplayPreference == "character+bank gold" then
-        gold = goldTotal
-    end
-    if gold_DisplayPreference == "tracked gold" or gold_DisplayPreference == "tracked+bank gold" then
-        for k, v in pairs(gold_Tracker) do
-            if v[1] then
-                trackedGold = trackedGold + v[2]
-            end
-        end   
-    end            
-
-    if gold_DisplayPreference == "tracked gold" then
-        if thousandsSeparator then     
-            gold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(trackedGold))
-        else
-            gold = goldBankUnformatted + trackedGold
-        end
-    end        
-    if gold_DisplayPreference == "tracked+bank gold" then
-        if thousandsSeparator then     
-            gold = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldBankUnformatted + trackedGold))
-        else
-            gold = goldBankUnformatted + trackedGold
-        end
-    end
-
-    if gadgetText["Gold"] then
-        TEBTopGold:SetText(gold)
-    else
-        TEBTopGold:SetText("")
-    end
-end
-
-------------------------------------------------------
--- UpdateAP
-------------------------------------------------------    
-function TEB.UpdateAP()
-    ap = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-
-    ap_Session = ap - ap_SessionStartPoints
-    ap_Hour = 0
-    if os.time() - ap_SessionStart > 0 then
-        if os.time() - ap_SessionStart < 3600 then
-            ap_Hour = math.floor(ap_Session)
-        else
-            ap_Hour = math.floor(ap_Session / ((os.time() - ap_SessionStart) / 3600))
-        end            
-    end
-
-    if thousandsSeparator then
-        ap = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap))
-        ap_Session = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Session))
-        ap_Hour = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Hour))
-    else
-        ap = string.format(ap) 
-        ap_Session = string.format(ap_Session) 
-        ap_Hour = string.format(ap_Hour) 
-    end
-    
-    if ap_DisplayPreference == "Total Points" then
-        apString = ap
-    end
-    if ap_DisplayPreference == "Session Points" then
-        apString = ap_Session
-    end
-    if ap_DisplayPreference == "Points Per Hour" then
-        apString = ap_Hour
-    end
-    if ap_DisplayPreference == "Total Points/Points Per Hour" then
-        apString = ap.."/"..ap_Hour
-    end
-    if ap_DisplayPreference == "Session Points/Points Per Hour" then
-        apString = ap_Session.."/"..ap_Hour
-    end
-    if ap_DisplayPreference == "Total Points/Session Points" then
-        apString = ap.."/"..ap_Session
-    end
-    if ap_DisplayPreference == "Total Points/Session Points (Points Per Hour)" then
-        apString = ap.."/"..ap_Session.." ("..ap_Hour..")"
-    end
-    if ap_DisplayPreference == "Total Points/Session Points/Points Per Hour" then
-        apString = ap.."/"..ap_Session.."/"..ap_Hour
-    end
-       
-    if gadgetText["Alliance Points"] then
-        TEBTopAP:SetText(apString) 
-    else
-        TEBTopAP:SetText("")
-    end   
-end
-
-------------------------------------------------------
--- UpdateTelvar
-------------------------------------------------------    
-function TEB.UpdateTelvar()
-    telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
-    telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
-    telvar = telvarc + telvarb
-
-    if thousandsSeparator then
-        telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(telvar))
-    else
-        telvar = string.format(telvar)        
-    end
-    
-    if gadgetText["Tel Var Stones"] then
-        TEBTopTelvar:SetText(string.format(telvar))   
-    else
-        TEBTopTelvar:SetText("")   
-    end
-end
-
-------------------------------------------------------
--- UpdateWritVouchers
-------------------------------------------------------   
-function TEB.UpdateWritVouchers()
-    writs = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
-
-    if thousandsSeparator then
-        writs = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(writs))
-    else
-        writs = string.format(writs) 
-    end
-    
-    if gadgetText["Writ Vouchers"] then
-        TEBTopWrit:SetText(string.format(writs))  
-    else
-        TEBTopWrit:SetText("")
-    end
-end
-
-------------------------------------------------------
--- UpdateTransmuteCrystals
-------------------------------------------------------    
-function TEB.UpdateTransmutateCrystals()
-    crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
-
-    if thousandsSeparator then
-        crystal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(crystal))
-    else
-        crystal = string.format(crystal) 
-    end
-
-    if gadgetText["Transmute Crystals"] then
-        TEBTopTC:SetText(string.format(crystal))   
-    else
-        TEBTopTC:SetText("")   
-    end
-end
-------------------------------------------------------
--- UpdateEventTickets
-------------------------------------------------------
-function TEB.UpdateEventTickets()
-    eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
-    maxeventtickets = 12
-
-    if eventtickets > 0 then
-        etHasTickets = true
-    else
-        etHasTickets = false
-    end
-    
-    local etIcon = "normal"
-    local etColor = "|ccccccc"
-    if eventtickets >= et_Warning then
-        etColor = "|cffdf00"
-        etIcon = "warning"
-    end
-    if eventtickets >= et_Danger then
-        etColor = "|ccc0000"
-        etIcon = "danger"
-    end
-    TEB.SetIcon("Event Tickets", etIcon)
-    
-    eventtickets = etColor..string.format(eventtickets)
-    if et_DisplayPreference == "tickets/max" then
-        eventtickets = eventtickets.."/12"
-    end
-      
-    if gadgetText["Event Tickets"] then
-        TEBTopET:SetText(eventtickets)
-    else
-        TEBTopET:SetText("")
-    end                                  
-end
-
-------------------------------------------------------
--- UpdateAllCurrency
-------------------------------------------------------  
-function TEB.UpdateAllCurrency()
-    TEB.UpdateGold()
-    TEB.UpdateAP()
-    TEB.UpdateTelvar()
-    TEB.UpdateWritVouchers()
-    TEB.UpdateTransmutateCrystals()
-    TEB.UpdateEventTickets()
-end
-
-------------------------------------------------------
--- UpdateLevel
-------------------------------------------------------  
-function TEB.UpdateLevel()
-
-    lvl = GetUnitLevel("player")
-    cp = GetPlayerChampionPointsEarned()
-    
-    local cp_Over_Soft_Cap = cp - champion_Points_Soft_Cap
-    local cp_modulus = cp % 3
-    local cp_dividend = (cp_Over_Soft_Cap - cp_modulus) / 3
-
-    lvlText = ""
-    local cp_Over_Soft_Cap_Warrior = 0
-    local cp_Over_Soft_Cap_Thief = 0
-    local cp_Over_Soft_Cap_Mage = 0
-
-    if cp > champion_Points_Soft_Cap then
-        cp_Over_Soft_Cap_Warrior = cp_dividend
-        cp_Over_Soft_Cap_Thief = cp_dividend
-        cp_Over_Soft_Cap_Mage = cp_dividend
-        
-        if cp_modulus >= 1 then 
-            cp_Over_Soft_Cap_Warrior = cp_Over_Soft_Cap_Warrior + 1
-        end
-        if cp_modulus == 2 then
-            cp_Over_Soft_Cap_Thief = cp_Over_Soft_Cap_Thief + 1
-        end
-    end
-
-	unspentWarrior = GetNumUnspentChampionPoints( 1 ) - cp_Over_Soft_Cap_Warrior
-	unspentMage = GetNumUnspentChampionPoints( 2 ) - cp_Over_Soft_Cap_Mage
-    unspentThief = GetNumUnspentChampionPoints( 3 ) - cp_Over_Soft_Cap_Thief
-    unspentTotal = unspentWarrior + unspentMage + unspentThief
-	local hasUnspentPoints = false
-	if unspentTotal > 0 then
-    	hasUnspentPoints = true
-    end
-    
-    local showUnspent = false
-    
-    if lvl < 50 then
-        if string.match(level_DisplayPreferenceNotMax, "Character Level") then
-            lvlText = string.format(lvl)
-        end
-        if string.match(level_DisplayPreferenceNotMax, "Champion Points") then
-            lvlText = string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceNotMax, "Character Level%/Champion Points") then
-            lvlText = string.format(lvl).."/"..string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceNotMax, "%(Unspent Points%)") and ((hasUnspentPoints and level_Dynamic) or not level_Dynamic) then
-            showUnspent = true
-        end
-    end          
-    if lvl == 50 then
-        if string.match(level_DisplayPreferenceMax, "Character Level") then
-            lvlText = string.format(lvl)
-        end
-        if string.match(level_DisplayPreferenceMax, "Champion Points") then
-            lvlText = string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceMax, "Character Level%/Champion Points") then
-            lvlText = string.format(lvl).."/"..string.format(cp)
-        end
-        if string.match(level_DisplayPreferenceMax, "%(Unspent Points%)") and ((hasUnspentPoints and level_Dynamic) or not level_Dynamic) then
-            showUnspent = true
-        end        
-    end
-    
-    if showUnspent then
-        lvlText = lvlText .. " ("
-        if unspentWarrior > 0 or not level_Dynamic then
-            lvlText = lvlText .. "|CD6660C|t18:18:esoui/art/champion/champion_points_health_icon.dds|t"..string.format(unspentWarrior)
-        end
-        if unspentThief > 0 or not level_Dynamic then
-            lvlText = lvlText .."|C51AB0D|t18:18:esoui/art/champion/champion_points_stamina_icon.dds|t"..string.format(unspentThief)
-        end
-        if unspentMage > 0 or not level_Dynamic then
-            lvlText = lvlText .."|C1970C9|t18:18:esoui/art/champion/champion_points_magicka_icon.dds|t"..string.format(unspentMage)
-        end
-        lvlText = lvlText .."|CCCCCCC)"
-    end
-    
-    if gadgetText["Level"] then
-        TEBTopLevel:SetText(string.format(lvlText)) 
-    else
-        TEBTopLevel:SetText("")
-    end   
-
-end
-
-------------------------------------------------------
--- mounttimer
-------------------------------------------------------    
-function TEB.mounttimer()
-    mountTimeLeft = GetTimeUntilCanBeTrained() / 1000
-    if STABLE_MANAGER:IsRidingSkillMaxedOut() then
-        mountlbltxt = "Maxed" 
-        mountTimerNotMaxed = false
-    else
-        mountTimerNotMaxed = true
-        if mountTimeLeft == 0 then
-            mountlbltxt = "TRAIN!"
-        else    
-            mountlbltxt = TEB.ConvertSeconds(mount_DisplayPreference, mountTimeLeft)
-        end
-    end
-    
-    if mountlbltxt == "Maxed" and not mountTimerVisible then
-        mountTimerVisible = true
-        TEB:RebuildBar()
-    end
-    if mountlbltxt ~= "Maxed" and mountTimerVisible then
-        mountTimerVisible = false
-        TEB:RebuildBar()
-    end     
-    
-    if mountlbltxt == "TRAIN!" then
-        if mount_Good then mountlbltxt = "|c00e900"..mountlbltxt end
-        if mount_Good and iconIndicator["Mount Timer"] then
-            TEB.SetIcon("Mount Timer", "good")
-        end
-    else
-        if addonInitialized then
-            if gadgetReference["Mount Timer"][6] then 
-                TEB.RemovePulseItem("Mount Timer")
-            end           
-        end
-        if mount_Good and iconIndicator["Mount Timer"] then
-            TEB.SetIcon("Mount Timer", "normal")
-        end
-    end
-end
-
-------------------------------------------------------
--- currenttime
-------------------------------------------------------    
-function TEB.currenttime()
-	local localTime = GetTimeString()
-	local hh, mm, ss = localTime:match("([^:]+):([^:]+):([^:]+)")
-    ampm = ""
-    
-    local igSecondsPerDay = 20955
-    local rlTimeStamp = GetTimeStamp()
-    local inGameTimeSeconds = (rlTimeStamp % igSecondsPerDay) * 86400 / igSecondsPerDay
-    local inGameTimeString = FormatTimeSeconds(inGameTimeSeconds, TIME_FORMAT_STYLE_CLOCK_TIME, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR, TIME_FORMAT_DIRECTION_NONE)
-    if not clock_TwentyFourHourClock then
-        local ighh, igmm = inGameTimeString:match("^(.+):(.+)$")
-    	ighh = ighh + 0
-    	if ighh < 12 then
-            igampm = " AM"
-        else
-            igampm = " PM"
-        end
-        if ighh > 12 then
-            ighh = ighh - 12
-        end
-        if ighh == 0 then
-            ighh = 12
-        end
-        ingameTime = ighh..":"..igmm..igampm
-    else
-        ingameTime = inGameTimeString
-    end
-  	
-	if not clock_TwentyFourHourClock then
-    	hh = hh + 0
-    	if hh < 12 then
-            ampm = " AM"
-        else
-            ampm = " PM"
-        end
-        if hh > 12 then
-            hh = hh - 12
-        end
-        if hh == 0 then
-            hh = 12
-        end
-    end
-    currentTime = hh..":"..mm..ampm
-    clock = currentTime
-    if clock_DisplayPreference == "ingame time" then
-        clock = ingameTime
-    end
-    if clock_DisplayPreference == "local time/ingame time" then
-        clock = currentTime.."/"..ingameTime
-    end
-         
-    if gadgetText["Clock"] then
-        TEBTopTime:SetText(clock)
-    else
-        TEBTopTime:SetText("")
-    end  
-end
-
-------------------------------------------------------
--- experience
-------------------------------------------------------
 function TEB.experience()
-	if IsUnitChampion("player") then
-		gcp = GetUnitChampionPoints("player")
-		if gcp < GetChampionPointsPlayerProgressionCap() then
-			gcp = GetChampionPointsPlayerProgressionCap()
-		end
-		gmaxxp = GetNumChampionXPInChampionPoint(gcp)
-    else
-	  	gmaxxp = GetUnitXPMax("player")
-    end      
-	
+    local gcp, gmaxxp, gxp, gxpCurrentPercentage, gxpperc, gxpneeded
     if IsUnitChampion("player") then
+        gcp = GetUnitChampionPoints("player")
+        if gcp < GetChampionPointsPlayerProgressionCap() then
+            gcp = GetChampionPointsPlayerProgressionCap()
+        elseif gcp == 3600 then
+            gcp = 3599
+        end
+        gmaxxp = GetNumChampionXPInChampionPoint(gcp)
         gxp = GetPlayerChampionXP()
     else
-       gxp = GetUnitXP("player")
-    end  
-  
-    gxpCurrentPercentage = (gxp/gmaxxp)*100
+        gmaxxp = GetUnitXPMax("player")
+        gxp = GetUnitXP("player")
+    end
+
+    gxpCurrentPercentage = 100 * gxp / gmaxxp
     gxpCurrentPercentage = round(gxpCurrentPercentage, 1)
     gxpperc = 100 - gxpCurrentPercentage
     gxpneeded = gmaxxp - gxp
-    
-    if thousandsSeparator then
+
+    if settings.bar.thousandsSeparator then
         gxp = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(gxp))
         gmaxxp = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(gmaxxp))
         gxpneeded = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(gxpneeded))
     else
         gxp = string.format(gxp)
-        gmaxxp = string.format(gmaxxp)       
-        gxpneeded = string.format(gxpneeded)       
-    end
-     
-    if experience_DisplayPreference == "% towards next level/CP" then
-        gxpString = string.format(gxpCurrentPercentage).."%"
-    end
-    if experience_DisplayPreference == "% needed for next level/CP" then
-        gxpString = string.format(gxpperc).."%"
-    end
-    if experience_DisplayPreference == "current XP" then
-        gxpString = gxp
-    end
-    if experience_DisplayPreference == "needed XP" then
-        gxpString = gxpneeded
-    end
-    if experience_DisplayPreference == "current XP/total needed" then
-        gxpString = gxp.."/"..gmaxxp
+        gmaxxp = string.format(gmaxxp)
+        gxpneeded = string.format(gxpneeded)
     end
 
-    if gadgetText["Experience"] then
-        TEBTopXP:SetText(gxpString)
-    else
-        TEBTopXP:SetText("")
-    end   
+    if settings.experience.DisplayPreference == "% towards next level/CP" then
+        G.gxpString = string.format(gxpCurrentPercentage).."%"
+    elseif settings.experience.DisplayPreference == "% needed for next level/CP" then
+        G.gxpString = string.format(gxpperc).."%"
+    elseif settings.experience.DisplayPreference == "current XP" then
+        G.gxpString = gxp
+    elseif settings.experience.DisplayPreference == "needed XP" then
+        G.gxpString = gxpneeded
+    elseif settings.experience.DisplayPreference == "current XP/total needed" then
+        G.gxpString = gxp.."/"..gmaxxp
+    end
+
 end
 
-------------------------------------------------------
--- zone
-------------------------------------------------------
--- Gets the zone and subzone name when the player changes zones.
--- Registered to trigger by EVENT_ZONE_CHANGED
--- You would think that it would be reliable to pass in zoneName and subZoneName
--- from the event, but sometimes they're empty strings for some reason.
-function TEB.getZone()
-	zoneNameDisplay = GetPlayerActiveSubzoneName()
-	if zoneNameDisplay == "" then zoneNameDisplay = GetUnitZone("player") end
-end
-
--- This function is responsible for updating what is displayed on the widget.
--- This is registered for update with the name "TEBZone"
 function TEB.zone()
     local x, y, heading = GetMapPlayerPosition("player")
-	x = round(x * 100,0)
+    x = round(x * 100,0)
     y = round(y * 100,0)
+    zoneName = GetPlayerActiveSubzoneName()
+    if zoneName == "" then zoneName = GetUnitZone("player") end
+
+    zoneName = TEB.fixname(zoneName)
     coordinates = string.format(x)..", "..string.format(y)
 
-    if location_DisplayPreference == "(x, y) Zone Name" then
-        location = "("..coordinates..") "..zoneNameDisplay
-    elseif location_DisplayPreference == "Zone Name (x, y)" then
-        location = zoneNameDisplay.." ("..coordinates..")"
-    elseif location_DisplayPreference == "Zone Name" then
-        location = zoneNameDisplay
-    elseif location_DisplayPreference == "x, y" then
-        location = coordinates
+    if settings.location.DisplayPreference == "(x, y) Zone Name" then
+        G.location = "("..coordinates..") "..zoneName
     end
-     
-    if gadgetText["Location"] then
-        TEBTopLocation:SetText(location)
-    else
-        TEBTopLocation:SetText("")
-    end  
+    if settings.location.DisplayPreference == "Zone Name (x, y)" then
+        G.location = zoneName.." ("..coordinates..")"
+    end
+    if settings.location.DisplayPreference == "Zone Name" then
+        G.location = zoneName
+    end
+    if settings.location.DisplayPreference == "x, y" then
+        G.location = coordinates
+    end
 end
-	
-------------------------------------------------------
--- bags
-------------------------------------------------------
+
+function TEB.memory()
+    G.memory = string.format(math.floor(collectgarbage("count") / 1024 + 0.5)).."MB"
+end
+
+function TEB.enlightenment()
+    local enlightenment_amount = 0
+    if IsEnlightenedAvailableForCharacter() then
+        enlightenment_amount = GetEnlightenedPool()
+        if settings.bar.thousandsSeparator then
+            G.enlightenment = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(enlightenment_amount))
+        else
+            G.enlightenment = string.format(enlightenment_amount)
+        end
+    else
+        G.enlightenment = "--"
+    end
+
+    if enlightenment_amount > 0 and not G.enlightenmentVisible then
+        if not G.enlightenmentVisible then
+            G.enlightenmentVisible = true
+            TEB.RebuildBar()
+        end
+    elseif enlightenment_amount == 0 and G.enlightenmentVisible then
+        if G.enlightenmentVisible then
+            G.enlightenmentVisible = false
+            TEB.RebuildBar()
+        end
+    end
+
+    local enlightenmentColor
+    enlightenmentColor, iconColor = TEB.checkThresholds(enlightenment_amount, true, settings.enlightenment)
+    G.enlightenment = enlightenmentColor .. G.enlightenment
+    TEB.SetIconByIndicator("Enlightenment", iconColor)
+end
+
+function TEB.pvp()
+    pvp = IsUnitPvPFlagged("player")
+    if pvp ~= G.pvpMode then
+        G.pvpMode = pvp
+        TEB.ShowBar()
+        TEB.RebuildBar()
+        if G.pvpMode then
+            G.kills = 0
+            G.killingBlows = 0
+            G.deaths = 0
+        end
+    end
+
+    G.killRatio = 0
+    if G.deaths == 0 then
+        G.killRatio = string.format(G.killingBlows)
+    else
+        G.killRatio = string.format(round(G.killingBlows/G.deaths, 1))..":1"
+    end
+    if settings.kc.DisplayPreference == "Assists/Killing Blows/Deaths (Kill Ratio)" then
+        G.killCount = string.format(G.kills).."/"..string.format(G.killingBlows).."/"..string.format(G.deaths).." ("..G.killRatio..")"
+    end
+    if settings.kc.DisplayPreference == "Assists/Killing Blows/Deaths" then
+        G.killCount = string.format(G.kills).."/"..string.format(G.killingBlows).."/"..string.format(G.deaths)
+    end
+    if settings.kc.DisplayPreference == "Killing Blows/Deaths (Kill Ratio)" then
+        G.killCount = string.format(G.killingBlows).."/"..string.format(G.deaths).." ("..G.killRatio..")"
+    end
+    if settings.kc.DisplayPreference == "Killing Blows/Deaths" then
+        G.killCount = string.format(G.killingBlows).."/"..string.format(G.deaths)
+    end
+    if settings.kc.DisplayPreference == "Kill Ratio" then
+        G.killCount = G.killRatio
+    end
+end
+
+function TEB.recall()
+    local remain, duration = GetRecallCooldown()
+    cost = GetRecallCost()
+    G.ftTimerRunning = remain > 0
+    if G.ftTimerRunning ~= G.ftTimerVisible then
+        G.ftTimerVisible = G.ftTimerRunning
+        TEB.RebuildBar()
+    end
+    seconds = math.floor(remain / 1000)
+    timeLeft = TEB.ConvertSeconds("simple", seconds)
+    if timeLeft == "" then timeLeft = "--" end
+    cost = settings.bar.thousandsSeparator and zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(cost)) or tostring(cost)
+    G.ft =  settings.ft.DisplayPreference == "time left" and timeLeft or
+            settings.ft.DisplayPreference == "cost" and cost.."g" or
+            zo_strformat("<<1>>/<<2>>g", timeLeft, cost)
+end
+
+local apFormats = {
+    ["Total Points"] = "<<1>>",
+    ["Session Points"] = "<<2>>",
+    ["Points Per Hour"] = "<<3>>",
+    ["Total Points/Points Per Hour"] = "<<1>>/<<3>>",
+    ["Session Points/Points Per Hour"] = "<<2>>/<<3>>",
+    ["Total Points/Session Points"] = "<<1>>/<<2>>",
+    ["Total Points/Session Points (Points Per Hour)"] = "<<1>>/<<2>> (<<3>>)",
+    ["Total Points/Session Points/Points Per Hour"] = "<<1>>/<<2>>/<<3>>",
+}
+
+local lvlFormats = { "<<1>>", "<<1>>/<<2>>", "<<2>>", }
+
+local unspentFormats = {
+    "|C51AB0D|t18:18:esoui/art/champion/champion_points_stamina_icon.dds|t%d",
+    "|C1970C9|t18:18:esoui/art/champion/champion_points_magicka_icon.dds|t%d",
+    "|CD6660C|t18:18:esoui/art/champion/champion_points_health_icon.dds|t%d",
+}
+
+function TEB.balance()
+    G.lvl = GetUnitLevel("player")
+    G.cp = GetPlayerChampionPointsEarned()
+    local telvarc = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
+    local telvarb = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
+    local goldCharacter = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+    G.goldBankUnformatted = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
+    local goldTotal = goldCharacter + G.goldBankUnformatted
+    G.trackedGold = 0
+    local maxeventtickets = 12
+    G.eventtickets = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
+    local ap = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+    G.crystal = GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT)
+    G.writs = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
+    G.etHasTickets = G.eventtickets > 0
+    G.telvar = telvarc + telvarb
+    goldColor, iconColor = TEB.checkThresholds(goldCharacter, false, settings.gold.low)
+
+    if iconColor == "normal" then
+        goldColor, iconColor = TEB.checkThresholds(goldCharacter, true, settings.gold.high)
+    end
+
+    if settings.bar.thousandsSeparator then
+        goldCharacter = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldCharacter))
+        G.goldBank = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(G.goldBankUnformatted))
+        goldTotal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(goldTotal))
+    else
+        goldCharacter = tostring(goldCharacter)
+        G.goldBank = tostring(G.goldBankUnformatted)
+        goldTotal = tostring(goldTotal)
+    end
+
+    if settings.gold.DisplayPreference == "gold on character" then
+        G.gold = string.format("%s%s", goldColor, goldCharacter)
+    elseif settings.gold.DisplayPreference == "gold on character/gold in bank" then
+        G.gold = string.format("%s%s|r/%s", goldColor, goldCharacter, G.goldBank)
+    elseif settings.gold.DisplayPreference == "gold on character (gold in bank)" then
+        G.gold = string.format("%s%s|r (%s)", goldColor, goldCharacter, G.goldBank)
+    elseif settings.gold.DisplayPreference == "character+bank gold" then
+        G.gold = goldTotal
+    elseif settings.gold.DisplayPreference == "tracked gold" or
+        settings.gold.DisplayPreference == "tracked+bank gold" then
+        if settings.gold.DisplayPreference == "tracked+bank gold" then
+            G.trackedGold = G.goldBankUnformatted
+        end
+        for k, v in pairs(settings.gold.Tracker) do
+            if v[1] then
+                G.trackedGold = G.trackedGold + v[2]
+            end
+        end
+        G.Gold = settings.bar.thousandsSeparator and
+            zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(G.trackedGold)) or
+            zo_strformat("<<1>>", G.trackedGold)
+    end
+    TEB.SetIconByIndicator("Gold", iconColor)
+
+    local ap_Session = ap - G.ap_SessionStartPoints
+    local ap_Hour = 0
+    if os.time() - G.ap_SessionStart > 0 then
+        if os.time() - G.ap_SessionStart < 3600 then
+            ap_Hour = math.floor(ap_Session)
+        else
+            ap_Hour = math.floor(ap_Session / ((os.time() - G.ap_SessionStart) / 3600))
+        end
+    end
+
+    if settings.bar.thousandsSeparator then
+        G.telvar = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(G.telvar))
+        ap = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap))
+        ap_Session = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Session))
+        ap_Hour = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(ap_Hour))
+        G.crystal = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(G.crystal))
+        G.writs = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(G.writs))
+    else
+        G.telvar = tostring(G.telvar)
+        ap = string.format(ap)
+        ap_Session = string.format(ap_Session)
+        ap_Hour = string.format(ap_Hour)
+        G.crystal = string.format(G.crystal)
+        G.writs = string.format(G.writs)
+    end
+    G.apString = zo_strformat(apFormats[settings.ap.DisplayPreference],
+        ap, ap_Session, ap_Hour)
+
+    -- tickets
+    local etIcon = "normal"
+    local etColor = "|ccccccc"
+    if G.eventtickets >= settings.et.danger then
+        etColor = "|ccc0000"
+        etIcon = "danger"
+    elseif G.eventtickets >= settings.et.warning then
+        etColor = "|cffdf00"
+        etIcon = "warning"
+    end
+    G.eventtickets = string.format("%s%s", etColor, G.eventtickets)
+    if settings.et.DisplayPreference == "tickets/max" then
+        G.eventtickets = G.eventtickets.."/12"
+    end
+    TEB.SetIcon("Event Tickets", etIcon)
+
+    -- level & CP
+    G.lvlText = ""
+    unspentMage = GetNumUnspentChampionPoints( 1 )
+    unspentWarrior = GetNumUnspentChampionPoints( 2 )
+    unspentThief = GetNumUnspentChampionPoints( 3 )
+    unspentTotal = unspentWarrior + unspentMage + unspentThief
+    local fmt = G.lvl < 50 and lvlFormats[settings.level.notmax.DisplayPreference] or
+        lvlFormats[settings.level.max.DisplayPreference]
+    local unspentText = ""
+    if G.lvl < 50 and settings.level.notmax.cp or settings.level.max.cp then
+        local dyn = G.lvl < 50 and settings.level.notmax.Dynamic or settings.level.max.Dynamic
+        if not dyn or unspentTotal > 0 then
+            local t = { " (" }
+            for i, u in ipairs({unspentThief, unspentMage, unspentWarrior}) do
+                if not dyn or u > 0 then
+                    table.insert(t, string.format(unspentFormats[i], u))
+                end
+            end
+            table.insert(t, "|ccccccc)")
+            unspentText = table.concat(t, "")
+        end
+    end
+    G.lvlText = zo_strformat(fmt, G.lvl, G.cp) .. unspentText
+end
+
+function TEB.mounttimer()
+    mountTimeLeft = GetTimeUntilCanBeTrained() / 1000
+    if STABLE_MANAGER:IsRidingSkillMaxedOut() then
+        G.mountlbltxt = "Maxed"
+        G.mountTimerNotMaxed = false
+    else
+        G.mountTimerNotMaxed = true
+        if mountTimeLeft == 0 then
+            G.mountlbltxt = "TRAIN!"
+        else
+            G.mountlbltxt = TEB.ConvertSeconds(settings.mount.DisplayPreference, mountTimeLeft)
+        end
+    end
+
+    if G.mountlbltxt == "Maxed" and not G.mountTimerVisible then
+        G.mountTimerVisible = true
+        TEB.RebuildBar()
+    end
+    if G.mountlbltxt ~= "Maxed" and G.mountTimerVisible then
+        G.mountTimerVisible = false
+        TEB.RebuildBar()
+    end
+
+    if G.mountlbltxt == "TRAIN!" then
+        if settings.mount.good then G.mountlbltxt = "|c00e900"..G.mountlbltxt end
+        if settings.mount.good and settings.iconIndicator["Mount Timer"] then
+            TEB.SetIcon("Mount Timer", "good")
+        end
+    else
+        if gadgetReference["Mount Timer"][6] then
+                TEB.RemovePulseItem("Mount Timer")
+        end
+        if settings.mount.good and settings.iconIndicator["Mount Timer"] then
+            TEB.SetIcon("Mount Timer", "normal")
+        end
+    end
+end
+
+-- for bag and bank
+local bagFormats = {
+    ["slots used/total slots"] = "<<1>><<2>>/<<4>>",
+    ["used%"] = "<<1>><<5>>",
+    ["slots free/total slots"] = "<<1>><<3>>/<<4>>",
+    ["slots free"] = "<<1>><<3>>",
+    ["free%"] = "<<1>><<6>>",
+}
+
+function TEB.bang(name, usedslots, maxslots, bagOrBank) -- bank & bag
+    local freeSlots = maxslots - usedslots
+    local bagPercentUsed = math.floor((usedslots / maxslots) * 100)
+    local bagPercentFree = 100 - bagPercentUsed
+    local testval = bagOrBank.UsageAsPercentage and bagPercentUsed or usedslots
+    local bagColor, iconColor = TEB.checkThresholds(testval, true, bagOrBank)
+    TEB.SetIconByIndicator(name, iconColor)
+    if iconColor == "critical" and settings.bar.pulseWhenCritical then
+        TEB.AddPulseItem(name)
+    else
+        TEB.RemovePulseItem(name)
+    end
+    local fmt = bagFormats[bagOrBank.DisplayPreference]
+    return zo_strformat(fmt, bagColor, usedslots, freeSlots, maxslots, bagPercentUsed, bagPercentFree)
+end
+
 function TEB.bags()
-    bagUsedSlots, bagMaxSlots = GetNumBagUsedSlots(BAG_BACKPACK), GetBagUseableSize(BAG_BACKPACK) --PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
-  	
-  	local bagPercentUsed = math.floor((bagUsedSlots / bagMaxSlots) * 100)
-  	local bagPercentFree = math.floor(((bagMaxSlots - bagUsedSlots) / bagMaxSlots) * 100)
-  	local freeSlots = bagMaxSlots - bagUsedSlots
-
-    local bagColor = "|ccccccc"
-    iconColor = "normal"
-    if bagPercentUsed >= bag_Warning then
-        bagColor = "|cffff00"
-        iconColor = "caution"
-    end
-    if bagPercentUsed >= bag_Danger then
-        bagColor = "|cff8000"
-        iconColor = "warning"
-    end    
-    if bagPercentUsed >= bag_Critical then
-        bagColor = "|cff0000"
-        iconColor = "danger"
-    end   
-
-    if iconIndicator["Bag Space"] and iconColor ~= "normal" then
-        TEB.SetIcon("Bag Space", iconColor)
-    else
-        TEB.SetIcon("Bag Space", "normal")
-    end
-
-    if addonInitialized then
-        if bagPercentUsed > bag_Critical and pulseWhenCritical then 
-            TEB.AddPulseItem("Bag Space")
-        end
-        if bagPercentUsed <= bag_Critical or not pulseWhenCritical then        
-            TEB.RemovePulseItem("Bag Space")
-        end
-    end
-
- 
-    bagInfo = bagColor..string.format(bagUsedSlots).."/"..string.format(bagMaxSlots)
-    if bag_DisplayPreference == "used%" then    
-        bagInfo = bagColor..string.format(bagPercentUsed).."%%"
-    end
-    if bag_DisplayPreference == "slots free/total slots" then    
-        bagInfo = bagColor..string.format(freeSlots).."/"..string.format(bagMaxSlots)
-    end
-    if bag_DisplayPreference == "slots free" then    
-        bagInfo = bagColor..string.format(freeSlots)
-    end
-    if bag_DisplayPreference == "free%" then    
-        bagInfo = bagColor..string.format(bagPercentFree).."%%"
-    end
-
-    if gadgetText["Bag Space"] then
-        TEBTopBag:SetText(string.format(bagInfo))
-    else
-        TEBTopBag:SetText("")
-    end  
+    G.bagUsedSlots, G.bagMaxSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+    G.bagInfo = TEB.bang("Bag Space", G.bagUsedSlots, G.bagMaxSlots, settings.bag)
 end
 
-------------------------------------------------------
--- bank
-------------------------------------------------------
 function TEB.bank()
-    usedSlots, maxSlots = GetNumBagUsedSlots(BAG_BANK), GetBagUseableSize(BAG_BANK) --PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
-    usedSlots = usedSlots + GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK)
-    maxSlots = maxSlots + GetBagUseableSize(BAG_SUBSCRIBER_BANK)
-
-  	local bankPercentUsed = math.floor((usedSlots / maxSlots) * 100)
-  	local bankPercentFree = math.floor(((maxSlots - usedSlots) / maxSlots) * 100)
-  	local freeSlots = maxSlots - usedSlots
-
-    if addonInitialized then
-        if bankPercentUsed > bank_Critical and pulseWhenCritical then 
-            TEB.AddPulseItem("Bank Space")
-        end
-        if bankPercentUsed <= bank_Critical or not pulseWhenCritical then        
-            TEB.RemovePulseItem("Bank Space")
-        end
-    end
-
-    local bankColor = "|ccccccc"
-    iconColor = "normal"
-    if bankPercentUsed >= bank_Warning then
-        bankColor = "|cffff00"
-        iconColor = "caution"
-    end
-    if bankPercentUsed >= bank_Danger then
-        bankColor = "|cff8000"
-        iconColor = "warning"
-    end    
-    if bankPercentUsed >= bank_Critical then
-        bankColor = "|cff0000"
-        iconColor = "danger"
-    end    
-
-    if iconIndicator["Bank Space"] and iconColor ~= "normal" then
-        TEB.SetIcon("Bank Space", iconColor)
-    else
-        TEB.SetIcon("Bank Space", "normal")
-    end
-
-    bankInfo = bankColor..string.format(usedSlots).."/"..string.format(maxSlots)
-    if bank_DisplayPreference == "used%" then    
-        bankInfo = bankColor..string.format(bankPercentUsed).."%"
-    end
-    if bank_DisplayPreference == "slots free/total slots" then    
-        bankInfo = bankColor..string.format(freeSlots).."/"..string.format(maxSlots)
-    end
-    if bank_DisplayPreference == "slots free" then    
-        bankInfo = bankColor..string.format(freeSlots)
-    end
-    if bank_DisplayPreference == "free%" then    
-        bankInfo = bankColor..string.format(bankPercentFree).."%"
-    end
+    G.bankUsedSlots, G.bankMaxSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BANK)
+    G.bankInfo = TEB.bang("Bank Space", G.bankUsedSlots, G.bankMaxSlots, settings.bank)
 end
 
-------------------------------------------------------
--- latency
-------------------------------------------------------
-function TEB.latency()
-  	local latencyValue = GetLatency()
-    local latencyColor = "|ccccccc"
-    local iconColor = "normal"    
-    if icons_Mode == "color" and latencyValue < latency_Warning and latencyValue < latency_Danger then
-        latencyColor = "|c00cc00"
-        iconColor = "good"
-    end
-    if latencyValue >= latency_Warning then
-        latencyColor = "|cffff00"
-        iconColor = "caution"
-    end
-    if latencyValue >= latency_Danger then
-        latencyColor = "|cff80000"
-        iconColor = "warning"
-    end    
-    if latencyValue >= latency_Danger then
-        latencyColor = "|cff0000"
-        iconColor = "danger"
-    end 
-    latency = latencyColor..string.format(latencyValue)
-  	
-    if iconIndicator["Latency"] and iconColor ~= "normal" then
-        TEB.SetIcon("Latency", iconColor)
-    else
-        TEB.SetIcon("Latency", "normal")
-    end  	
-           
-    if gadgetText["Latency"] then
-        TEBTopLatency:SetText(latency)
-    else
-        TEBTopLatency:SetText("")
-    end
-end
-
-------------------------------------------------------
--- fps
-------------------------------------------------------
-function TEB.fps()
-  	local fpsValue = math.floor(GetFramerate())
-  	
-  	if fpsValue < lowestFPS then lowestFPS = fpsValue end
-  	if fpsValue > highestFPS then highestFPS = fpsValue end
-  	
-    local fpsColor = "|ccccccc"
-    local iconColor = "normal"
-    if fpsValue <= fps_Warning then
-        fpsColor = "|cffff00"
-        iconColor = "caution"
-    end
-    if fpsValue <= fps_Danger then
-        fpsColor = "|cff8000"
-        iconColor = "warning"
-    end    
-    if fpsValue <= fps_Danger then
-        fpsColor = "|cff0000"
-        iconColor = "danger"
-    end  
-    fps = fpsColor..string.format(fpsValue)
-  	
-    if iconIndicator["FPS"] and iconColor ~= "normal" then
-        TEB.SetIcon("FPS", iconColor)
-    else
-        TEB.SetIcon("FPS", "normal")
-    end     	
-         
-    if gadgetText["FPS"] then
-        TEBTopFPS:SetText(fps)
-    else
-        TEBTopFPS:SetText("")
-    end   
-end
-
-------------------------------------------------------
--- weaponcharge
-------------------------------------------------------
 function TEB.weaponcharge()
     local activeWeaponPair, locked = GetActiveWeaponPairInfo()
-    
+
     local mainHandChargePerc = 0
     local offHandChargePerc = 0
     local mainHandHasPoison = false
@@ -3812,11 +2112,11 @@ function TEB.weaponcharge()
     offHandChargePerc = getitemcharge(EQUIP_SLOT_OFF_HAND)
     backupMainHandChargePerc = getitemcharge(EQUIP_SLOT_BACKUP_MAIN)
     backupOffHandChargePerc = getitemcharge(EQUIP_SLOT_BACKUP_OFF)
-    
+
     if activeWeaponPair == 0 then
         wcToolTipLeft = "|cffffffWeapon Charge:|cccccc\nNo weapons are equipped."
         wcToolTipRight = ""
-        weaponCharge = "--"
+        G.weaponCharge = "--"
         return
     end
     if activeWeaponPair == 1 then
@@ -3824,49 +2124,42 @@ function TEB.weaponcharge()
         offCharge = offHandChargePerc
         hasPoison = mainHandHasPoison
         poisonCount = mainHandPoisonCount
-    end
-    if activeWeaponPair == 2 then
+    elseif activeWeaponPair == 2 then
         mainCharge = backupMainHandChargePerc
         offCharge = backupOffHandChargePerc
         hasPoison = backupMainHandHasPoison
         poisonCount = backupMainHandPoisonCount
     end
-    
+
     local leastPerc = mainCharge
     if offCharge < mainCharge then leastPerc = offCharge end
-    
+
     local wcColor, iconColor, poisonColor = getWCColor(leastPerc, hasPoison, poisonCount)
-    if hasPoison and wc_AutoPoison then
-        weaponCharge = poisonColor..string.format(poisonCount)
+    if hasPoison and settings.wc.AutoPoison then
+        G.weaponCharge = poisonColor..string.format(poisonCount)
     else
         if leastPerc == 10000 then
-            weaponCharge = wcColor.."--"
+            G.weaponCharge = wcColor.."--"
         else
-            weaponCharge = wcColor..string.format(leastPerc).."%"
-        end        
-    end
-    
-    if iconIndicator["Weapon Charge"] and iconColor ~= "normal" then
-        TEB.SetIcon("Weapon Charge", iconColor)
-    else
-        TEB.SetIcon("Weapon Charge", "normal")
+            G.weaponCharge = wcColor..string.format(leastPerc).."%"
+        end
     end
 
-    if addonInitialized then
-        if hasPoison and wc_AutoPoison then
-            if poisonCount < wc_PoisonCritical and pulseWhenCritical then 
-                TEB.AddPulseItem("Weapon Charge")
-            end
-            if poisonCount >= wc_PoisonCritical or not pulseWhenCritical then        
-                TEB.RemovePulseItem("Weapon Charge")
-            end            
-        else
-            if leastPerc < wc_Critical and pulseWhenCritical then 
-                TEB.AddPulseItem("Weapon Charge")
-            end
-            if leastPerc >= wc_Critical or not pulseWhenCritical then        
-                TEB.RemovePulseItem("Weapon Charge")
-            end
+    TEB.SetIconByIndicator("Weapon Charge/Poison", iconColor)
+
+    if hasPoison and settings.wc.AutoPoison then
+        if poisonCount < settings.wc.PoisonCritical and settings.bar.pulseWhenCritical then
+            TEB.AddPulseItem("Weapon Charge/Poison")
+        end
+        if poisonCount >= settings.wc.PoisonCritical or not settings.bar.pulseWhenCritical then
+            TEB.RemovePulseItem("Weapon Charge/Poison")
+        end
+    else
+        if leastPerc < settings.wc.critical and settings.bar.pulseWhenCritical then
+            TEB.AddPulseItem("Weapon Charge/Poison")
+        end
+        if leastPerc >= settings.wc.critical or not settings.bar.pulseWhenCritical then
+            TEB.RemovePulseItem("Weapon Charge/Poison")
         end
     end
 
@@ -3910,11 +2203,6 @@ function TEB.weaponcharge()
         end
     end
 
-    if gadgetText["Weapon Charge"] then
-        TEBTopWC:SetText(weaponCharge)
-    else
-        TEBTopWC:SetText("")
-    end  
 end
 
 function getpoisoncount(slotNum)
@@ -3923,323 +2211,240 @@ function getpoisoncount(slotNum)
 end
 
 function getitemcharge(slotNum)
-	local itemLink = GetItemLink( BAG_WORN, slotNum )
-	if itemLink == nil or link == "" then 
-    	return 10000
+    local itemLink = GetItemLink( BAG_WORN, slotNum )
+    if itemLink == nil or link == "" then
+        return 10000
     end
-	if not IsItemChargeable( BAG_WORN, slotNum ) then
-	    return 10000
+    if not IsItemChargeable( BAG_WORN, slotNum ) then
+        return 10000
     end
-	local currentCharge = GetItemLinkNumEnchantCharges(itemLink)
-	local maxCharge = GetItemLinkMaxEnchantCharges(itemLink)
+    local currentCharge = GetItemLinkNumEnchantCharges(itemLink)
+    local maxCharge = GetItemLinkMaxEnchantCharges(itemLink)
     return math.floor((currentCharge / maxCharge) * 100)
 end
 
 function getWCColor(wcPerc, hasPoison, poisonCount)
     local wcColor = "|ccccccc"
-    local poisonColor = "|ccccccc"
+    local poisonColor = "|cccccc"
     local iconColor = "normal"
-    if hasPoison and wc_AutoPoison then
-        if poisonCount <= wc_PoisonWarning then
+    if hasPoison and settings.wc.AutoPoison then
+        if poisonCount <= settings.wc.PoisonWarning then
             poisonColor = "|cffff00"
             iconColor = "caution"
         end
-        if poisonCount <= wc_PoisonDanger then
+        if poisonCount <= settings.wc.PoisonDanger then
             poisonColor = "|cff8000"
             iconColor = "warning"
-        end 
-        if poisonCount <= wc_PoisonCritical then
+        end
+        if poisonCount <= settings.wc.PoisonCritical then
             poisonColor = "|cff0000"
             iconColor = "danger"
-        end 
-    else   
+        end
+    else
         if wcPerc then
-            if wcPerc <= wc_Warning then
+            if wcPerc <= settings.wc.warning then
                 wcColor = "|cffff00"
                 iconColor = "caution"
             end
-            if wcPerc <= wc_Danger then
+            if wcPerc <= settings.wc.danger then
                 wcColor = "|cff8000"
                 iconColor = "warning"
-            end    
-            if wcPerc <= wc_Critical then
+            end
+            if wcPerc <= settings.wc.critical then
                 wcColor = "|cff0000"
                 iconColor = "danger"
-            end    
+            end
         end
     end
     return wcColor, iconColor, poisonColor
 end
 
-------------------------------------------------------
--- durability
-------------------------------------------------------
-function TEB.durability()
-    durabilityInfo = ""
-    durabilityTooltipLeft = ""
-    durabilityTooltipRight = ""
+local durabilityFormats = {
+    ["durability %" ] = "<<1>>%",
+    ["durability %/repair cost" ] = "<<1>>%|ccccccc/<<2>>",
+    ["repair cost" ] = "<<2>>",
+    ["durability % (repair kits)" ] = "<<1>>% (<<3>>)",
+    ["durability %/repair cost (repair kits)" ] = "<<1>>%|ccccccc/<<2>> (<<3>>)",
+    ["repair cost (repair kits)" ] = "<<2>> (<<3>>)",
+    ["most damaged" ] = "<<4>>",
+    ["most damaged/durability %" ] = "<<4>>/<<5>>%",
+    ["most damaged/durability %/repair cost" ] = "<<4>>/<<5>>%/<<6>>g",
+    ["most damaged/repair cost" ] = "<<4>>/<<6>>g",
+}
 
-    local repairCost = 0
+function TEB.durability()
+    local repairCost
     local leastDurability = 100
     local totalRepairCost = 0
     local mostDamagedItem = ""
     local mostDamagedCost = 0
     local mostDamagedCondition = 100
+    local durabilityColor
+    local toolTipLeft = { "Armor durability." }
+    local toolTipRight = { "" }
 
-    for slotIndex=0,16,1 do
-      	if DoesItemHaveDurability(BAG_WORN,slotIndex) then
-          	if repairCost == nil or repairCost == "" then
-              	repairCost = 0
+    for slotIndex = 0, 16, 1 do
+        if DoesItemHaveDurability(BAG_WORN, slotIndex) then
+            if repairCost == nil or repairCost == "" then
+                repairCost = 0
+            else
+                repairCost = GetItemRepairCost(BAG_WORN, slotIndex)
             end
-          	repairCost = tonumber(GetItemRepairCost(BAG_WORN, slotIndex))
-          	totalRepairCost = totalRepairCost + repairCost
+            totalRepairCost = totalRepairCost + repairCost
             condition = GetItemCondition(BAG_WORN, slotIndex)
             if condition < mostDamagedCondition then
                 mostDamagedItem = equipSlotReference[slotIndex]
                 mostDamagedCost = repairCost
                 mostDamagedCondition = condition
             end
-          	
-          	if leastDurability > condition then
+            if leastDurability > condition then
                 leastDurability = condition
             end
-            local durabilityColor = "|ccccccc"
-            if condition > durability_Warning and condition > durability_Danger then
-                durabilityColor = "|c00ff00"
-            end
-            if condition <= durability_Warning then
-                durabilityColor = "|cffff00"                  
-            end
-            if condition <= durability_Danger then
-                durabilityColor = "|cff8000"                  
-            end    
-            if condition <= durability_Critical then
-                durabilityColor = "|cff0000"                  
-            end    
-            
-            durabilityTooltipLeft = durabilityTooltipLeft .. "\n"..durabilityColor..TEB.fixname(GetItemName(BAG_WORN, slotIndex))
-            durabilityTooltipRight = durabilityTooltipRight .. "\n"..durabilityColor.."("..string.format(repairCost).."g) "..string.format(condition).."%"
+            durabilityColor, iconColor = TEB.checkThresholds(condition, false, settings.durability)
+            table.insert(toolTipLeft, zo_strformat("<<C:1>>", GetItemName(BAG_WORN, slotIndex)))
+            table.insert(toolTipRight, string.format("%s(%dg) %d%%", durabilityColor, repairCost, condition))
         end
-    end
-    
-    if thousandsSeparator then
-        totalRepairCost = zo_strformat("<<1>>", ZO_LocalizeDecimalNumber(totalRepairCost)) 
-    else
-        totalRepairCost = string.format(totalRepairCost)
-    end
-    
-    durabilityTooltipLeft = durabilityTooltipLeft .. "\n\n|cccccccTotal Repair Cost\n\n"
-    durabilityTooltipRight = durabilityTooltipRight .. "\n\n|ccccccc"..string.format(totalRepairCost).."g\n\n"
-    
-    durabilityTooltipLeft = durabilityTooltipLeft .. "Petty Repair Kit\nMinor Repair Kit\nLesser Repair Kit\nCommon Repair Kit\nGreater Repair Kit\nGrand Repair Kit\nCrown Repair Kit"
-    if pettyRepairKit ~= nil then
-        durabilityTooltipRight = durabilityTooltipRight .. string.format(pettyRepairKit).."\n"..string.format(minorRepairKit).."\n"..string.format(lesserRepairKit).."\n"..string.format(commonRepairKit).."\n"..string.format(greaterRepairKit).."\n"..string.format(grandRepairKit).."\n"..string.format(crownRepairKit)
-    end
-    
-    local durabilityColor = "|ccccccc"
-    iconColor = "normal"                  
-    if leastDurability < durability_Warning then
-        durabilityColor = "|cffff00"
-        iconColor = "caution"        
-    end
-    if leastDurability < durability_Danger then
-        durabilityColor = "|cff8000"
-        iconColor = "warning"        
-    end
-    if leastDurability < durability_Danger then
-        durabilityColor = "|cff0000"
-        iconColor = "danger"        
     end
 
-    if iconIndicator["Durability"] and iconColor ~= "normal" then
-        TEB.SetIcon("Durability", iconColor)
+    if settings.bar.thousandsSeparator then
+        totalRepairCost = zo_strformat("<<1>>g", ZO_LocalizeDecimalNumber(totalRepairCost))
     else
-        TEB.SetIcon("Durability", "normal")
-    end    
-    
-    if addonInitialized then
-        if leastDurability < durability_Critical and pulseWhenCritical then 
-            TEB.AddPulseItem("Durability")
-        end
-        if leastDurability >= durability_Critical or not pulseWhenCritical then        
-            TEB.RemovePulseItem("Durability")
-        end
-    end        
-        
-    if durability_DisplayPreference == "durability %" then
-     durabilityInfo = durabilityColor..string.format(leastDurability).."%"
+        totalRepairCost = zo_strformat("<<1>>g", totalRepairCost)
     end
-    if durability_DisplayPreference == "durability %/repair cost" then
-     durabilityInfo = durabilityColor..string.format(leastDurability).."%|ccccccc/"..durabilityColor..string.format(totalRepairCost).."g"
-    end
-    if durability_DisplayPreference == "repair cost" then
-     durabilityInfo = durabilityColor..string.format(totalRepairCost).."g"
-    end
-    if durability_DisplayPreference == "durability % (repair kits)" then
-     durabilityInfo = durabilityColor..string.format(leastDurability).."% ("..string.format(totalRepairKits)..")"
-    end
-    if durability_DisplayPreference == "durability %/repair cost (repair kits)" then
-     durabilityInfo = durabilityColor..string.format(leastDurability).."%|ccccccc/"..durabilityColor..string.format(totalRepairCost).."g ("..string.format(totalRepairKits)..")"
-    end
-    if durability_DisplayPreference == "repair cost (repair kits)" then
-     durabilityInfo = durabilityColor..string.format(totalRepairCost).."g ("..string.format(totalRepairKits)..")"
-    end
-    if durability_DisplayPreference == "most damaged" then
-        durabilityInfo = durabilityColor..string.format(mostDamagedItem)
-    end    
-    if durability_DisplayPreference == "most damaged/durability %" then
-        durabilityInfo = durabilityColor..string.format(mostDamagedItem).."/"..string.format(leastDurability).."%"
-    end    
-     
-    if durability_DisplayPreference == "most damaged/durability %/repair cost" then
-        durabilityInfo = durabilityColor..string.format(mostDamagedItem).."/"..string.format(mostDamagedCondition).."%/"..string.format(mostDamagedCost).."g"
-    end    
-    if durability_DisplayPreference == "most damanaged/repair cost" then
-        durabilityInfo = durabilityColor..string.format(mostDamagedItem).."/"..string.format(mostDamagedCost).."g"
-    end 
-    
-    if gadgetText["Durability"] then
-        TEBTopDurability:SetText(durabilityInfo)
+
+    G.durabilityTooltipLeft = table.concat( toolTipLeft, "\n") ..
+        table.concat( { "\n|cff3030Total Repair Cost|r\n", "Petty Repair Kit", "Minor Repair Kit", "Lesser Repair Kit",
+            "Common Repair Kit", "Greater Repair Kit", "Grand Repair Kit",
+            "Crown Repair Kit" }, "\n")
+    G.durabilityTooltipRight = table.concat( toolTipRight, "\n") ..
+        table.concat( { "\n|cff3030" .. totalRepairCost, "|r",
+            G.pettyRepairKit, G.minorRepairKit, G.lesserRepairKit,
+            G.commonRepairKit, G.greaterRepairKit, G.grandRepairKit,
+            G.crownRepairKit }, "\n")
+
+    local durabilityColor
+    durabilityColor, iconColor = TEB.checkThresholds(leastDurability, false, settings.durability)
+    TEB.SetIconByIndicator("Durability", iconColor)
+    if iconColor == "critical" and settings.bar.pulseWhenCritical then
+        TEB.AddPulseItem("Durability")
     else
-        TEBTopDurability:SetText("")
-    end  
+        TEB.RemovePulseItem("Durability")
+    end
+
+    local fmt = durabilityFormats[settings.durability.DisplayPreference]
+    G.durabilityInfo = zo_strformat(fmt,
+        leastDurability, totalRepairCost, G.totalRepairKits,
+        mostDamagedItem, mostDamagedCondition, mostDamagedCost)
 end
 
-------------------------------------------------------
--- skyshards
-------------------------------------------------------
+local skyshardsFormats = {
+    ["collected/unspent points"] = "<<1>>/<<2>>",
+    ["collected/total needed (unspent points)"] = "<<1>>/3 (<<2>>)",
+    ["collected"] = "<<1>>",
+    ["needed/unspent points"] = "<<3>>/<<2>>",
+    ["needed"] = "<<3>>",
+}
+
 function TEB.skyshards()
-    availablePoints = GetAvailableSkillPoints()
-    skyShards = GetNumSkyShards()
-
-    if skyshards_DisplayPreference == "collected/unspent points" then
-        skyShardsInfo = string.format(skyShards).."/"..string.format(availablePoints)
-    end
-    if skyshards_DisplayPreference == "collected/total needed (unspent points)" then
-        skyShardsInfo = string.format(skyShards).."/3 ("..string.format(availablePoints)..")"
-    end
-    if skyshards_DisplayPreference == "collected" then
-        skyShardsInfo = string.format(skyShards)
-    end
-    if skyshards_DisplayPreference == "needed/unspent points" then
-        skyShardsInfo = string.format(3 - skyShards).."/"..string.format(availablePoints)
-    end
-    if skyshards_DisplayPreference == "needed" then
-        skyShardsInfo = string.format(3 - skyShards)
-    end
+    G.availablePoints = GetAvailableSkillPoints()
+    G.skyShards = GetNumSkyShards()
+    local fmt = skyshardsFormats[settings.skyshards.DisplayPreference]
+    G.skyShardsInfo = zo_strformat(fmt, G.skyShards, G.availablePoints, 3 - G.skyShards)
 end
 
-------------------------------------------------------
--- blacksmithing
-------------------------------------------------------
 function TEB.blacksmithing()
-    blackSmithingInfo, blackSmithingTimerRunning, blackSmithToolTipLeft, blackSmithToolTipRight = TEB.researchtimer(TEBTopResearchBlacksmithingIcon, CRAFTING_TYPE_BLACKSMITHING)
-    if blackSmithingTimerRunning and not blacksmithTimerVisible then
-        blacksmithTimerVisible = true
-        TEB:RebuildBar()
+    G.blackSmithingInfo, G.blackSmithingTimerRunning,
+    G.blackSmithToolTipLeft, G.blackSmithToolTipRight =
+    TEB.researchtimer(TEBTopResearchBlacksmithingIcon, CRAFTING_TYPE_BLACKSMITHING)
+
+    if G.blackSmithingTimerRunning and not G.blacksmithTimerVisible then
+        G.blacksmithTimerVisible = true
+        TEB.RebuildBar()
+    elseif not G.blackSmithingTimerRunning and G.blacksmithTimerVisible then
+        G.blacksmithTimerVisible = false
+        TEB.RebuildBar()
     end
-    if not blackSmithingTimerRunning and blacksmithTimerVisible then
-        blacksmithTimerVisible = false
-        TEB:RebuildBar()
-    end     
 end
 
-------------------------------------------------------
--- clothing
-------------------------------------------------------
 function TEB.clothing()
-    clothingInfo, clothingTimerRunning, clothingToolTipLeft, clothingToolTipRight = TEB.researchtimer(TEBTopResearchClothingIcon, CRAFTING_TYPE_CLOTHIER)
-    if clothingTimerRunning and not clothingTimerVisible then
-        clothingTimerVisible = true
-        TEB:RebuildBar()
+    G.clothingInfo, G.clothingTimerRunning, G.clothingToolTipLeft, G.clothingToolTipRight = TEB.researchtimer(TEBTopResearchClothingIcon, CRAFTING_TYPE_CLOTHIER)
+    if G.clothingTimerRunning and not G.clothingTimerVisible then
+        G.clothingTimerVisible = true
+        TEB.RebuildBar()
+    elseif not G.clothingTimerRunning and G.clothingTimerVisible then
+        G.clothingTimerVisible = false
+        TEB.RebuildBar()
     end
-    if not clothingTimerRunning and clothingTimerVisible then
-        clothingTimerVisible = false
-        TEB:RebuildBar()
-    end     
 end
 
-------------------------------------------------------
--- woodworking
-------------------------------------------------------
 function TEB.woodworking()
-    woodWorkingInfo, woodWorkingTimerRunning, woodWorkingToolTipLeft, woodWorkingToolTipRight = TEB.researchtimer(TEBTopResearchWoodworkingIcon, CRAFTING_TYPE_WOODWORKING)
-    if woodWorkingTimerRunning and not woodworkingTimerVisible then
-        woodworkingTimerVisible = true
-        TEB:RebuildBar()
+    G.woodWorkingInfo, G.woodWorkingTimerRunning, G.woodWorkingToolTipLeft, G.woodWorkingToolTipRight = TEB.researchtimer(TEBTopResearchWoodworkingIcon, CRAFTING_TYPE_WOODWORKING)
+    if G.woodWorkingTimerRunning and not G.woodworkingTimerVisible then
+        G.woodworkingTimerVisible = true
+        TEB.RebuildBar()
+    elseif not G.woodWorkingTimerRunning and G.woodworkingTimerVisible then
+        G.woodworkingTimerVisible = false
+        TEB.RebuildBar()
     end
-    if not woodWorkingTimerRunning and woodworkingTimerVisible then
-        woodworkingTimerVisible = false
-        TEB:RebuildBar()
-    end     
 end
 
-------------------------------------------------------
--- jewelrycrafting
-------------------------------------------------------
 function TEB.jewelrycrafting()
-    jewelryCraftingInfo, jewelryTimerRunning, jewelryToolTipLeft, jewelryToolTipRight = TEB.researchtimer(TEBTopResearchJewelryCraftingIcon, CRAFTING_TYPE_JEWELRYCRAFTING)
-    if jewelryTimerRunning and not jewelryTimerVisible then
-        jewelryTimerVisible = true
-        TEB:RebuildBar()
+    G.jewelryCraftingInfo, G.jewelryTimerRunning, G.jewelryToolTipLeft, G.jewelryToolTipRight = TEB.researchtimer(TEBTopResearchJewelryCraftingIcon, CRAFTING_TYPE_JEWELRYCRAFTING)
+    if G.jewelryTimerRunning and not G.jewelryTimerVisible or
+        not G.jewelryTimerRunning and G.jewelryTimerVisible then
+        G.jewelryTimerVisible = G.jewelryTimerRunning
+        TEB.RebuildBar()
     end
-    if not jewelryTimerRunning and jewelryTimerVisible then
-        jewelryTimerVisible = false
-        TEB:RebuildBar()
-    end     
 end
 
-------------------------------------------------------
--- researchtimer
-------------------------------------------------------
 function TEB.researchtimer(researchIcon, craftId)
     researchInfo = ""
     local leastTime = 9999999
     local toolTipLeft = ""
     local toolTipRight = ""
     local timerRunning = false
+    local freeSlots = 0
     local timers, totalSlots, traits = TEB.CalculateCraftingTimers(craftId)
-    local freeSlots = totalSlots
     if #timers > 0 then
-        timerRunning = true        
+        timerRunning = true
         for timerIndex=1,#timers do
-            freeSlots = freeSlots - 1
             if timers[timerIndex] < leastTime then
                 leastTime = timers[timerIndex]
             end
             toolTipLeft = toolTipLeft .. "\n" .. "Slot "..string.format(timerIndex).." - "..traits[timerIndex]
-            if researchInfo ~= "" then 
+            if researchInfo ~= "" then
                 researchInfo = researchInfo .."|ccccccc/"
             end
-            local timerString = TEB.ConvertSeconds(research_DisplayPreference, timers[timerIndex])
-        	researchInfo = researchInfo .. timerString
-        	toolTipRight = toolTipRight .."\n".. timerString
+            local timerString = TEB.ConvertSeconds(settings.research.DisplayPreference, timers[timerIndex])
+            researchInfo = researchInfo .. timerString
+            toolTipRight = toolTipRight .."\n".. timerString
         end
         for timerIndex=#timers+1,totalSlots do
+            freeSlots = freeSlots + 1
             toolTipLeft = toolTipLeft .. "\n" .. "Slot "..string.format(timerIndex)
-            toolTipRight = toolTipRight .."\n"..research_FreeText            
+            toolTipRight = toolTipRight .."\n"..settings.research.FreeText
         end
-        if research_DisplayAllSlots then
+        if settings.research.DisplayAllSlots then
             for timerIndex=#timers+1,totalSlots do
-                if researchInfo ~= "" then 
+                if researchInfo ~= "" then
                     researchInfo = researchInfo .."|ccccccc/"
                 end
-                researchInfo = researchInfo ..research_FreeText
-            end        
+                researchInfo = researchInfo ..settings.research.FreeText
+            end
         end
     end
     toolTipLeft = toolTipLeft .. "\n\n".."Free Slots: "..string.format(freeSlots).."\nTotal Slots: "..string.format(totalSlots)
-    
-    if research_ShowShortest then
+
+    if settings.research.ShowShortest then
         if leastTime == 9999999 then
-            researchInfo = research_FreeText
+            researchInfo = settings.research.FreeText
         else
-            researchInfo = TEB.ConvertSeconds(research_DisplayPreference, leastTime)
+            researchInfo = TEB.ConvertSeconds(settings.research.DisplayPreference, leastTime)
         end
     end
 
-    if research_DisplayAllSlots then
-        if researchInfo ~= "" then 
+    if settings.research.DisplayAllSlots then
+        if researchInfo ~= "" then
             researchInfo = researchInfo .."|ccccccc ("..string.format(freeSlots)..")"
         end
     end
@@ -4247,16 +2452,13 @@ function TEB.researchtimer(researchIcon, craftId)
     return researchInfo, timerRunning, toolTipLeft, toolTipRight
 end
 
-------------------------------------------------------
--- ConvertSeconds
-------------------------------------------------------
 function TEB.ConvertSeconds(displayMethod, seconds)
 
     local timeString = ""
     local days = math.floor(seconds/86400)
     local hours = math.floor(seconds/3600)
     local mins = math.floor(seconds/60 - (hours*60))
-    local secs = math.floor(seconds - hours*3600 - mins *60)  
+    local secs = math.floor(seconds - hours*3600 - mins *60)
     if days > 0 then hours = hours - (days * 24) end
     if displayMethod == "short" then
         if days > 0 then
@@ -4267,11 +2469,11 @@ function TEB.ConvertSeconds(displayMethod, seconds)
         end
         if mins > 0 and timeString == "" then
             timeString = string.format(mins).."m"..string.format(secs).."s"
-        end        
+        end
         if secs > 0 and timeString == "" then
             timeString = string.format(secs).."s"
         end
-    end         
+    end
     if displayMethod == "simple" then
         if days > 0 then
             timeString = string.format(days).."d"
@@ -4296,135 +2498,94 @@ function TEB.ConvertSeconds(displayMethod, seconds)
     return timeString
 end
 
-------------------------------------------------------
--- CalculateCraftingTimers
-------------------------------------------------------
 function TEB.CalculateCraftingTimers(craftId)
     timers = {}
-	local totalSlots = GetMaxSimultaneousSmithingResearch(craftId)
-	local totalResearchLines = GetNumSmithingResearchLines(craftId)
+    local totalSlots = GetMaxSimultaneousSmithingResearch(craftId)
+    local totalResearchLines = GetNumSmithingResearchLines(craftId)
     local usedSlots = 0
     traits = {}
 
-	for researchLine = 1, totalResearchLines do
-    	local lineName, icon, totalTraits, researchTimeSecs = GetSmithingResearchLineInfo(craftId, researchLine)
+    for researchLine = 1, totalResearchLines do
+        local lineName, icon, totalTraits, researchTimeSecs = GetSmithingResearchLineInfo(craftId, researchLine)
         for traitNum=1, totalTraits do
-    		totalSecs, remainingSecs = GetSmithingResearchLineTraitTimes(craftId, researchLine, traitNum)
-    		if remainingSecs ~= nil then
+            totalSecs, remainingSecs = GetSmithingResearchLineTraitTimes(craftId, researchLine, traitNum)
+            if remainingSecs ~= nil then
                 local traitId, traitDescription, known = GetSmithingResearchLineTraitInfo(craftId, researchLine, traitNum)
-                usedSlots = usedSlots + 1    		
+                usedSlots = usedSlots + 1
                 timers[usedSlots] = remainingSecs
                 traits[usedSlots] = traitReference[traitId]
             end
 
         end
-	end
-    	
-	return timers, totalSlots, traits
+    end
+
+    return timers, totalSlots, traits
 end
 
-------------------------------------------------------
--- UpdateKillingBlows
-------------------------------------------------------
 function TEB.UpdateKillingBlows( eventID, result , isError , abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log )
-    if pvpMode then
-   
-        local currPlayer = GetUnitName('player')
+    if G.pvpMode then
         local target = zo_strformat("<<1>>", targetName)
         local source = zo_strformat("<<1>>", sourceName)
-
         if sourceType == COMBAT_UNIT_TYPE_PLAYER and targetType == COMBAT_UNIT_TYPE_OTHER then
-            kills = kills + 1
-            if abilityName ~= "" then --If I got the killing blow
-                local kill_time = GetFrameTimeMilliseconds()
-                killingBlows = killingBlows + 1
+            G.kills = G.kills + 1
+            if abilityName ~= "" then -- If I got the killing blow
+                G.killingBlows = G.killingBlows + 1
             end
         end
-	 end
-	 
+     end
 end
 
-------------------------------------------------------
--- Buffs
-------------------------------------------------------
 function TEB.buffs()
-    local isBuffActive, timeLeftInSeconds, abilityId = LFDB:IsFoodBuffActiveAndGetTimeLeft("player")
+    local textColor, iconColor
+    local isBuffActive, timeLeftInSeconds, abilityId = G.LFDB:IsFoodBuffActiveAndGetTimeLeft("player")
     if isBuffActive then
-        foodTimerRunning = true
-        foodBuffWasActive = true
+        G.foodTimerRunning = true
+        G.foodBuffWasActive = true
         local numBuffs = GetNumBuffs("player")
         for buffIndex=1, numBuffs do
             local buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, BuffEffectType, AbilityType, StatusEffectType, abilityId, canClickOff, castByPlayer = GetUnitBuffInfo("player", buffIndex)
         end
     else
-        foodTimerRunning = false
+        G.foodTimerRunning = false
     end
 
-    if addonInitialized then
-        if ((timeLeftInSeconds < food_Critical * 60 and timeLeftInSeconds > 0) or (timeLeftInSecond == 0 and foodBuffWasActive)) and pulseWhenCritical then 
-            TEB.AddPulseItem("Food Buff Timer")
-        end
-        if timeLeftInSeconds >= (food_Critical * 60) or not pulseWhenCritical then        
-            TEB.RemovePulseItem("Food Buff Timer")
-        end
+    if timeLeftInSeconds < settings.food.critical and timeLeftInSeconds > 0 or
+        timeLeftInSecond == 0 and G.foodBuffWasActive and settings.bar.pulseWhenCritical then
+        TEB.AddPulseItem("Food Buff Timer")
+    elseif timeLeftInSeconds >= settings.food.critical or
+        not settings.bar.pulseWhenCritical then
+        TEB.RemovePulseItem("Food Buff Timer")
     end
-    local foodColor = "|ccccccc"
-    iconColor = "normal"
-    if timeLeftInSeconds < (food_Warning * 60) then
-        foodColor = "|cffff00"
-        iconColor = "caution"
+    local foodColor
+    foodColor, iconColor = TEB.checkThresholds(timeLeftInSeconds, false, settings.food)
+    TEB.SetIconByIndicator("Food Buff Timer", iconColor)
+    if G.foodTimerRunning ~= G.foodTimerVisible then
+        G.foodTimerVisible = G.foodTimerRunning
+        TEB.RebuildBar()
     end
-    if timeLeftInSeconds < (food_Danger * 60) then
-        foodColor = "|cff8000"
-        iconColor = "warning"
-    end    
-    if timeLeftInSeconds < (food_Danger * 60) then
-        foodColor = "|cff0000"
-        iconColor = "danger"
-    end 
-
-    if iconIndicator["Food Buff Timer"] and foodColor ~= "normal" then
-        TEB.SetIcon("Food Buff Timer", iconColor)
-    else
-        TEB.SetIcon("Food Buff Timer", "normal")
-    end
-    
-    --[[
-    if foodTimerRunning and not foodTimerVisible then
-        foodTimerVisible = true
-        d("foodbuff")
-        TEB:RebuildBar()
-    end
-    if not foodTimerRunning and foodTimerVisible then
-        foodTimerVisible = false
-        d("foodbuff")
-        TEB:RebuildBar()
-    end 
-    ]]      
-        
-    foodTooltip = TEB.ConvertSeconds(food_DisplayPreference, timeLeftInSeconds)
-    food = foodColor..foodTooltip 
-
-    mundus = "None"
+    foodTooltip = TEB.ConvertSeconds(settings.food.DisplayPreference, timeLeftInSeconds)
+    G.food = foodColor..foodTooltip
+    G.mundus = "None"
     numBuffs = GetNumBuffs("player")
-    if numBuffs ~=nil then
+    if numBuffs then
         for i = 0, numBuffs, 1 do
             buffName,timeStarted,timeEnding,buffSlot,stackCount,textureName, buffType, effectType, abilityType, statusEffectType,abilityId,canClickOff = GetUnitBuffInfo("player", i)
-             if textureName and textureName ~= "" and PlainStringFind(textureName,"ability_mundusstones_") then
+            if textureName and textureName ~= "" and
+                PlainStringFind(textureName,"ability_mundusstones_") then
                 local mundusBuff = ZO_CachedStrFormat("<<C:1>>", textureName)
-                local mundusID = string.sub(string.sub(mundusBuff,-7),1,3)
-                mundus = mundusStoneReference[mundusID]
+                G.mundus = tonumber(string.sub(mundusBuff,-7, -5))
             end
             if textureName and textureName ~= "" and PlainStringFind(textureName,"_vampire_infection_") then
-                if not isVampire then
-                    isVampire = true
-                    TEB:RebuildBar() 
-                end 
-                timeEnding = math.floor(timeEnding) * 1000
-                timeStarted = math.floor(timeStarted)
-                vampireStage = string.match(buffName,"%d+")
+                if not G.isVampire then
+                    G.isVampire = true
+                    TEB.RebuildBar()
+                end
+                local timeEnding = math.floor(timeEnding) * 1000
+                local timeStarted = math.floor(timeStarted)
+                local vampireStage = string.match(buffName,"%d+")
+                local stage = tonumber(vampireStage)
                 local buffTimeLeft = math.floor((timeEnding - GetFrameTimeMilliseconds()) / 1000)
-                vampireTimeLeft = TEB.ConvertSeconds(vampirism_TimerPreference, buffTimeLeft)
+                local vampireTimeLeft = TEB.ConvertSeconds(settings.vampirism.TimerPreference, buffTimeLeft)
                 local skillIndex = 0
                 local SkillLinesCount = GetNumSkillLines(SKILL_TYPE_WORLD)
                 local nextRankXP
@@ -4452,57 +2613,49 @@ function TEB.buffs()
                         if skillLineData then
                             _, lineLevel = skillLineData:GetName(), skillLineData:GetCurrentRank()
                         end
-                    end                    
+                    end
                 end
                 vampireLevel = lineLevel
                 --vampireLevelPercent = round((currentXP / nextRankXP)*100, 1)
                 --vampireLevelPercentLeft = round(100 - vampireLevelPercent, 1)
-                if vampireStage == "1" then vampireTimeLeft = "--" end
+                if stage == 1 then vampireTimeLeft = "--" end
                 local textColor = "|ccccccc"
                 iconColor = "normal"
-                local stage = tonumber(vampireStage)
-                if vampirism_StageColor[stage] == "green" then 
-                    textColor = "|c00ff00"
-                    iconColor = "good"
+                local s = settings.vampirism.StageColor[stage]
+                if s ~= "normal" then
+                    textColor, iconColor = unpack(Vampirism_StageColors[s])
                 end
-                if vampirism_StageColor[stage] == "yellow" then
-                    textColor = "|cffff00"
-                    iconColor = "caution"
+                G.vampireText = textColor .. vampireTimeLeft
+                if settings.vampirism.DisplayPreference == "Stage (Timer)" then
+                    G.vampireText = string.format("%s%s (%s)", textColor, vampireStage, vampireTimeLeft)
                 end
-                if vampirism_StageColor[stage] == "orange" then
-                    textColor = "|cff8000"
-                    iconColor = "warning"
-                end
-                if vampirism_StageColor[stage] == "red" then
-                    textColor = "|cff0000"
-                    iconColor = "danger"
-                end
-                vampireText = textColor..vampireTimeLeft
-                if vampirism_DisplayPreference == "Stage (Timer)" then
-                    vampireText = textColor..vampireStage.." ("..vampireTimeLeft..")"
-                end
-                TEB.SetIcon("Vampirism", iconColor)    
-                vampTooltipRight = textColor..vampireStage.."\n|ccccccc"..vampireTimeLeft
+                TEB.SetIcon("Vampirism", iconColor)
+                vampTooltipRight = string.format("%s%s\n|ccccccc%s", textColor, vampireStage, vampireTimeLeft)
            end
         end
     end
 
 end
 
-------------------------------------------------------
--- Bounty/Heat Timer
-------------------------------------------------------
+local bountyColors = {
+    yellow = { "|cffff00", "caution", },
+    orange = { "|cff8000", "warning", },
+    red =    { "|cff0000", "danger", },
+}
+
 function TEB.bounty()
+    local infamyLevels = {
+        [INFAMY_THRESHOLD_DISREPUTABLE] = { "Disreputable", settings.bounty.warning, },
+        [INFAMY_THRESHOLD_NOTORIOUS] = { "Notorious", settings.bounty.danger, },
+        [INFAMY_THRESHOLD_FUGITIVE] = { "Fugitive", settings.bounty.critical, },
+    }
+    local bountyColor, iconColor
     local bountyTime = GetSecondsUntilBountyDecaysToZero()
     local heatTime = GetSecondsUntilHeatDecaysToZero()
-    if bountyTime >0 or heatTime > 0 then 
-        bountyTimerRunning = true
-    else
-        bountyTimerRunning = false
-    end
+    G.bountyTimerRunning =  bountyTime > 0 or heatTime > 0
     local longestTime = heatTime
     if bountyTime > heatTime then longestTime = bountyTime end
-    if bounty_Good == "normal" then
+    if settings.bounty.good == "normal" then
         bountyColor = "|ccccccc"
         iconColor = "normal"
     else
@@ -4512,3104 +2665,2041 @@ function TEB.bounty()
     local infamyAmount =  GetInfamy()
     local infamy = GetInfamyLevel(infamyAmount)
     infamyText = "Upstanding"
-    if infamy == INFAMY_THRESHOLD_DISREPUTABLE then
-        infamyText = "Disreputable"
-        if bounty_Warning == "yellow" then
-            bountyColor = "|cffff00"
-            iconColor = "caution"
-        end
-        if bounty_Warning == "orange" then
-            bountyColor = "|cff8000"
-            iconColor = "warning"
-        end
-        if bounty_Warning == "red" then
-            bountyColor = "|cff0000"
-            iconColor = "danger"
-        end
-    end
-    if infamy == INFAMY_THRESHOLD_NOTORIOUS then
-        infamyText = "Notorious"
-        if bounty_Danger == "yellow" then
-            bountyColor = "|cffff00"
-            iconColor = "caution"
-        end
-        if bounty_Danger == "orange" then
-            bountyColor = "|cff8000"
-            iconColor = "warning"
-        end
-        if bounty_Danger == "red" then
-            bountyColor = "|cff0000"
-            iconColor = "danger"
-        end
-    end
-    if infamy == INFAMY_THRESHOLD_FUGITIVE then
-        infamyText = "Fugitive"
-        if bounty_Critical == "yellow" then
-            bountyColor = "|cffff00"
-            iconColor = "caution"
-        end
-        if bounty_Critical == "orange" then
-            bountyColor = "|cff8000"
-            iconColor = "warning"
-        end
-        if bounty_Critical == "red" then
-            bountyColor = "|cff0000"
-            iconColor = "danger"
-        end
+    if infamyLevels[infamy] then
+        infamyText, bountyLevel = unpack(infamyLevels[infamy])
+        bountyColor, iconColor = unpack(bountyColors[bountyLevel])
     end
     bountyPayoff = GetReducedBountyPayoffAmount()
-    bountyTimerText = TEB.ConvertSeconds(bounty_DisplayPreference, bountyTime)
-    heatTimerText = TEB.ConvertSeconds(bounty_DisplayPreference, heatTime)
+    bountyTimerText = TEB.ConvertSeconds(settings.bounty.DisplayPreference, bountyTime)
+    heatTimerText = TEB.ConvertSeconds(settings.bounty.DisplayPreference, heatTime)
     infamyText = bountyColor..infamyText
-    bounty = bountyColor..TEB.ConvertSeconds(bounty_DisplayPreference, longestTime)
-    TEB.SetIcon("Bounty Timer", iconColor)
-    if bountyTimerRunning and not bountyTimerVisible then
-        bountyTimerVisible = true
-        TEB:RebuildBar()
+    G.bounty = bountyColor..TEB.ConvertSeconds(settings.bounty.DisplayPreference, longestTime)
+    TEB.SetIcon("Bounty/Heat Timer", iconColor)
+    if G.bountyTimerRunning and not G.bountyTimerVisible then
+        -- turn on
+        G.bountyTimerVisible = true
+        TEB.RebuildBar()
+    elseif not G.bountyTimerRunning and G.bountyTimerVisible then
+        -- turn off
+        G.bountyTimerVisible = false
+        TEB.RebuildBar()
     end
-    if not bountyTimerRunning and bountyTimerVisible then
-        bountyTimerVisible = false
-        TEB:RebuildBar()
-    end  
 end
 
-------------------------------------------------------
--- Mail
-------------------------------------------------------
-function TEB.mail(rebuild)
-    local rebuild = rebuild or true
-
-    -- EVENT_MAIL_NUM_UNREAD_CHANGED triggers twice after loading. The first
-    -- time it's triggered, it returns 0 for unread mail. The 2nd time it's
-    -- triggered it returns the actual number of unread mail. This causes 
-    -- TEB:RebuildBar to be called twice because mail was 0 and then !0.
-
-    -- The following block of code checks if new_unread_mail is 0. Since you
-    -- can only read 1 mail at a time, it doesn't make sense for new_unread_mail
-    -- to be 0 if unread_mail wasn't 1. If new_unread_mail is 0 and unread_mail 
-    -- is not 1, it will return and skip the rest of the function. The only 
-    -- issue is that this function will always rebuild the bar twice when
-    -- unread_mail is 1.
-    --d("Unread mail " .. string.format(unread_mail))
-    new_unread_mail = GetNumUnreadMail()
-    --d("New unread mail " .. string.format(new_unread_mail))
-    if new_unread_mail == 0 and unread_mail ~= 1 then
-        return
-    end
-    unread_mail = new_unread_mail
-
-    if unread_mail > 0 then
-        if not mailUnread then
-            mailUnread = true
-            if rebuild then TEB:RebuildBar() end
-        end
-    else
-        if mailUnread then
-            mailUnread = false
-            if rebuild then TEB:RebuildBar() end
-        end
+function TEB.mail()
+    G.unread_mail = GetNumUnreadMail()
+    if not G.mailUnread and G.unread_mail > 0  then
+        G.mailUnread = true
+        TEB.RebuildBar()
+    elseif G.mailUnread and G.unread_mail == 0 then
+        G.mailUnread = false
+        TEB.RebuildBar()
     end
 
-    if unread_mail > 0 then
-        if mail_Good and iconIndicator["Unread Mail"] then
+    if G.unread_mail > 0 then
+        if settings.mail.good and settings.iconIndicator["Unread Mail"] then
             TEB.SetIcon("Unread Mail", "good")
         else
-            TEB.SetIcon("Unread Mail", "normal")        
+            TEB.SetIcon("Unread Mail", "normal")
         end
     end
-
-    if mail_Good and unread_mail > 0 then unread_mail = "|c00e900"..string.format(unread_mail) end    
-                
-    if gadgetText["Unread Mail"] then
-        TEBTopMail:SetText(unread_mail)
-    else
-        TEBTopMail:SetText("")
+    if settings.mail.good and G.unread_mail > 0 then
+        G.unread_mail = string.format("|c00e900%s", G.unread_mail)
     end
-end
-
-function TEB.mailChecker()
 
 end
 
-------------------------------------------------------
--- UpdateDeaths
-------------------------------------------------------
 function TEB.UpdateDeaths()
-    if pvpMode then
-        deaths = deaths + 1
+    if G.pvpMode then
+        G.deaths = G.deaths + 1
     end
 end
 
+local soulgemToolTips = {
+    ["total filled/empty"] = "Total filled / empty soul gems.",
+    ["total filled (crown)/empty"] = "Total filled (crown filled) / empty soul gems.",
+    ["total filled (empty)"] = "Total filled (empty) soul gems.",
+    ["normal filled/crown/empty"] = "Normal filled / crown / empty soul gems.",
+    ["total filled"] = "Total filled soul gems.",
+    ["normal filled"] = "Normal filled soul gems.",
+}
 
-------------------------------------------------------
--- soulgems
-------------------------------------------------------
+local soulgemsFormats = {
+    ["total filled/empty"] =  "<<1>>|ccccccc/<<4>>",
+    ["total filled (crown)/empty"] = "<<1>> |ccccccc(<<3>>|ccccccc)/<<4>>",
+    ["total filled (empty)"] = "<<1>>|ccccccc(<<4>>)",
+    ["normal filled/crown/empty"] = "<<2>>|ccccccc/<<3>>|ccccccc/<<4>>",
+    ["total filled"] = "<<1>>",
+    ["normal filled"] = "<<2>>",
+}
+
+local ttFormats = {
+
+    ["lockpicks"] = "<<1>>",
+    ["total stolen"] = "<<2>>",
+    ["total stolen (lockpicks)"] = "<<2>> (<<1>>)",
+    ["stolen treasures/stolen goods"] = "<<3>>/<<4>>",
+    ["stolen treasures/stolen goods (lockpicks)"] = "<<3>>/<<4>> (<<1>>)",
+    ["stolen treasures/fence_remaining stolen goods/launder_remaining"] = "<<3>>/<<7>><<5>>|ccccccc <<4>>/<<8>><<6>>",
+    ["stolen treasures/fence_remaining stolen goods/launder_remaining (lockpicks)"] = "<<3>>/<<7>><<5>>|ccccccc <<4>>/<<8>><<6>>|ccccccc (<<1>>)",
+    ["stolen treasures/stolen goods fence_remaining/launder_remaining"] = "<<3>>/<<4>> <<7>><<5>>|ccccccc/<<8>><<6>>",
+    ["stolen treasures/stolen goods fence_remaining/launder_remaining (lockpicks)"] = "<<3>>/<<4>> <<7>><<5>>|ccccccc/<<8>><<6>>|ccccccc (<<1>>)",
+}
+
+local itemsInSlot = {
+    [33271] = "normal_filled",
+    [61080] = "crown_filled",
+    [33265] = "empty",
+    [44874] = "pettyRepairKit",
+    [44875] = "minorRepairKit",
+    [44876] = "lesserRepairKit",
+    [44877] = "commonRepairKit",
+    [44878] = "greaterRepairKit",
+    [44879] = "grandRepairKit",
+    [61079] = "crownRepairKit",
+    -- to initialize G[n] in the same loop
+    ["treasures"]       = "treasures" ,
+    ["not_treasures"]   = "not_treasures",
+    ["stolenSlots"] =   "stolenSlots",
+}
+
 function TEB.CalculateBagItems()
-    soulGemsToolTipLeft = ""
-    soulGemsToolTipRight = ""
+    G.bagUsedSlots, G.bagMaxSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
 
-    total_filled = 0
-    normal_filled = 0
-    crown_filled = 0
-    empty = 0
-    lockpicks = 0
-    treasures = 0
-    not_treasures = 0
-    fence = 0
-    launder = 0
-    stolenSlots = 0
-    pettyRepairKit = 0
-    minorRepairKit = 0
-    lesserRepairKit = 0
-    commonRepairKit = 0
-    greaterRepairKit = 0
-    grandRepairKit = 0
-    crownRepairKit = 0
-    totalRepairKits = 0
+    for k, n in pairs(itemsInSlot) do
+        G[n] = 0
+    end
 
-    nf, cf, e, lockpicks, treasures, not_treasures, stolenSlots, pettyRepairKit, minorRepairKit, lesserRepairKit, commonRepairKit, greaterRepairKit, grandRepairKit, crownRepairKit = CountItemsInBag(INVENTORY_BACKPACK)
-    
-    totalRepairKits = pettyRepairKit + minorRepairKit + lesserRepairKit + commonRepairKit + greaterRepairKit + grandRepairKit + crownRepairKit
-    
-    total_filled = nf + cf
-    normal_filled = nf
-    crown_filled = cf
-    empty = e
-    total_stolen = treasures + not_treasures
-    
-    local crown_color = "|ccccccc"
-    if soulgems_ColorCrown then
-        if crown_filled == 0 then
-            crown_color = "|ccc0000"
-        else
-            crown_color = "|cffdf00"
-        end
-    end
-    local total_color = "|ccccccc"
-    if soulgems_ColorNormal then
-        if total_filled == 0 then
-            total_color = "|ccc0000"
-        else
-            total_color = "|c9900ff"
-        end
-    end
-    local normal_color = "|ccccccc"
-    if soulgems_ColorNormal then
-        if normal_filled == 0 then
-            normal_color = "|ccc0000"
-        else
-            normal_color = "|cbb00ff"
-        end
-    end
-    local empty_color = "|ccccccc"
-    if soulgems_ColorNormal then
-        if empty == 0 then
-            empty_color = "|ccc0000"
-        else
-            empty_color = "|c8800ff"
-        end
-    end        
-
-    soulGemsToolTipLeft = soulGemsToolTipLeft.."\n"..normal_color.."Regular Filled Soul Gems"
-    soulGemsToolTipLeft = soulGemsToolTipLeft.."\n"..crown_color.."Crown Soul Gems"
-    soulGemsToolTipLeft = soulGemsToolTipLeft.."\n"..empty_color.."Empty Soul Gems"
-    
-    soulGemsToolTipRight = soulGemsToolTipRight.."\n"..normal_color..string.format(normal_filled)
-    soulGemsToolTipRight = soulGemsToolTipRight.."\n"..crown_color..string.format(crown_filled)
-    soulGemsToolTipRight = soulGemsToolTipRight.."\n"..empty_color..string.format(empty)
-
-    if soulgems_DisplayPreference == "total filled/empty" then
-        soulGemInfo = total_color..string.format(total_filled).."|ccccccc/"..empty_color..string.format(empty)
-    end
-    if soulgems_DisplayPreference == "total filled (crown)/empty" then
-        soulGemInfo = total_color..string.format(total_filled)..crown_color.." ("..string.format(crown_filled)..")|ccccccc/"..empty_color..string.format(empty)
-    end
-    if soulgems_DisplayPreference == "total filled (empty)" then
-        soulGemInfo = total_color..string.format(total_filled)..empty_color.." ("..string.format(empty)..")"
-    end
-    if soulgems_DisplayPreference == "regular filled/crown/empty" then
-        soulGemInfo = normal_color..string.format(normal_filled).."|ccccccc/"..crown_color..string.format(crown_filled).."|ccccccc/"..empty_color..string.format(empty)
-    end            
-    if soulgems_DisplayPreference == "total filled" then
-        soulGemInfo = total_color..string.format(total_filled)
-    end
-    if soulgems_DisplayPreference == "regular filled" then
-        soulGemInfo = total_color..string.format(normal_filled)
-    end
-    
-    totalSells, sellsUsed, resetTimeSeconds = GetFenceSellTransactionInfo()
-    fence = totalSells - sellsUsed
-    totalLaunders, laundersUsed, resetTimeSeconds = GetFenceLaunderTransactionInfo()
-    launder = totalLaunders - laundersUsed
-    
-    local fenceColor = "|ccccccc"
-    if fence <= tt_Warning then
-        fenceColor = "|cffdf00"
-    end
-    if fence <= tt_Danger then
-        fenceColor = "|ccc0000"
-    end
-    
-    local launderColor = "|ccccccc"
-    if launder <= tt_Warning then
-        launderColor = "|cffdf00"
-    end
-    if launder <= tt_Danger then
-        launderColor = "|ccc0000"
-    end    
-    
-    local stolenInvPerc = (stolenSlots/bagMaxSlots)*100
-    
-    local invColor = "|ccccccc"
-    
-    if tt_DisplayPreference == "lockpicks" then
-        tt = string.format(lockpicks)
-    end
-    if tt_DisplayPreference == "total stolen" then
-        tt = invColor..string.format(total_stolen)
-    end
-    if tt_DisplayPreference == "total stolen (lockpicks)" then
-        tt = invColor..string.format(total_stolen).."|ccccccc ("..string.format(lockpicks)..")"
-    end
-    if tt_DisplayPreference == "stolen treasures/stolen goods" then
-        tt = invColor..string.format(treasures).."|ccccccc/"..string.format(not_treasures)
-    end
-    if tt_DisplayPreference == "stolen treasures/stolen goods (lockpicks)" then
-        tt = invColor..string.format(treasures).."|ccccccc/"..string.format(not_treasures).."|ccccccc ("..string.format(lockpicks)..")"
-    end
-    if tt_DisplayPreference == "stolen treasures/fence_remaining stolen goods/launder_remaining" then
-        tt = invColor..string.format(treasures).."|ccccccc/"..fenceColor..string.format(fence).."|ccccccc "..invColor..string.format(not_treasures).."|ccccccc/"..launderColor..string.format(launder)
-    end
-    if tt_DisplayPreference == "stolen treasures/fence_remaining stolen goods/launder_remaining (lockpicks)" then
-        tt = invColor..string.format(treasures).."|ccccccc/"..fenceColor..string.format(fence).."|ccccccc "..invColor..string.format(not_treasures).."|ccccccc/"..launderColor..string.format(launder).."|ccccccc ("..string.format(lockpicks)..")"
-    end
-    if tt_DisplayPreference == "stolen treasures/stolen goods fence_remaining/launder_remaining" then
-        tt = invColor..string.format(treasures).."|ccccccc/"..string.format(not_treasures).." "..fenceColor..string.format(fence).."|ccccccc/"..launderColor..string.format(launder)
-    end    
-    if tt_DisplayPreference == "stolen treasures/stolen goods fence_remaining/launder_remaining (lockpicks)" then
-        tt = invColor..string.format(treasures).."|ccccccc/"..string.format(not_treasures).." "..fenceColor..string.format(fence).."|ccccccc/"..launderColor..string.format(launder).."|ccccccc ("..string.format(lockpicks)..")"
-    end
-    
-end
-
-function CountItemsInBag(bagId)
-    local filled = 0
-    local crown_filled = 0
-    local empty = 0
-    local treasures = 0
-    local not_treasures = 0
-    local stolenSlots = 0
-    local pettyRepairKit = 0
-    local minorRepairKit = 0
-    local lesserRepairKit = 0
-    local commonRepairKit = 0
-    local greaterRepairKit = 0
-    local grandRepairKit = 0
-    local crownRepairKit = 0
-    
-    local usedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(bagId)
-    for slotIndex=0, numSlots-1 do
-        local itemLink = GetItemLink( bagId, slotIndex )
+    for slotIndex = 0, G.bagMaxSlots-1 do
+        local itemLink = GetItemLink( INVENTORY_BACKPACK, slotIndex )
         local itemType, specializedItemType = GetItemLinkItemType( itemLink )
-        itemInSlot = GetItemLinkItemId( itemLink )
+        local itemId = GetItemLinkItemId( itemLink )
+        local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType,
+            itemStyleId, itemQuality = GetItemInfo(INVENTORY_BACKPACK, slotIndex)
+        local key
         if IsItemLinkStolen( itemLink ) then
-            stolenSlots = stolenSlots + 1
-            if itemType == ITEMTYPE_TREASURE then 
-               local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex) 
-               treasures = treasures + stack
-            end
-            if itemType ~= ITEMTYPE_TREASURE then
-               local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-               not_treasures = not_treasures + stack
-            end
+            G.stolenSlots = G.stolenSlots + 1
+            key = itemType == ITEMTYPE_TREASURE and "treasures" or "not_treasures"
+        else
+            key = itemsInSlot[itemId]
         end
-        --local itemInSlot = GetItemId( bagId, slotIndex )
-        if itemInSlot == 33271 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            filled = filled + stack
-        end
-        if itemInSlot == 61080 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            crown_filled = crown_filled + stack
-        end
-        if itemInSlot == 33265 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            empty = empty + stack
-        end
-        if itemInSlot == 44874 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            pettyRepairKit = pettyRepairKit + stack
-        end
-        if itemInSlot == 44875 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            minorRepairKit = minorRepairKit + stack
-        end
-        if itemInSlot == 44876 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            lesserRepairKit = lesserRepairKit + stack
-        end
-        if itemInSlot == 44877 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            commonRepairKit = commonRepairKit + stack
-        end
-        if itemInSlot == 44878 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            greaterRepairKit = greaterRepairKit + stack
-        end
-        if itemInSlot == 44879 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            grandRepairKit = grandRepairKit + stack
-        end
-        if itemInSlot == 61079 then
-            local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, itemQuality = GetItemInfo(bagId, slotIndex)
-            crownRepairKit = crownRepairKit + stack
+        if key then
+            -- d(zo_strformat("<<1>> <<2>> <<3>>", itemId, key, stack))
+            G[key] = G[key] + stack
         end
     end
-    
-    lockpicks = GetNumLockpicksLeft()
 
-    return filled, crown_filled, empty, lockpicks, treasures, not_treasures, stolenSlots, pettyRepairKit, minorRepairKit, lesserRepairKit, commonRepairKit, greaterRepairKit, grandRepairKit, crownRepairKit
-end
+    -- repair kits
+    G.totalRepairKits = G.pettyRepairKit + G.minorRepairKit + G.lesserRepairKit +
+        G.commonRepairKit + G.greaterRepairKit + G.grandRepairKit + G.crownRepairKit
 
---====================================================
---====================================================
--- Asynchronous tasks
---====================================================
---====================================================
-
-------------------------------------------------------
--- HideBarFade. Controls bar fade in and out.
-------------------------------------------------------
-function TEB.HideBarFade()
-    if hideBar and barAlpha > 0 then
-        barAlpha = barAlpha - .2
-        if barAlpha < 0 then 
-            barAlpha = 0 
-            EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
-        end
-        TEBTop:SetAlpha(barAlpha)
-    elseif not hideBar and barAlpha < 1 then
-        barAlpha = barAlpha + .2
-        if barAlpha > 1 then 
-            barAlpha = 1 
-            EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
-        end
-        TEBTop:SetAlpha(barAlpha)
+    -- soul gems
+    G.total_filled = G.normal_filled + G.crown_filled
+    local crown_color, total_color, normal_color, empty_color
+    if settings.soulgems.Color then
+        crown_color = crown_filled == 0 and "|ccc0000" or "|cffdf00"
+        total_color = total_filled == 0 and "|ccc0000" or "|c8080ff"
+        normal_color = normal_filled == 0 and "|ccc0000" or "|cbb00ff"
+        empty_color = empty == 0 and "|ccc0000" or "|c8800ff"
     else
-        EVENT_MANAGER:UnregisterForUpdate("TEBHideBarFade")
+        crown_color = "|ccccccc"
+        total_color = "|ccccccc"
+        normal_color = "|ccccccc"
+        empty_color = "|ccccccc"
     end
+    local soulgemStrings = {
+        total_color .. G.total_filled,
+        normal_color .. G.normal_filled,
+        crown_color .. G.crown_filled,
+        empty_color .. G.empty,
+    }
+    local fmt = soulgemsFormats[settings.soulgems.DisplayPreference]
+    G.soulGemInfo = zo_strformat(fmt, unpack(soulgemStrings))
+    G.soulGemsToolTipLeft =
+        string.format("%s\n%sTotal filled\n%sRegular filled\n%sCrown Soul Gems\n%sEmpty",
+        soulgemToolTips[settings.soulgems.DisplayPreference] or "",
+        total_color, normal_color, crown_color, empty_color)
+    G.soulGemsToolTipRight = "\n" .. table.concat( soulgemStrings, "\n" )
+
+    -- thieves' tools
+    G.lockpicks = GetNumLockpicksLeft()
+    G.total_stolen = G.treasures + G.not_treasures
+    G.totalSells, G.sellsUsed, _ = GetFenceSellTransactionInfo()
+    local fence = G.totalSells - G.sellsUsed
+    G.totalLaunders, G.laundersUsed, _ = GetFenceLaunderTransactionInfo()
+    local launder = G.totalLaunders - G.laundersUsed
+
+    local fenceColor =
+        fence <= settings.tt.danger and "|ccc0000" or
+        fence <= settings.tt.warning and "|cffdf00" or "|ccccccc"
+    local launderColor =
+        launder <= settings.tt.danger and "|ccc0000" or
+        launder <= settings.tt.warning and "|cffdf00" or "|ccccccc"
+
+    local stolenInvPerc = 100 * G.stolenSlots / G.bagMaxSlots
+    fmt = ttFormats[settings.tt.DisplayPreference]
+    G.tt = zo_strformat(fmt,
+        G.lockpicks, G.total_stolen, G.treasures, G.not_treasures,
+        fence, launder, fenceColor, launderColor)
 end
 
-------------------------------------------------------
--- CombatColorFade. Controls combat color/indicator fade in and out.
-------------------------------------------------------
-function TEB.CombatColorFade()
-    if inCombat and combatAlpha < combatOpacity/100 then
-        combatAlpha = combatAlpha + .2
-        if combatAlpha > combatOpacity/100 then
-            combatAlpha = combatOpacity
-            EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
-        end
-        TEBTopCombatBG:SetAlpha(combatAlpha)
-    elseif not inCombat and combatAlpha > 0 then
-        combatAlpha = combatAlpha - .2
-        if combatAlpha < 0 then
-            combatAlpha = 0
-            EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
-        end
-        TEBTopCombatBG:SetAlpha(combatAlpha)
-    else
-        EVENT_MANAGER:UnregisterForUpdate("TEBCombatColorFade")
-    end
-end
+-- called from XML
 
---====================================================
---====================================================
--- OnUpdate
---====================================================
---====================================================
 function TEB.OnUpdate()
-    if refreshTimer > 19 then
-        TEB.enlightenment()
+
+    if not G.addonInitialized or not settings then
+        return
+    end
+
+    if G.refreshTimer > 19 then
+        G.refreshTimer = 0
+
+        TEB.balance()
         TEB.skyshards()
+        TEB.bags()
         TEB.mounttimer()
+        TEB.experience()
+        TEB.localTime()
+        TEB.durability()
         TEB.blacksmithing()
         TEB.clothing()
         TEB.woodworking()
         TEB.jewelrycrafting()
-        --TEB.recall()
+        TEB.bank()
+        TEB.latency()
+        TEB.fps()
+        TEB.weaponcharge()
+        TEB.zone()
+        TEB.memory()
+        TEB.recall()
         TEB.pvp()
+        TEB.enlightenment()
+        TEB.mail()
         TEB.buffs()
         TEB.bounty()
+        TEB.AddToMountDatabase(G.characterName)
+        TEB.AddToGoldDatabase(G.characterName)
 
-        
-        if addonInitialized then
-            TEB.AddToMountDatabase(playerName)
-            TEB.AddToGoldDatabase(playerName)
+        for name, gadget in pairs(gadgetReference) do
+            local control, value = gadget[2], gadget[7]
+            local txt = settings.gadgetText[name] and value() or ""
+            control:SetText(txt)
         end
 
-       --gold = "737,011"
-        --lvlText="734"
-        --skyShardsInfo="1/11"      
-        if gadgetText["Mount Timer"] then
-            TEBTopMount:SetText(string.format(mountlbltxt))
-        else
-            TEBTopMount:SetText("")
-        end 
-        if gadgetText["Soul Gems"] then
-            TEBTopSoulGems:SetText(soulGemInfo)
-        else
-            TEBTopSoulGems:SetText("")
-        end   
-        if gadgetText["Sky Shards"] then
-            TEBTopSkyShards:SetText(skyShardsInfo)
-        else
-            TEBTopSkyShards:SetText("")
-        end            
-        if gadgetText["Blacksmithing Research Timer"] then
-            TEBTopResearchBlacksmithing:SetText(blackSmithingInfo)
-        else
-            TEBTopResearchBlacksmithing:SetText("")
-        end           
-        if gadgetText["Woodworking Research Timer"] then
-            TEBTopResearchWoodworking:SetText(woodWorkingInfo)
-        else
-            TEBTopResearchWoodworking:SetText("")
-        end      
-        if gadgetText["Clothing Research Timer"] then
-            TEBTopResearchClothing:SetText(clothingInfo)
-        else
-            TEBTopResearchClothing:SetText("")
-        end      
-        if gadgetText["Jewelry Crafting Research Timer"] then
-            TEBTopResearchJewelryCrafting:SetText(jewelryCraftingInfo)
-        else
-            TEBTopResearchJewelryCrafting:SetText("")
-        end           
-        if gadgetText["Bank Space"] then
-            TEBTopBank:SetText(bankInfo)
-        else
-            TEBTopBank:SetText("")
-        end
-        if gadgetText["Thief's Tools"] then
-            TEBTopTT:SetText(tt)
-        else
-            TEBTopTT:SetText("")
-        end     
-        if gadgetText["Kill Counter"] then
-            TEBTopKills:SetText(killCount)
-        else
-            TEBTopKills:SetText("")
-        end
-        if gadgetText["Food Buff Timer"] then
-            TEBTopFood:SetText(food)
-        else
-            TEBTopFood:SetText("")
-        end    
-        if gadgetText["Mundus Stone"] then
-            TEBTopMundus:SetText(mundus)
-        else
-            TEBTopMundus:SetText("")
-        end  
-        if gadgetText["Bounty Timer"] then
-            TEBTopBounty:SetText(bounty)
-        else
-            TEBTopBounty:SetText("")
-        end  
-        if gadgetText["Vampirism"] then
-            TEBTopVampirism:SetText(vampireText)
-        else
-            TEBTopVampirism:SetText("")
-        end             
-
-        refreshTimer = 0
-        
     end
-    
-    pulseTimer = pulseTimer + 1
-    if pulseTimer > 60 then pulseTimer = 0 end
 
-    if pulseType == "none" then    
-        pulseAlpha = 1   
-    end    
+    G.pulseTimer = (G.pulseTimer + 1) % 60
 
-    if pulseType == "fade in" then    
-        if pulseTimer <= 30 then
-            pulseAlpha = (pulseTimer / 30)
-        end    
-        if pulseTimer > 30 then
-            pulseAlpha = 1
-        end    
-    end 
-    
-    if pulseType == "fade out" then    
-        if pulseTimer <= 30 then
-            pulseAlpha = 1
-        end    
-        if pulseTimer > 30 then
-            pulseAlpha = ((30 - (pulseTimer - 30)) / 30)
-        end    
-    end    
+    if settings.bar.pulseType == "none" then
+        pulseAlpha = 1
+    elseif settings.bar.pulseType == "fade in" then
+        pulseAlpha = G.pulseTimer / 60 
+    elseif settings.bar.pulseType == "fade out" then
+        pulseAlpha =  1 - G.pulseTimer / 60
+    elseif settings.bar.pulseType == "fade in/out" then
+        pulseAlpha = math.abs(30 - G.pulseTimer) / 30
+    elseif settings.bar.pulseType == "slow toggle" then
+        pulseAlpha = G.pulseTimer < 30 and 2 or 3
+    elseif settings.bar.pulseType == "slow blink" then
+        pulseAlpha = G.pulseTimer < 30 and 1 or 0
+    elseif settings.bar.pulseType == "fast blink" then
+        pulseAlpha =  math.floor(G.pulseTimer / 15) % 2 == 1 and 1 or 0
+    end
 
-    if pulseType == "fade in/out" then    
-        if pulseTimer <= 30 then
-            pulseAlpha = (pulseTimer / 30)
-        end    
-        if pulseTimer > 30 then
-            pulseAlpha = ((30 - (pulseTimer - 30)) / 30)
-        end    
-    end        
-
-    if pulseType == "slow blink" then    
-        if pulseTimer <= 30 then
-            pulseAlpha = 1
-        end    
-        if pulseTimer > 30 then
-            pulseAlpha = 0
-        end    
-    end  
-    
-    if pulseType == "slow toggle" then    
-        if pulseTimer <= 30 then
-            pulseAlpha = 2
-        end    
-        if pulseTimer > 30 then
-            pulseAlpha = 3
-        end    
-    end  
-
-    if pulseType == "fast blink" then    
-        if pulseTimer <= 15 then
-            pulseAlpha = 1
-        end    
-        if pulseTimer > 15 and pulseTimer < 30 then
-            pulseAlpha = 0
-        end    
-        if pulseTimer > 30 and pulseTimer < 45 then
-            pulseAlpha = 1
-        end    
-        if pulseTimer > 45 then
-            pulseAlpha = 0
-        end    
-    end 
-        
-    for i=1,#pulseList do
+    for i = 1, #G.pulseList do
         if pulseAlpha < 2 then
-            gadgetReference[pulseList[i]][1]:SetAlpha(pulseAlpha)
-            gadgetReference[pulseList[i]][2]:SetAlpha(pulseAlpha)
-        else
-            --TEB.SetIcon(pulseList[i], "critical")
-        end            
+            gadgetReference[G.pulseList[i]][1]:SetAlpha(pulseAlpha)
+            gadgetReference[G.pulseList[i]][2]:SetAlpha(pulseAlpha)
+        end
     end
-    
-    
 
-    --[[
     local currentTopBarAlpha = ZO_TopBarBackground:GetAlpha()
 
     if currentTopBarAlpha ~= 1 then
-        table.insert(topBarAlphaList, currentTopBarAlpha)
-    end
-    if currentTopBarAlpha == 1 and lastTopBarAlpha ~= currentTopBarAlpha then
-        if topBarAlphaList[1] > topBarAlphaList[#topBarAlphaList] then TEB.ShowBar() end
-        if topBarAlphaList[1] < topBarAlphaList[#topBarAlphaList] then TEB.HideBar() end
-        topBarAlphaList = {}
-    end
-    
-    lastTopBarAlpha = currentTopBarAlpha
-    ]]
-
-    if centerTimer > 60 * 60 * 5 then
-        TEB:UpdateControlsPosition()
+        table.insert(G.topBarAlphaList, currentTopBarAlpha)
+    elseif G.lastTopBarAlpha ~= currentTopBarAlpha then
+        if G.topBarAlphaList[1] > G.topBarAlphaList[#G.topBarAlphaList] then
+            TEB.ShowBar()
+        else
+            TEB.HideBar()
+        end
+        G.topBarAlphaList = {}
     end
 
-    if (ZO_CompassFrame:GetTop() == originalCompassTop and barPosition == "top" and bumpCompass) then
-        TEB:SetBarPosition()
-    end
-    
-    --[[
-    if hideBar  and barAlpha > 0 then
-        barAlpha = barAlpha - .05
-        if barAlpha < 0 then barAlpha = 0 end
-        TEBTop:SetAlpha(barAlpha)
-    end
-    if not hideBar and barAlpha < 1 then
-        barAlpha = barAlpha + .05
-        if barAlpha > 1 then barAlpha = 1 end
-        TEBTop:SetAlpha(barAlpha)
-    end
-    
-    inCombat = IsUnitInCombat("player")
-    
-    local maxAlpha = combatOpacity/100
-    local incrementAlpha = maxAlpha / 20
-    
-    if showCombatOpacity > 0 then
-        showCombatOpacity = showCombatOpacity - 1
-        TEBTopCombatBG:SetAlpha(maxAlpha)
-        combatAlpha = maxAlpha
-    end
-    
-    if inCombat and combatAlpha < maxAlpha and combatIndicator then
-        combatAlpha = combatAlpha + incrementAlpha
-        if combatAlpha > maxAlpha then combatAlpha = maxAlpha end
-        TEBTopCombatBG:SetAlpha(combatAlpha)
-    end
-    if not inCombat and combatAlpha > 0 and showCombatOpacity == 0 then
-        combatAlpha = combatAlpha - incrementAlpha
-        if combatAlpha < 0 then combatAlpha = 0 end
-        TEBTopCombatBG:SetAlpha(combatAlpha)
-    end
-    ]]
-    
-    refreshTimer = refreshTimer + 1
-    centerTimer = centerTimer + 1
-end
+    G.lastTopBarAlpha = currentTopBarAlpha
 
-function TEB.DefragGadgets()
-    for i=#gadgets, 1, -1 do
-        if gadgets[i] == "(None)" or gadgets[i] == "" then
-            table.remove(gadgets, i)
+    if G.centerTimer > 60 * 60 * 5 then
+        TEB.UpdateControlsPosition()
+    end
+
+    if  settings.bar.bumpCompass and settings.bar.Position == "top" and 
+        ZO_CompassFrame:GetTop() == G.original.CompassTop then
+        TEB.SetBarPosition()
+    end
+
+    if G.hideBar then
+        if G.barAlpha > 0 then
+            G.barAlpha = G.barAlpha - .05
+            if G.barAlpha < 0 then G.barAlpha = 0 end
+            TEBTop:SetAlpha(G.barAlpha)
+        end
+    else
+        if G.barAlpha < 1 then
+            G.barAlpha = G.barAlpha + .05
+            if G.barAlpha > 1 then G.barAlpha = 1 end
+            TEBTop:SetAlpha(G.barAlpha)
         end
     end
-    
-    for i=#gadgets+1, #defaultGadgets do
-        gadgets[i] = "(None)"
-        
+
+    G.inCombat = IsUnitInCombat("player")
+
+    local maxAlpha = settings.bar.combatOpacity / 100
+    local incrementAlpha = maxAlpha / 20
+
+    if G.showCombatOpacity > 0 then
+        G.showCombatOpacity = G.showCombatOpacity - 1
+        TEBTopCombatBG:SetAlpha(maxAlpha)
+        G.combatAlpha = maxAlpha
     end
 
-    for i=#gadgets_pvp, 1, -1 do
+    if G.inCombat and G.combatAlpha < maxAlpha and settings.bar.combatIndicator then
+        G.combatAlpha = G.combatAlpha + incrementAlpha
+        if G.combatAlpha > maxAlpha then G.combatAlpha = maxAlpha end
+        TEBTopCombatBG:SetAlpha(G.combatAlpha)
+    end
+    if not G.inCombat and G.combatAlpha > 0 and G.showCombatOpacity == 0 then
+        G.combatAlpha = G.combatAlpha - incrementAlpha
+        if G.combatAlpha < 0 then G.combatAlpha = 0 end
+        TEBTopCombatBG:SetAlpha(G.combatAlpha)
+    end
+
+    G.refreshTimer = G.refreshTimer + 1
+    G.centerTimer = G.centerTimer + 1
+end
+
+-- self refers to the bar
+function TEB.StopMovingBar()
+    local barY = TEBTop:GetTop()
+    settings.bar.Y = barY
+    settings.bar.Position =
+        barY < 72 and "top" or barY > G.screenHeight - 144 and "bottom" or "middle"
+    TEB.SetBarPosition()
+    TEBTop:SetDrawLayer(settings.bar.Layer)
+end
+
+-- called from TEB.Initialize
+
+function TEB.DefragGadgets()
+    local gadgets_pve, gadgets_pvp = settings.gadgets_pve, settings.gadgets_pvp
+
+    for i = #gadgets_pve, 1, -1 do
+        if gadgets_pve[i] == "(None)" or gadgets_pve[i] == "" then
+            table.remove(gadgets_pve, i)
+        end
+    end
+
+    for i = #gadgets_pve + 1, #defaultGadgets do
+        gadgets_pve[i] = "(None)"
+
+    end
+
+    for i = #gadgets_pvp, 1, -1 do
         if gadgets_pvp[i] == "(None)" or gadgets_pvp[i] == "" then
             table.remove(gadgets_pvp, i)
         end
     end
-    
-    for i=#gadgets_pvp+1, #defaultGadgets do
+
+    for i = #gadgets_pvp+1, #defaultGadgets do
         gadgets_pvp[i] = "(None)"
     end
 
-    TEB.savedVariables.gadgets = gadgets
-    TEB.savedVariables.gadgets_pvp = gadgets_pvp
-
-end
-------------------------------------------------------
--- round
-------------------------------------------------------
-function round(val, decimal)
-  if (decimal) then
-    return math.floor( (val * 10^decimal) + 0.5) / (10^decimal)
-  else
-    return math.floor(val+0.5)
-  end
 end
 
-function TEB.fixname(itemName)
-    if string.sub(itemName, -2) == "^p" then itemName = itemName:sub(1, -3) end
-    if string.sub(itemName, -2) == "^n" then itemName = itemName:sub(1, -3) end
-    if string.sub(itemName, -2) == "^f" then itemName = itemName:sub(1, -3) end
-    if string.sub(itemName, -2) == "^m" then itemName = itemName:sub(1, -3) end
-    --itemName = itemName:gsub("([a-zA-Z])(%w*)", function(a,b) return string.upper(a)..b end)
-    return itemName
-end
-
-------------------------------------------------------
--- format tooltip
-------------------------------------------------------
-function FormatTooltip(left, right)
-    TEBTooltipLeft:SetText(left)
-    TEBTooltipRight:SetText(right)
-    if string.len(right) > 0 then
-        TEBTooltipRight:SetWidth(100)
-    else
-        TEBTooltipRight:SetWidth(0)
+function TEB.ConvertArrayToTable(arr)
+    local tbl = { }
+    local pair
+    for _, pair in ipairs(tbl) do
+        local k, v = unpack(pair)
+        tbl[k] = v
     end
-    TEBTooltip:SetHeight(TEBTooltipLeft:GetHeight())
-    TEBTooltip:SetWidth(TEBTooltipLeft:GetWidth() + TEBTooltipRight:GetWidth())
+    return tbl
 end
 
-------------------------------------------------------
--- titlecase
-------------------------------------------------------
-local function titlecase(first, rest)
-   return first:upper()..rest:lower()
+function TEB.GetArrayKeysAndValues(tbl)
+    local keys, values = { }, { }
+    for k, v in ipairs(tbl) do
+        table.insert(keys, k)
+        table.insert(values, v)
+    end
+    return keys, values
 end
 
-------------------------------------------------------
--- CreateSettingsWindow
-------------------------------------------------------
 function TEB.CreateSettingsWindow()
-  panelData = {
-    type = "panel",
-    name = "The Elder Bar",
-    displayName = "The Elder Bar",
-    author = "Eldrni",
-    version = TEB.version,
-    slashCommand = "/teb",
-    registerForRefresh = true,
-    registerForDefaults = true,
-  }
-  
-  choiceList = { "Off", "PvE Bar", "PvP Bar", "Both Bars" }
-  
-  cntrlOptionsPanel = LAM2:RegisterAddonPanel("TEB_ASUGB", panelData)
-  
-  LAM2:RegisterOptionControls("TEB_ASUGB", { 
-      { type = "submenu",
-        name = "General Settings",
-        controls = {
-            {
-                type = "checkbox",
-                name = "Lock the bar",
-                tooltip = "Lock the bar, preventing it from being moved.",
-                default = true,
-                getFunc = function() return TEB.savedVariables.barLocked end,
-                setFunc = function(newValue) 
-                  TEB.LockUnlockBar(newValue)
-                end,
-            },           
-            {
-                type = "checkbox",
-                name = "Lock the gadgets",
-                tooltip = "Lock the bar, preventing it from being moved.",
-                default = true,
-                getFunc = function() return TEB.savedVariables.gadgetsLocked end,
-                setFunc = function(newValue) 
-                  TEB.savedVariables.gadgetsLocked = newValue
-                  gadgetsLocked = newValue
-                  TEB.LockUnlockGadgets(newValue)
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Show lock messages in chat",
-                tooltip = "Show a message in chat each time the bar or gadgets are locked or unlocked.",
-                default = true,
-                getFunc = function() return TEB.savedVariables.lockMessage end,
-                setFunc = function(newValue) 
-                    TEB.savedVariables.lockMessage = newValue
-                    lockMessage = newValue
-                end,
-            }, 
-            {
-                type = "dropdown",
-                name = "Icon Color",
-                tooltip = "Choose how you'd like the icons displayed.",
-                default = "white",
-                choices = {"white", "color"},
-                getFunc = function() return TEB.savedVariables.icons_Mode end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.icons_Mode = newValue
-                    icons_Mode = newValue
-                    TEB:RebuildBar()
-                end,
-              }, 
-              {
-                type = "slider",
-                name = "Draw Layer (0=background, 4=foreground)",
-                tooltip = "Choose which layer on which you'd like the bar drawn. Background is underneath everything, foreground is on top of everything.",
-                min = 0,
-                max = 4,
-                step = 1,
-                default = 0,
-                getFunc = function() return TEB.savedVariables.barLayer end,
-                setFunc = function(newValue) 
-                    TEB.savedVariables.barLayer = newValue
-                    barLayer = newValue    
-                    TEB.SetBarLayer()                
-                end,
-            },                        
-              {
-                      type = "checkbox",
-                      name = "Bump compass down when bar at top",
-                      tooltip = "Bump the compass down if the bar position is set to top. Disable this if other addons will be moving the compass.",
-                      default = true,
-                      warning = "Disabling this will cause UI reload.",
-                      getFunc = function() return TEB.savedVariables.bumpCompass end,
-                      setFunc = function(newValue) 
-                        TEB.savedVariables.bumpCompass = newValue
-                        bumpCompass = newValue
+    panelData = {
+        type = "panel",
+        name = "The Elder Bar Reloaded",
+        displayName = TEB.displayName,
+        author = TEB.author,
+        version = TEB.version,
+        slashCommand = "/teb",
+        registerForRefresh = true,
+        registerForDefaults = true,
+    }
+
+    local visibilityChoiceList = { "Off", "PvE only ", "PvP only", "Both", }
+    local visibilityValueList = { 0, 1, 2, 3, }
+    local lvlChoiceList = { "Character Level", "Character Level/Champion Points", "Champion Points", }
+    local lvlValueList = { 1, 2, 3, }
+    local iconChoiceList = { "Character class icon", "CP icon", }
+    local iconValueList = { 1, 2, }
+
+    local function GadgetGetterFactory(title)
+        return function() return gadgetSettings[title] end
+    end
+
+    local function GadgetSetterFactory(title)
+        return function(newValue)
+                    gadgetSettings[title] = newValue
+                    TEB.UpdateGadgetList(title, newValue)
+                end
+    end
+
+    local function VampireStageFactory(stage)
+        return {
+            type = "dropdown",
+            name = string.format("Stage %d", stage),
+            default = "normal",
+            choices = {"normal", "green", "yellow", "orange", "red"},
+            getFunc = function() return settings.vampirism.StageColor[stage] end,
+            setFunc = function(newValue)
+                settings.vampirism.StageColor[stage] = newValue
+            end,
+        }
+    end
+
+    local function GetterFactory(submenu, option)
+        return function() return settings[submenu][option] end                
+    end
+
+    local function SetterFactory(submenu, option)
+        return function(newValue) settings[submenu][option] = newValue end
+    end
+
+    local function DTCheckBoxFactory(name)
+        return  {
+                    type = "checkbox",
+                    name = "Display Text",
+                    default = true,
+                    tooltip = "Display text for this gadget.",
+                    getFunc = function() return settings.gadgetText[name] end,
+                    setFunc = function(newValue)
+                        settings.gadgetText[name] = newValue
+                    end,
+                }
+    end
+
+    local function GoldLimit(name, high_low, danger_level)
+        return {
+            type = "editbox",
+            textType = TEXT_TYPE_NUMERIC_UNSIGNED_INT,
+            name = name,
+            tooltip = string.format("Enter %d to disable",
+                high_low == "high" and 999999999 or 0),
+            default = high_low == "high" and 999999999 or 0,
+            isMultiline = false,
+            isExtraWide = false,
+            maxChars = 9,
+            getFunc = function() return settings.gold[high_low][danger_level] end,
+            setFunc = function(newValue)
+                settings.gold[high_low][danger_level] = tonumber(newValue)
+            end,
+        }
+    end
+
+    local function SetBangAsPercentageFactory(subsettings, maxItems, bagOrBank)
+        return function(newValue)
+            subsettings.UsageAsPercentage = newValue
+            local newMax = newValue and 100 or maxItems
+            local factor = newValue and 100/maxItems or maxItems/100
+            local slidervalue 
+                
+            for i, w in ipairs({"Caution", "Warning", "Danger", "Critical"}) do
+                local objname = string.format("TEB%sSlider%s", bagOrBank, w)
+                local s = _G[objname]
+                -- controlStructure[n].controls[i], where bag: n=7, bank: n=8, sliders: i=4..7
+                slidervalue = s.data.getFunc()
+                s.data.max = newMax
+                s.slider:SetMinMax(0, newMax)
+                s.maxText:SetText(newMax)
+                s:UpdateValue(false, slidervalue * factor)                            
+            end
+        end
+    end
+
+    -- 0 = Off, 1 = PvE, 2 = PvP, 3 = Both
+    local GadgetVisibilityControls = {
+        { name = "Alliance Points",                 default = 0, },
+        { name = "Bag Space",                       default = 3, },
+        { name = "Bank Space",                      default = 1, },
+        { name = "Blacksmithing Research Timer",    default = 0, },
+        { name = "Bounty/Heat Timer",               default = 1, },
+        { name = "Clock",                           default = 3, },
+        { name = "Clothing Research Timer",         default = 0, },
+        { name = "Durability",                      default = 3, },
+        { name = "Enlightenment",                   default = 0, },
+        { name = "Event Tickets",                   default = 1, },
+        { name = "Experience",                      default = 3, },
+        { name = "Fast Travel Timer",               default = 0, },
+        { name = "Food Buff Timer",                 default = 3, },
+        { name = "FPS",                             default = 3, },
+        { name = "Gold",                            default = 3, },
+        { name = "Kill Counter",                    default = 2, },
+        { name = "Latency",                         default = 3, },
+        { name = "Level",                           default = 3, },
+        { name = "Location",                        default = 1, },
+        { name = "Jewelry Crafting Research Timer", default = 0, },
+        { name = "Memory Usage",                    default = 0, },
+        { name = "Mount Timer",                     default = 1, },
+        { name = "Mundus Stone",                    default = 0, },
+        { name = "Sky Shards",                      default = 0, },
+        { name = "Soul Gems",                       default = 0, },
+        { name = "Tel Var Stones",                  default = 0, },
+        { name = "Thief's Tools",                   default = 0, },
+        { name = "Transmute Crystals",              default = 1, },
+        { name = "Unread Mail",                     default = 3, },
+        { name = "Vampirism",                       default = 3, },
+        { name = "Weapon Charge/Poison",            default = 3, },
+        { name = "Woodworking Research Timer",      default = 0, },
+        { name = "Writ Vouchers",                   default = 0, },
+    }
+
+    -- complete visibility controls
+    for _, gadget in ipairs(GadgetVisibilityControls) do
+        gadget.type = "dropdown"
+        gadget.choices = visibilityChoiceList
+        gadget.choicesValues = visibilityValueList
+        gadget.getFunc = GadgetGetterFactory(gadget.name)
+        gadget.setFunc = GadgetSetterFactory(gadget.name)
+    end
+
+    local controlStructure
+    controlStructure = {
+        {
+            type = "submenu",
+            name = "General Settings",
+            controls = {
+                {
+                    type = "checkbox",
+                    name = "Lock the bar",
+                    tooltip = "Lock the bar, preventing it from being moved.",
+                    default = true,
+                    getFunc = function() return settings.bar.Locked end,
+                    setFunc = function(newValue)
+                        TEB.LockUnlockBar(newValue)
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Lock the gadgets",
+                    tooltip = "Lock the gadgets, preventing them from being moved.",
+                    default = true,
+                    getFunc = function() return settings.bar.gadgetsLocked end,
+                    setFunc = function(newValue)
+                        TEB.LockUnlockGadgets(newValue)
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Show lock messages in chat",
+                    tooltip = "Show a message in chat each time the bar or gadgets are locked or unlocked.",
+                    default = true,
+                    getFunc = GetterFactory("bar", "lockMessage"), setFunc = SetterFactory("bar", "lockMessage"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Icon color",
+                    tooltip = "Choose how you'd like the icons displayed.",
+                    default = "color",
+                    choices = {"monochrome", "color"},
+                    choicesValues = {"white", "color"}, 
+                    getFunc = function() return settings.bar.iconsMode end,
+                    setFunc = function(newValue)
+                        settings.bar.iconsMode  = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "colorpicker",
+                    name = "Custom color",
+                    tooltip = "Choose what color you'd like the icons/text to be.",
+                    default = defaults.bar.customColor,				
+                    getFunc = function() return settings.bar.customColor:UnpackRGBA() end,
+                    setFunc = function(r, g, b, a)
+                        settings.bar.customColor = ZO_ColorDef:New(r, g, b, a)
+                        settings.bar.colors.normal =
+                            "|c" .. settings.bar.customColor:ToHex(r, g, b)
+                        TEB.RebuildBar()
+                    end,
+                   
+                },
+                {
+                    type = "slider",
+                    name = "Draw Layer (0=background, 4=foreground)",
+                    tooltip = "Choose which layer on which you'd like the bar drawn. Background is underneath everything, foreground is on top of everything.",
+                    min = 0,
+                    max = 4,
+                    step = 1,
+                    default = 0,
+                    getFunc = function() return settings.bar.Layer end,
+                    setFunc = function(newValue)
+                        settings.bar.Layer = newValue
+                        TEB.SetBarLayer()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Bump compass down when bar at top",
+                    tooltip = "Bump the compass down if the bar position is set to top. Disable this if other addons will be moving the compass.",
+                    default = true,
+                    warning = "Disabling this will cause UI reload.",
+                    getFunc = function() return settings.bar.bumpCompass end,
+                    setFunc = function(newValue)
+                        settings.bar.bumpCompass = newValue
                         ReloadUI("ingame")
-                        if not bumpCompass then
+                        if not settings.bar.bumpCompass then
                             ReloadUI("ingame")
                         else
-                            TEB:SetBarPosition()
-                            TEB:UpdateControlsPosition()
+                            TEB.SetBarPosition()
+                            TEB.UpdateControlsPosition()
                         end
-                      end,
-              },
-              {
-                      type = "checkbox",
-                      name = "Bump action/resource bars up when bar at bottom",
-                      tooltip = "Bump the action bar, magicka, health, and stamina bars up if the bar position is set to bottom. Disable this if other addons will be moving the action bar or health/stamina/magicka bars.",
-                      default = true,
-                      warning = "Disabling this will cause UI reload.",
-                      getFunc = function() return TEB.savedVariables.bumpActionBar end,
-                      setFunc = function(newValue) 
-                        TEB.savedVariables.bumpActionBar = newValue
-                        bumpActionBar = newValue
-                        if not bumpActionBar then
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Bump action/resource bars up when bar at bottom",
+                    tooltip = "Bump the action bar, magicka, health, and stamina bars up if the bar position is set to bottom. Disable this if other addons will be moving the action bar or health/stamina/magicka bars.",
+                    default = true,
+                    warning = "Disabling this will cause UI reload.",
+                    getFunc = function() return settings.bar.bumpActionBar end,
+                    setFunc = function(newValue)
+                        settings.bar.bumpActionBar = newValue
+                        if not settings.bar.bumpActionBar then
                             ReloadUI("ingame")
                         else
-                            TEB:SetBarPosition()
-                            TEB:UpdateControlsPosition()
+                            TEB.SetBarPosition()
+                            TEB.UpdateControlsPosition()
                         end
-                      end,
-              },
-              {
-                      type = "dropdown",
-                      name = "Gadgets position",
-                      tooltip = "Set The Elder Bar's horizontal position on the screen.",
-                      default = "center",
-                      choices = {"left", "center", "right"},
-                      getFunc = function() return TEB.savedVariables.controlsPosition end,
-                      setFunc = function(newValue) 
-                        TEB.savedVariables.controlsPosition = newValue
-                        controlsPosition = newValue
-                        TEB:UpdateControlsPosition()
-                        
-                      end,
-              },   
-              {
-                type = "dropdown",
-                name = "Font",
-                tooltip = "Set the font used for gadget text.",
-                default = "Univers57",
-                choices = {"Univers57", "Univers67", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
-                getFunc = function() return TEB.savedVariables.font end,
-                setFunc = function(newValue) 
-                  TEB.savedVariables.font = newValue
-                  font = newValue
-                  TEB.ResizeBar()
-                  
-                end,
-            },   
-              {
-                      type = "slider",
-                      name = "Scale",
-                      tooltip = "Set The Elder Bar's scale.",
-                      min = 50,
-                      max = 150,
-                      step = 1,
-                      default = 100,
-                      getFunc = function() return TEB.savedVariables.scale end,
-                      setFunc = function(newValue) 
-                        TEB.savedVariables.scale = newValue
-                        scale = newValue
-                        TEB.ResizeBar()                  
-                      end,
-              },         
-              {
-                      type = "checkbox",
-                      name = "Use thousands separator",
-                      tooltip = "Makes numbers a bit more readable by adding a thousands separator (comma, space, period, etc).",
-                      default = true,
-                      getFunc = function() return TEB.savedVariables.thousandsSeparator end,
-                      setFunc = function(newValue) 
-                        TEB.savedVariables.thousandsSeparator = newValue
-                        thousandsSeparator = newValue
-                      end,
-              },
-              {
-                type = "checkbox",
-                name = "Pulse Gadgets When Critical",
-                tooltip = "Pulse gadgets when the critical theshold is reached.",
-                default = false,
-                getFunc = function() return TEB.savedVariables.pulseWhenCritical end,
-                setFunc = function(newValue) 
-                  TEB.savedVariables.pulseWhenCritical = newValue
-                  pulseWhenCritical = newValue
-                end,
-              },     
-              {
-                      type = "dropdown",
-                      name = "Pulse type",
-                      tooltip = "Choose the type of pulse used when a gadget needs your attention.",
-                      default = "fade in",
-                      choices = {"none", "fade in", "fade out", "fade in/out", "slow blink", "fast blink"},
-                      getFunc = function() return TEB.savedVariables.pulseType end,
-                      setFunc = function(newValue) 
-                        TEB.savedVariables.pulseType = newValue
-                        pulseType = newValue            
-                      end,
-              },                         
-        },
-      },
-      { type = "submenu",
-        name = "Bar Background Settings",
-        controls = {      
-            {
-                type = "dropdown",
-                name = "Background Width",
-                tooltip = "Choose how you'd like the bar background displays, either full screen width or dynamic.",
-                default = "dynamic",
-                choices = {"dynamic", "screen width"},
-                getFunc = function() return TEB.savedVariables.barWidth end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.barWidth = newValue
-                    barWidth = newValue
-                    TEB:SetBarWidth()
-                end,
-            },                 
-            {
-                type = "slider",
-                name = "Bar background opacity",
-                tooltip = "Set The Elder Bar's background opacity.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 100,
-                getFunc = function() return TEB.savedVariables.backdropOpacity end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.backdropOpacity = newValue
-                backdropOpacity = newValue
-                TEB:SetBackdropOpacity()    
-                end,
-            },    
-            {
-                type = "checkbox",
-                name = "Turn the bar red when in combat",
-                tooltip = "Turn the bar red with in combat.",
-                default = true,
-                getFunc = function() return TEB.savedVariables.combatIndicator end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.combatIndicator = newValue
-                combatIndicator = newValue                
-                end,
-            },   
-            {
-                type = "slider",
-                name = "Combat indicator opacity",
-                tooltip = "Set the combat indicator's opacity.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 100,
-                getFunc = function() return TEB.savedVariables.combatOpacity end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.combatOpacity = newValue
-                combatOpacity = newValue
-                showCombatOpacity = 300
-                        
-                end,
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Gadgets position",
+                    tooltip = "Set The Elder Bar's horizontal position on the screen.",
+                    default = "center",
+                    choices = {"left", "center", "right"},
+                    getFunc = function() return settings.bar.controlsPosition end,
+                    setFunc = function(newValue)
+                        settings.bar.controlsPosition = newValue
+                        TEB.UpdateControlsPosition()
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Font",
+                    tooltip = "Set the font used for gadget text.",
+                    default = "Univers57",
+                    choices = {"Univers57", "Univers67", "FTN47", "FTN57", "FTN87", "ProseAntiquePSMT", "Handwritten_Bold", "TrajanPro-Regular"},
+                    getFunc = function() return settings.bar.font end,
+                    setFunc = function(newValue)
+                      settings.bar.font = newValue
+                      TEB.ResizeBar()
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Scale",
+                    tooltip = "Set The Elder Bar's scale.",
+                    min = 50,
+                    max = 150,
+                    step = 1,
+                    default = 100,
+                    getFunc = function() return settings.bar.scale end,
+                    setFunc = function(newValue)
+                      settings.bar.scale = newValue
+                      TEB.ResizeBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Use thousands separator",
+                    tooltip = "Makes numbers a bit more readable by adding a thousands separator (comma, space, period, etc).",
+                    default = true,
+                    getFunc = GetterFactory("bar", "thousandsSeparator"), setFunc = SetterFactory("bar", "thousandsSeparator"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Pulse gadgets when critical",
+                    tooltip = "Pulse gadgets when the critical threshold is reached.",
+                    default = false,
+                    getFunc = GetterFactory("bar", "pulseWhenCritical"), setFunc = SetterFactory("bar", "pulseWhenCritical"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Pulse type",
+                    tooltip = "Choose the type of pulse used when a gadget needs your attention.",
+                    default = "fade in",
+                    choices = {"none", "fade in", "fade out", "fade in/out", "slow blink", "fast blink"},
+                    getFunc = GetterFactory("bar", "pulseType"), setFunc = SetterFactory("bar", "pulseType"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Background width",
+                    tooltip = "Choose how you'd like the bar background displays, either full screen width or dynamic.",
+                    default = "dynamic",
+                    choices = {"dynamic", "screen width"},
+                    getFunc = function() return settings.bar.Width end,
+                    setFunc = function(newValue)
+                        settings.bar.Width = newValue
+                        TEB.SetBarWidth(newValue)
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Bar transparency",
+                    tooltip = "Set The Elder Bar's transparency. Lower number means more transparent.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 100,
+                    getFunc = function() return settings.bar.opacity end,
+                    setFunc = function(newValue)
+                        settings.bar.opacity = newValue
+                        TEB.SetOpacity()
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Bar background transparency",
+                    tooltip = "Set The Elder Bar's background transparency. Lower number means more transparent.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 0,
+                    getFunc = function() return settings.bar.backgroundOpacity end,
+                    setFunc = function(newValue)
+                        settings.bar.backgroundOpacity = newValue
+                        TEB.SetOpacity()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Turn the bar red when in combat",
+                    tooltip = "Turn the bar red with in combat.",
+                    default = true,
+                    getFunc = GetterFactory("bar", "combatIndicator"), setFunc = SetterFactory("bar", "combatIndicator"),
+                },
+                {
+                    type = "slider",
+                    name = "Combat indicator transparency",
+                    tooltip = "Set the combat indicator's transparency. Lower number means more transparent.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 100,
+                    getFunc = function() return settings.bar.combatOpacity end,
+                    setFunc = function(newValue)
+                        settings.bar.combatOpacity = newValue
+                        G.showCombatOpacity = 300
+                    end,
+                },
             },
         },
-      },
-      { type = "submenu",
-        name = "AUTO-HIDE Settings",
-        controls = {                                                                                   
-            {
-                type = "description",
-                text = [[Choose when The Elder Bar will automatically hide and show itself. Hide the bar when:]],
-            },
-            {
-                type = "checkbox",
-                name = "Opening the game menu",
-                default = true,
-                tooltip = "Hide the bar when you open the game menu (crown store, map, character, inventory, skills, etc.",
-                getFunc = function() return TEB.savedVariables.autohide_GameMenu end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.autohide_GameMenu = newValue
-                    autohide_GameMenu = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Conversing with NPCs",
-                default = true,
-                tooltip = "Hide the bar when you talk to any NPC.",
-                getFunc = function() return TEB.savedVariables.autohide_Chatter end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.autohide_Chatter = newValue
-                    autohide_Chatter = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Using a crafting station",
-                default = true,
-                tooltip = "Hide the bar when you use a crafting station.",
-                getFunc = function() return TEB.savedVariables.autohide_Crafting end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.autohide_Crafting = newValue
-                    autohide_Crafting = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Opening your personal bank",
-                default = true,
-                tooltip = "Hide the bar when you open your bank. (only applies if you don't hide the bar when conversing with NPCs)",
-                getFunc = function() return TEB.savedVariables.autohide_Bank end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.autohide_Bank = newValue
-                    autohide_Bank = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Opening your guild's bank",
-                default = true,
-                tooltip = "Hide the bar when you open your guild's bank. (only applies if you don't hide the bar when conversing with NPCs)",
-                getFunc = function() return TEB.savedVariables.autohide_GuildBank end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.autohide_GuildBank = newValue
-                    autohide_GuildBank = newValue
-                end,
-            },
-        },
-    },
-    { type = "submenu",
-    name = "Gadgets",
-    controls = {                                                                                   
         {
-            type = "dropdown",
+            type = "submenu",
+            name = "AUTO-HIDE Settings",
+            controls = {
+                {
+                    type = "description",
+                    text = [[Choose when The Elder Bar will automatically hide and show itself. Hide the bar when:]],
+                },
+                {
+                    type = "checkbox",
+                    name = "Opening the game menu",
+                    default = true,
+                    tooltip = "Hide the bar when you open the game menu (crown store, map, character, inventory, skills, etc.",
+                    getFunc = GetterFactory("autohide", "GameMenu"), setFunc = SetterFactory("autohide", "GameMenu"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Conversing with NPCs",
+                    default = true,
+                    tooltip = "Hide the bar when you talk to any NPC.",
+                    getFunc = GetterFactory("autohide", "Chatter"), setFunc = SetterFactory("autohide", "Chatter"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Using a crafting station",
+                    default = true,
+                    tooltip = "Hide the bar when you use a crafting station.",
+                    getFunc = GetterFactory("autohide", "Crafting"), setFunc = SetterFactory("autohide", "Crafting"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Opening your personal bank",
+                    default = true,
+                    tooltip = "Hide the bar when you open your bank. (only applies if you don't hide the bar when conversing with NPCs)",
+                    getFunc = GetterFactory("autohide", "Bank"), setFunc = SetterFactory("autohide", "Bank"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Opening your guild's bank",
+                    default = true,
+                    tooltip = "Hide the bar when you open your guild's bank. (only applies if you don't hide the bar when conversing with NPCs)",
+                    getFunc = GetterFactory("autohide", "GuildBank"), setFunc = SetterFactory("autohide", "GuildBank"),
+                },
+            },
+        },
+        {
+            type = "submenu",
+            name = "Gadget Visibility",
+            controls = GadgetVisibilityControls,
+        },
+        {
+            type = "header",
+            name = "|cff8040Gadget Options|r",
+
+        },
+        {
+            type = "submenu",
             name = "Alliance Points",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Alliance Points"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Alliance Points"] = newValue
-                TEB.UpdateGadgetList("Alliance Points", newValue)
-            end,
-        },      
+            controls = {
+                DTCheckBoxFactory("Alliance Points"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display alliance points.",
+                    default = "Total Points",
+                    choices = {"Total Points", "Session Points", "Points Per Hour", "Total Points/Points Per Hour", "Session Points/Points Per Hour", "Total Points/Session Points", "Total Points/Session Points (Points Per Hour)", "Total Points/Session Points/Points Per Hour"},
+                    getFunc = GetterFactory("ap", "DisplayPreference"), setFunc = SetterFactory("ap", "DisplayPreference"),
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Bag Space",
-            default = "Both Bars",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Bag Space"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Bag Space"] = newValue
-                TEB.UpdateGadgetList("Bag Space", newValue)
-            end,
-        },   
+            controls = {
+                DTCheckBoxFactory("Bag Space"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display bag space.",
+                    default = "slots used/total slots",
+                    choices = {"slots used/total slots", "used%", "slots free/total slots", "slots free", "free%"},
+                    getFunc = GetterFactory("bag", "DisplayPreference"), setFunc = SetterFactory("bag", "DisplayPreference"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Thresholds as percentage of the total space",
+                    tooltip = "Thresholds are expressed in percents of total space rather than absolute values",
+                    default = true,
+                    getFunc = GetterFactory("bag", "UsageAsPercentage"), 
+                    setFunc = SetBangAsPercentageFactory(settings.bag, 210, "Bag"), 
+                },
+                {
+                    type = "slider",
+                    name = "Caution threshold",
+                    tooltip = "Choose at what percentage bag space will be colored yellow.",
+                    min = 0,
+                    max = settings.bag.UsageAsPercentage and 100 or 210,
+                    step = 1,
+                    default = settings.bag.UsageAsPercentage and 50 or 105,
+                    decimals = 0,
+                    reference = "TEBBagSliderCaution",
+                    getFunc = GetterFactory("bag", "caution"), setFunc = SetterFactory("bag", "caution"),
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold",
+                    tooltip = "Choose at what percentage bag space will be colored orange.",
+                    min = 0,
+                    max = settings.bag.UsageAsPercentage and 100 or 210,
+                    step = 1,
+                    default = settings.bag.UsageAsPercentage and 80 or 168,
+                    decimals = 0,
+                    reference = "TEBBagSliderWarning",
+                    getFunc = GetterFactory("bag", "warning"), setFunc = SetterFactory("bag", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold",
+                    tooltip = "Choose at what percentage bag space will be colored red.",
+                    min = 0,
+                    max = settings.bag.UsageAsPercentage and 100 or 210,
+                    step = 1,
+                    default = settings.bag.UsageAsPercentage and 90 or 189,
+                    decimals = 0,
+                    reference = "TEBBagSliderDanger",
+                    getFunc = GetterFactory("bag", "danger"), setFunc = SetterFactory("bag", "danger"),
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold",
+                    tooltip = "Bag Space used over this percentage will cause the gadget to pulse.",
+                    min = 0,
+                    max = settings.bag.UsageAsPercentage and 100 or 210,
+                    step = 1,
+                    default = settings.bag.UsageAsPercentage and 99 or 209,
+                    decimals = 0,
+                    reference = "TEBBagSliderCritical",
+                    getFunc = GetterFactory("bag", "critical"), setFunc = SetterFactory("bag", "critical"),
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Bank Space",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Bank Space"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Bank Space"] = newValue
-                TEB.UpdateGadgetList("Bank Space", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Bank Space"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display bank space.",
+                    default = "slots used/total slots",
+                    choices = {"slots used/total slots", "used%", "slots free/total slots", "slots free", "free%"},
+                    getFunc = GetterFactory("bank", "DisplayPreference"), setFunc = SetterFactory("bank", "DisplayPreference"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Thresholds as percentage of the total space",
+                    tooltip = "Thresholds are expressed in percents of total space rather than absolute values",
+                    default = false,
+                    getFunc = GetterFactory("bank", "UsageAsPercentage"), 
+                    setFunc = SetBangAsPercentageFactory(settings.bank, 480, "Bank"),
+                },
+                {
+                    type = "slider",
+                    name = "Caution threshold",
+                    tooltip = "Choose at what percentage bank space will be colored yellow.",
+                    min = 0,
+                    max = settings.bank.UsageAsPercentage and 100 or 480,
+                    step = 1,
+                    default = settings.bank.UsageAsPercentage and 50 or 240,
+                    decimals = 0,
+                    reference = "TEBBankSliderCaution",
+                    getFunc = GetterFactory("bank", "caution"), setFunc = SetterFactory("bank", "caution"),
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold",
+                    tooltip = "Choose at what percentage bank space will be colored orange.",
+                    min = 0,
+                    max = settings.bank.UsageAsPercentage and 100 or 480,
+                    step = 1,
+                    default = 360,
+                    decimals = 0,
+                    reference = "TEBBankSliderWarning",
+                    getFunc = GetterFactory("bank", "warning"), setFunc = SetterFactory("bank", "warning"),
+                    reference = "TEBBankSliderWarning",
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold",
+                    tooltip = "Choose at what percentage bank space will be colored red.",
+                    min = 0,
+                    max = settings.bank.UsageAsPercentage and 100 or 480,
+                    step = 1,
+                    default = settings.bank.UsageAsPercentage and 90 or 432,
+                    decimals = 0,
+                    reference = "TEBBankSliderDanger",
+                    getFunc = GetterFactory("bank", "danger"), setFunc = SetterFactory("bank", "danger"),
+                    reference = "TEBBankSliderDanger",
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold",
+                    tooltip = "Bank Space used over this percentage will cause the gadget to pulse.",
+                    min = 0,
+                    max = settings.bank.UsageAsPercentage and 100 or 480,
+                    step = 1,
+                    default = settings.bank.UsageAsPercentage and 99 or 479,
+                    decimals = 0,
+                    reference = "TEBBankSliderCritical",
+                    getFunc = GetterFactory("bank", "critical"), setFunc = SetterFactory("bank", "critical"),
+                    reference = "TEBBankSliderCritical",
+
+                },
+            },
         },
         {
-            type = "dropdown",
-            name = "Blacksmithing Research Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Blacksmithing Research Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Blacksmithing Research Timer"] = newValue
-                TEB.UpdateGadgetList("Blacksmithing Research Timer", newValue)
-            end,
-        },  	
-        {
-            type = "dropdown",
+            type = "submenu",
             name = "Bounty/Heat Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Bounty Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Bounty Timer"] = newValue
-                TEB.UpdateGadgetList("Bounty Timer", newValue)
-            end,
-        },  
+            controls = {
+                DTCheckBoxFactory("Bounty/Heat Timer"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display the bounty timer.",
+                    default = "simple",
+                    choices = {"simple", "short", "exact"},
+                    getFunc = GetterFactory("bounty", "DisplayPreference"), setFunc = SetterFactory("bounty", "DisplayPreference"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Dynamically show timer",
+                    default = true,
+                    tooltip = "Show the icon and timer only when you have a bounty or heat.",
+                    getFunc = function() return settings.bounty.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.bounty.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Upstanding",
+                    default = "normal",
+                    choices = {"normal", "green"},
+                    getFunc = GetterFactory("bounty", "good"), setFunc = SetterFactory("bounty", "good"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Disreputable",
+                    default = "yellow",
+                    choices = {"normal", "yellow", "orange", "red"},
+                    getFunc = GetterFactory("bounty", "warning"), setFunc = SetterFactory("bounty", "warning"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Notorious",
+                    default = "orange",
+                    choices = {"normal", "yellow", "orange", "red"},
+                    getFunc = GetterFactory("bounty", "danger"), setFunc = SetterFactory("bounty", "danger"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Fugitive from Justice",
+                    default = "red",
+                    choices = {"normal", "yellow", "orange", "red"},
+                    getFunc = GetterFactory("bounty", "critical"), setFunc = SetterFactory("bounty", "critical"),
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Clock",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Clock"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Clock"] = newValue
-                TEB.UpdateGadgetList("Clock", newValue)
-            end,
-        },  
+            controls = {
+                DTCheckBoxFactory("Clock"),
+                {
+                    type = "dropdown",
+                    name = "Clock(s) to display",
+                    tooltip = "Choose what to display as clock.",
+                    default = "local time",
+                    choices = {"local time", "UTC time", "ingame time", "local time/ingame time", "local date and time"},
+                    getFunc = GetterFactory("clock", "DisplayPreference"), setFunc = SetterFactory("clock", "DisplayPreference"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Time format",
+                    tooltip = "Choose how to display the time.",
+                    default = "24h",
+                    choices = { "24h", "24h with seconds", "12h", "12h no leading zero", "12h with seconds" },
+                    getFunc = GetterFactory("clock", "Type"), setFunc = SetterFactory("clock", "Type"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Date format",
+                    tooltip = "Choose how to display the date.",
+                    default = "24h",
+                    choices = {"YYYY-MM-DD", "DD.MM.YY", "DD Mon", "DD Month", "Imperial", "Argonian" },
+                    choicesValues = { "%Y-%m-%d", "%d.%m.%y", "%d %b", "%d %B", "%d %BI", "%d %BA", },
+                    getFunc = GetterFactory("clock", "DateFormat"), setFunc = SetterFactory("clock", "DateFormat"),
+                },
+            },
+        },
         {
-            type = "dropdown",
-            name = "Clothing Research Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Clothing Research Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Clothing Research Timer"] = newValue
-                TEB.UpdateGadgetList("Clothing Research Timer", newValue)
-            end,
-        }, 
-        {
-            type = "dropdown",
+            type = "submenu",
             name = "Durability",
-            default = "Both Bars",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Durability"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Durability"] = newValue
-                TEB.UpdateGadgetList("Durability", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Durability"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display durability.",
+                    default = "durability %",
+                    choices = {"durability %", "durability %/repair cost", "repair cost", "durability % (repair kits)", "durability %/repair cost (repair kits)", "repair cost (repair kits)", "most damaged", "most damaged/durability %", "most damaged/durability %/repair cost", "most damaged/repair cost"},
+                    getFunc = GetterFactory("durability", "DisplayPreference"), setFunc = SetterFactory("durability", "DisplayPreference"),
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold (yellow)",
+                    tooltip = "Choose at what percentage durability will be colored yellow.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 50,
+                    getFunc = GetterFactory("durability", "warning"), setFunc = SetterFactory("durability", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "Choose at what percentage durability will be colored red, indicating armor is about to break.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 25,
+                    getFunc = GetterFactory("durability", "danger"), setFunc = SetterFactory("durability", "danger"),
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold (pulse red)",
+                    tooltip = "Durability below this number will cause the gadget to pulse.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 10,
+                    getFunc = GetterFactory("durability", "critical"), setFunc = SetterFactory("durability", "critical"),
+                },
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Enlightenment",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Enlightenment"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Enlightenment"] = newValue
-                TEB.UpdateGadgetList("Enlightenment", newValue)
-            end,
-        }, 
+            controls = {
+                DTCheckBoxFactory("Enlightenment"),
+                {
+                    type = "checkbox",
+                    name = "Hide when enlighenment empty",
+                    default = true,
+                    tooltip = "Automatically hide the Enlighenment gadget, when there is no enlightenment to spend.",
+                    getFunc = function() return settings.enlightenment.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.enlightenment.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold (yellow)",
+                    tooltip = "Enlightenment below this number will be colored yellow.",
+                    min = 0,
+                    max = 1200000,
+                    step = 10000,
+                    default = 200000,
+                    getFunc = GetterFactory("enlightenment", "warning"), setFunc = SetterFactory("enlightenment", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "Enlightenment below this number will be colored red.",
+                    min = 0,
+                    max = 1200000,
+                    step = 10000,
+                    default = 100000,
+                    getFunc = GetterFactory("enlightenment", "danger"), setFunc = SetterFactory("enlightenment", "danger"),
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold (pulse red)",
+                    tooltip = "Enlightenment below this number will cause the gadget to pulse.",
+                    min = 0,
+                    max = 1200000,
+                    step = 10000,
+                    default = 500000,
+                    getFunc = GetterFactory("enlightenment", "critical"), setFunc = SetterFactory("enlightenment", "critical"),
+                },
+            },
+        },
         {
-            type = "dropdown",
-            name = "Event Tickets",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Event Tickets"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Event Tickets"] = newValue
-                TEB.UpdateGadgetList("Event Tickets", newValue)
-            end,
-        }, 	  
-        {
-            type = "dropdown",
+            type = "submenu",
             name = "Experience",
-            default = "Both Bars",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Experience"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Experience"] = newValue
-                TEB.UpdateGadgetList("Experience", newValue)
-            end,
-        }, 	   
+            controls = {
+                DTCheckBoxFactory("Experience"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display experience.",
+                    default = "% towards next level/CP",
+                    choices = {"% towards next level/CP", "% needed for next level/CP", "current XP", "needed XP", "current XP/total needed"},
+                    getFunc = GetterFactory("experience", "DisplayPreference"), setFunc = SetterFactory("experience", "DisplayPreference"),
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
+            name = "Event Tickets",
+            controls = {
+                DTCheckBoxFactory("Event Tickets"),
+                {
+                    type = "checkbox",
+                    name = "Hide when have no tickets",
+                    default = true,
+                    tooltip = "Automatically hide the Event Tickets gadget when the character has no event tickets.",
+                    getFunc = function() return settings.et.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.et.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display event tickets.",
+                    default = "tickets",
+                    choices = {"tickets", "tickets/max"},
+                    getFunc = GetterFactory("et", "DisplayPreference"), setFunc = SetterFactory("et", "DisplayPreference"),
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold",
+                    tooltip = "The warning color will be used when the number of tickets is equal to or higher than what is set here.",
+                    min = 0,
+                    max = 12,
+                    step = 1,
+                    default = 9,
+                    getFunc = GetterFactory("et", "warning"), setFunc = SetterFactory("et", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold",
+                    tooltip = "The danger color will be used when the number of tickets is equal to or higher than what is set here.",
+                    min = 0,
+                    max = 12,
+                    step = 1,
+                    default = 12,
+                    getFunc = GetterFactory("et", "danger"), setFunc = SetterFactory("et", "danger"),
+                },
+            },
+        },
+        {
+            type = "submenu",
             name = "Fast Travel Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Fast Travel Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Fast Travel Timer"] = newValue
-                TEB.UpdateGadgetList("Fast Travel Timer", newValue)
-            end,
-        }, 
+            controls = {
+                DTCheckBoxFactory("Fast Travel Timer"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display fast travel timer.",
+                    default = "time left/cost",
+                    choices = {"time left", "cost", "time left/cost"},
+                    getFunc = GetterFactory("ft", "DisplayPreference"), setFunc = SetterFactory("ft", "DisplayPreference"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Timer display format",
+                    tooltip = "Choose how to display fast travel time left until cheapest.",
+                    default = "simple",
+                    choices = {"simple", "short", "exact"},
+                    getFunc = GetterFactory("ft", "TimerDisplayPreference"), setFunc = SetterFactory("ft", "TimerDisplayPreference"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Only show timer after traveling",
+                    default = true,
+                    tooltip = "Show the icon and timer only after you've fast traveled. When the timer reaches zero, the timer disappears again.",
+                    getFunc = function() return settings.ft.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.ft.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+            },
+        },
         {
-            type = "dropdown",
-            name = "Food/Drink Buff Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Food Buff Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Food Buff Timer"] = newValue
-                TEB.UpdateGadgetList("Food Buff Timer", newValue)
-            end,
-        }, 
+            type = "submenu",
+            name = "Food Buff Timer",
+            controls = {
+                DTCheckBoxFactory("Food Buff Timer"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display the food buff timer.",
+                    default = "simple",
+                    choices = {"simple", "short", "exact"},
+                    getFunc = GetterFactory("food", "DisplayPreference"), setFunc = SetterFactory("food", "DisplayPreference"),
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold (minutes remaining)",
+                    tooltip = "The warning color will be used when the timer falls below what is set here.",
+                    min = 0,
+                    max = 120,
+                    step = 1,
+                    default = 15,
+                    -- set/display in minutes, but store in seconds
+                    getFunc = function() return settings.food.warning / 60 end,
+                    setFunc = function(newValue)
+                        settings.food.warning = newValue * 60
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (minutes remaining)",
+                    tooltip = "The danger color will be used when the timer falls below what is set here.",
+                    min = 0,
+                    max = 120,
+                    step = 1,
+                    default = 7,
+                    getFunc = function() return settings.food.danger / 60 end,
+                    setFunc = function(newValue)
+                        settings.food.danger = newValue * 60
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold (minutes remaining)",
+                    tooltip = "The gadget will pulse when the timer falls below what is set here.",
+                    min = 0,
+                    max = 120,
+                    step = 1,
+                    default = 2,
+                    getFunc = function() return settings.food.critical / 60 end,
+                    setFunc = function(newValue)
+                        settings.food.critical = newValue * 60
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Keep Pulsing After Expiring",
+                    default = true,
+                    tooltip = "Allows the gadget to continue pulsing even after the timer has expired.",
+                    getFunc = GetterFactory("food", "PulseAfter"), setFunc = SetterFactory("food", "PulseAfter"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Only show timer when buff active",
+                    default = true,
+                    tooltip = "Show the icon and timer only when a food buff is active.",
+                    getFunc = function() return settings.food.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.food.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                  },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "FPS",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["FPS"] end,
-            setFunc = function(newValue)
-                gadgetSettings["FPS"] = newValue
-                TEB.UpdateGadgetList("FPS", newValue)
-            end,
-        }, 
+            controls = {
+                DTCheckBoxFactory("FPS"),
+                {
+                    type = "slider",
+                    name = "Caution threshold (yellow)",
+                    tooltip = "FPS below this number will be colored yellow.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 30,
+                    getFunc = GetterFactory("fps", "caution"), setFunc = SetterFactory("fps", "caution"),
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold (orange)",
+                    tooltip = "FPS below this number will be colored orange.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 30,
+                    getFunc = GetterFactory("fps", "warning"), setFunc = SetterFactory("fps", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "FPS below this number will be colored red.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 15,
+                    getFunc = GetterFactory("fps", "danger"), setFunc = SetterFactory("fps", "danger"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Use fixed width",
+                    default = true,
+                    tooltip = "Use fixed width for this gadget.",
+                    getFunc = function() return settings.fps.Fixed end,
+                    setFunc = function(newValue)
+                        settings.fps.Fixed = newValue
+                        TEB.SetWidth(settings.fps, TEBTopFPS)
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Fixed Width Size",
+                    tooltip = "The size in pixels for the gadget.",
+                    min = 20,
+                    max = 60,
+                    step = 1,
+                    default = 20,
+                    getFunc = function() return settings.fps.FixedLength end,
+                    setFunc = function(newValue)
+                        settings.fps.FixedLength = newValue
+                        TEB.SetWidth(settings.fps, TEBTopFPS)
+                    end,
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Gold",
-            default = "Both Bars",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Gold"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Gold"] = newValue
-                TEB.UpdateGadgetList("Gold", newValue)
-            end,
-        }, 
+            controls = {
+                DTCheckBoxFactory("Gold"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display gold.",
+                    default = "gold on character",
+                    choices = {
+                        "gold on character",
+                        "gold on character/gold in bank",
+                        "gold on character (gold in bank)",
+                        "character+bank gold",
+                        "tracked gold",
+                        "tracked+bank gold",
+                    },
+                    getFunc = GetterFactory("gold", "DisplayPreference"), setFunc = SetterFactory("gold", "DisplayPreference"),
+                },
+                GoldLimit("Warning below this level", "low", "warning"),
+                GoldLimit("Danger below this level", "low", "danger"),
+                GoldLimit("Warning above this level", "high", "warning"),
+                GoldLimit("Danger above this level", "high", "danger"),
+                {
+                    type = "checkbox",
+                    name = "Track this character",
+                    tooltip = "Track this character's gold.",
+                    default = true,
+                    disabled = function() return TEB.DisableGoldTracker() end,
+                    getFunc = function() return TEB.GetCharacterGoldTracked() end,
+                    setFunc = function(newValue)
+                        TEB.SetCharacterGoldTracked(newValue)
+                    end,
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Kill Counter",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Kill Counter"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Kill Counter"] = newValue
-                TEB.UpdateGadgetList("Kill Counter", newValue)
-            end,
-        }, 
+            controls = {
+                DTCheckBoxFactory("Kill Counter"),
+                {
+                    type = "dropdown",
+                    name = "Kill Counter display format",
+                    tooltip = "Choose how to display the kill counter.",
+                    default = "Killing Blows/Deaths (Kill Ratio)",
+                    choices = {"Assists/Killing Blows/Deaths (Kill Ratio)", "Assists/Killing Blows/Deaths", "Killing Blows/Deaths (Kill Ratio)", "Killing Blows/Deaths", "Kill Ratio"},
+                    getFunc = GetterFactory("kc", "DisplayPreference"), setFunc = SetterFactory("kc", "DisplayPreference"),
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Latency",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Latency"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Latency"] = newValue
-                TEB.UpdateGadgetList("Latency", newValue)
-            end,
-        }, 	  
+            controls = {
+                DTCheckBoxFactory("Latency"),
+                {
+                    type = "slider",
+                    name = "Warning threshold (yellow)",
+                    tooltip = "Latency above this number will be colored yellow.",
+                    min = 0,
+                    max = 5000,
+                    step = 10,
+                    default = 100,
+                    getFunc = GetterFactory("latency", "warning"), setFunc = SetterFactory("latency", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "Latency above this number will be colored red.",
+                    min = 0,
+                    max = 5000,
+                    step = 10,
+                    default = 500,
+                    getFunc = GetterFactory("latency", "danger"), setFunc = SetterFactory("latency", "danger"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Use Fixed Width",
+                    default = true,
+                    tooltip = "Use fixed width for this gadget.",
+                    getFunc = function() return settings.latency.Fixed end,
+                    setFunc = function(newValue)
+                        settings.latency.Fixed = newValue
+                        TEB.SetWidth(settings.latency, TEBTopLatency)
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Fixed width size",
+                    tooltip = "The size in pixels for the gadget.",
+                    min = 30,
+                    max = 60,
+                    step = 1,
+                    default = 30,
+                    getFunc = function() return settings.latency.FixedLength end,
+                    setFunc = function(newValue)
+                        settings.latency.FixedLength = newValue
+                        TEB.SetWidth(settings.latency, TEBTopLatency)
+                    end,
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Level",
-            default = "Both Bars",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Level"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Level"] = newValue
-                TEB.UpdateGadgetList("Level", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Level"),
+
+                {
+                    type = "description",
+                    text = "Display format when |cff0000below|r level 50",
+                },
+                {
+                    type = "dropdown",
+                    name = "Icon to use (<L50)",
+                    tooltip = "Choose icon to precede level when below level 50.",
+                    default = 1,
+                    choices = iconChoiceList,
+                    choicesValues = iconValueList,
+                    getFunc = function() return settings.level.notmax.icon end,
+                    setFunc = function(newValue)
+                        settings.level.notmax.icon = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Display level (<L50)",
+                    tooltip = "Choose how to display the level when below level 50.",
+                    default = 1,
+                    choices = lvlChoiceList,
+                    choicesValues = lvlValueList,
+                    getFunc = function() return settings.level.notmax.DisplayPreference end,
+                    setFunc = function(newValue)
+                        settings.level.notmax.DisplayPreference = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Display Champion Points (<L50)",
+                    default = true,
+                    tooltip = "Display Champion Points after level when below level 50.",
+                    getFunc = function() return settings.level.notmax.cp end,
+                    setFunc = function(newValue)
+                        settings.level.notmax.cp = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Dynamically show champion points (<L50)",
+                    default = true,
+                    tooltip = "Show the icon and unspent points only when there is at least one point to spend.",
+                    getFunc = function() return settings.level.notmax.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.level.notmax.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+
+                {
+                    type = "description",
+                    text = "Display format when |cff0000at|r level 50",
+                },
+                {
+                    type = "dropdown",
+                    name = "Icon to use",
+                    tooltip = "Choose icon to precede level when at level 50.",
+                    default = 1,
+                    choices = iconChoiceList,
+                    choicesValues = iconValueList,
+                    getFunc = function() return settings.level.max.icon end,
+                    setFunc = function(newValue)
+                        settings.level.max.icon = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Display level",
+                    tooltip = "Choose how to display the level when at level 50.",
+                    default = 1,
+                    choices = lvlChoiceList,
+                    choicesValues = lvlValueList,
+                    getFunc = function() return settings.level.max.DisplayPreference end,
+                    setFunc = function(newValue)
+                        settings.level.max.DisplayPreference = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Display Champion Points",
+                    default = true,
+                    tooltip = "Display Champion Points after level when at level 50.",
+                    getFunc = function() return settings.level.max.cp end,
+                    setFunc = function(newValue)
+                        settings.level.max.cp = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Dynamically show champion points",
+                    default = true,
+                    tooltip = "Show the icon and unspent points only when there is at least one point to spend.",
+                    getFunc = function() return settings.level.max.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.level.max.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Location",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Location"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Location"] = newValue
-                TEB.UpdateGadgetList("Location", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Location"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display your location.",
+                    default = "(x, y) Zone Name",
+                    choices = {"(x, y) Zone Name", "Zone Name (x, y)", "Zone Name", "x, y"},
+                    getFunc = GetterFactory("location", "DisplayPreference"), setFunc = SetterFactory("location", "DisplayPreference"),
+                },
+            },
         },
         {
-            type = "dropdown",
-            name = "Jewelry Crafting Research Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Jewelry Crafting Research Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Jewelry Crafting Research Timer"] = newValue
-                TEB.UpdateGadgetList("Jewelry Crafting Research Timer", newValue)
-            end,
-        },
-        {
-            type = "dropdown",
+            type = "submenu",
             name = "Memory Usage",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Memory Usage"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Memory Usage"] = newValue
-                TEB.UpdateGadgetList("Memory Usage", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Memory Usage"),
+                {
+                    type = "slider",
+                    name = "Warning threshold (yellow)",
+                    tooltip = "Memory Usage above this number will be colored yellow.",
+                    min = 0,
+                    max = 1024,
+                    step = 8,
+                    default = 512,
+                    getFunc = GetterFactory("memory", "warning"), setFunc = SetterFactory("memory", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "Memory usage above this number will be colored red.",
+                    min = 0,
+                    max = 1024,
+                    step = 8,
+                    default = 768,
+                    getFunc = GetterFactory("memory", "danger"), setFunc = SetterFactory("memory", "danger"),
+                },
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Mount Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Mount Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Mount Timer"] = newValue
-                TEB.UpdateGadgetList("Mount Timer", newValue)
-            end,
-        },	  
+            controls = {
+                DTCheckBoxFactory("Mount Timer"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display the mount timer.",
+                    default = "simple",
+                    choices = {"simple", "short", "exact"},
+                    getFunc = GetterFactory("mount", "DisplayPreference"), setFunc = SetterFactory("mount", "DisplayPreference"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Automatically hide timer when mount fully trained",
+                    default = true,
+                    tooltip = "Hide the icon and timer only when the mount is fully trained.",
+                    getFunc = function() return settings.mount.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.mount.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Indicate when the timer has reached zero",
+                    default = true,
+                    tooltip = "When the timer has reached zero, turn the gadget green.",
+                    getFunc = GetterFactory("mount", "good"), setFunc = SetterFactory("mount", "good"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Pulse gadget",
+                    default = true,
+                    tooltip = "Pulse the gadget when it is time to train your mount.",
+                    getFunc = GetterFactory("mount", "critical"), setFunc = SetterFactory("mount", "critical"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Track this character",
+                    tooltip = "Track this character's mount training time left.",
+                    default = true,
+                    disabled = function() return TEB.DisableMountTracker() end,
+                    reference = "mountTrackCheckbox",
+                    getFunc = function() return TEB.GetCharacterMountTracked() end,
+                    setFunc = function(newValue)
+                        TEB.SetCharacterMountTracked(newValue)
+                    end,
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Mundus Stone",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Mundus Stone"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Mundus Stone"] = newValue
-                TEB.UpdateGadgetList("Mundus Stone", newValue)
-            end,
-        },	          {
-            type = "dropdown",
+            controls = {
+                DTCheckBoxFactory("Mundus Stone"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display your Mundus",
+                    default = "Full",
+                    choices = {"Abbreviated", "Full"},
+                    getFunc = GetterFactory("mundus", "DisplayPreference"), setFunc = SetterFactory("mundus", "DisplayPreference"),
+                },
+
+            },
+        },
+        {
+            type = "submenu",
+            name = "Research Timers",
+            controls = {
+                {
+                    type = "checkbox",
+                    name = "Display Text",
+                    default = true,
+                    tooltip = "Display text for these gadgets.",
+                    getFunc = function() return settings.gadgetText["Blacksmithing Research Timer"] end,
+                    setFunc = function(newValue)
+                        settings.gadgetText["Blacksmithing Research Timer"] = newValue
+                        settings.gadgetText["Clothing Research Timer"] = newValue
+                        settings.gadgetText["Woodworking Research Timer"] = newValue
+                        settings.gadgetText["Jewelry Crafting Research Timer"] = newValue
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display research timers.",
+                    default = "simple",
+                    choices = {"simple", "short", "exact"},
+                    getFunc = GetterFactory("research", "DisplayPreference"), setFunc = SetterFactory("research", "DisplayPreference"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Only show timers while researching",
+                    default = true,
+                    tooltip = "Show the icon and timer only when you are actively researching.",
+                    getFunc = function() return settings.research.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.research.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Only show the shortest timer",
+                    default = false,
+                    tooltip = "When researching multiple items, only show the timer that has the least amount of time left.",
+                    getFunc = GetterFactory("research", "ShowShortest"), setFunc = SetterFactory("research", "ShowShortest"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Show free slots",
+                    default = true,
+                    tooltip = "Show the number of free slots available for research.",
+                    getFunc = GetterFactory("research", "DisplayAllSlots"), setFunc = SetterFactory("research", "DisplayAllSlots"),
+                },
+                {
+                    type = "dropdown",
+                    name = "Display free slots as",
+                    tooltip = "Choose how to display free research slots.",
+                    default = "--",
+                    choices = {"--", "-", "free", "0", "done"},
+                    getFunc = GetterFactory("research", "FreeText"), setFunc = SetterFactory("research", "FreeText"),
+                },
+            },
+        },
+        {
+            type = "submenu",
             name = "Sky Shards",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Sky Shards"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Sky Shards"] = newValue
-                TEB.UpdateGadgetList("Sky Shards", newValue)
-            end,
-        },	  
+            controls = {
+                DTCheckBoxFactory("Sky Shards"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display sky shard count.",
+                    default = "collected/unspent points",
+                    choices = {"collected/unspent points", "collected/total needed (unspent points)", "needed/unspent points", "collected", "needed"},
+                    getFunc = GetterFactory("skyshards", "DisplayPreference"), setFunc = SetterFactory("skyshards", "DisplayPreference"),
+                },
+            },
+        },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Soul Gems",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Soul Gems"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Soul Gems"] = newValue
-                TEB.UpdateGadgetList("Soul Gems", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Soul Gems"),
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display soul gem count.\ntotal filled = normal (non-crown) filled soul gems + crown soul gems\nnormal filled = normal (non-crown) filled soul gems\ncrown = crown soul gems\nempty = empty soul gems",
+                    default = "total filled/empty",
+                    choices = {"total filled/empty", "total filled (empty)", "total filled (crown)/empty", "normal filled/crown/empty", "total filled", "normal filled"},
+                    getFunc = function() return settings.soulgems.DisplayPreference end,
+                    setFunc = function(newValue)
+                        settings.soulgems.DisplayPreference = newValue
+                        TEB.CalculateBagItems()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Color soul gems",
+                    default = true,
+                    tooltip = "Appriopriately color each kind of soul gems in tooltips",
+                    getFunc = GetterFactory("soulgems", "Color"), setFunc = SetterFactory("soulgems", "Color"),
+                },
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Tel Var Stones",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Tel Var Stones"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Tel Var Stones"] = newValue
-                TEB.UpdateGadgetList("Tel Var Stones", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Tel Var Stones"),
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Thief's Tools",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Thief's Tools"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Thief's Tools"] = newValue
-                TEB.UpdateGadgetList("Thief's Tools", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Thief's Tools"),
+                {
+                    type = "slider",
+                    name = "Interactions warning threshold (yellow)",
+                    tooltip = "Fence and launder interactions below this number will be colored yellow.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 25,
+                    getFunc = function() return settings.tt.warning end,
+                    setFunc = function(newValue)
+                        settings.tt.warning = newValue
+                        TEB.CalculateBagItems()
+                    end,
+                },
+                {
+                    type = "slider",
+                    name = "Interactions danger threshold (red)",
+                    tooltip = "Fence and launder interactions below this number will be colored red.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 10,
+                    getFunc = function() return settings.tt.danger end,
+                    setFunc = function(newValue)
+                        settings.tt.danger = newValue
+                        TEB.CalculateBagItems()
+                    end,
+                },
+                {
+                    type = "dropdown",
+                    name = "Display format",
+                    tooltip = "Choose how to display the thief's tools.",
+                    default = "stolen treasures/stolen goods (lockpicks)",
+                    choices = {"lockpicks", "total stolen", "total stolen (lockpicks)", "stolen treasures/stolen goods", "stolen treasures/stolen goods (lockpicks)", "stolen treasures/fence_remaining stolen goods/launder_remaining", "stolen treasures/fence_remaining stolen goods/launder_remaining (lockpicks)", "stolen treasures/stolen goods fence_remaining/launder_remaining", "stolen treasures/stolen goods fence_remaining/launder_remaining (lockpicks)"},
+                    getFunc = function() return settings.tt.DisplayPreference end,
+                    setFunc = function(newValue)
+                        settings.tt.DisplayPreference = newValue
+                        TEB.CalculateBagItems()
+                    end,
+                },
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Transmute Crystals",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Transmute Crystals"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Transmute Crystals"] = newValue
-                TEB.UpdateGadgetList("Transmute Crystals", newValue)
-            end,
+            controls = {
+                DTCheckBoxFactory("Transmute Crystals"),
+            },
         },
         {
-            type = "dropdown",
+            type = "submenu",
             name = "Unread Mail",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Unread Mail"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Unread Mail"] = newValue
-                TEB.UpdateGadgetList("Unread Mail", newValue)
-            end,
-        },	  
-        {
-            type = "dropdown",
-            name = "Vamprism",
-            default = "PvE Bar",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Vampirism"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Vampirism"] = newValue
-                TEB.UpdateGadgetList("Vampirism", newValue)
-            end,
-        },
-        {
-            type = "dropdown",
-            name = "Weapon Charge/Poison",
-            default = "Both Bars",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Weapon Charge"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Weapon Charge"] = newValue
-                TEB.UpdateGadgetList("Weapon Charge", newValue)
-            end,
-        },
-        {
-            type = "dropdown",
-            name = "Woodworking Research Timer",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Woodworking Research Timer"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Woodworking Research Timer"] = newValue
-                TEB.UpdateGadgetList("Woodworking Research Timer", newValue)
-            end,
+            controls =
+            {
+                DTCheckBoxFactory("Unread Mail"),
+                {
+                    type = "checkbox",
+                    name = "Automatically hide when no unread mail",
+                    default = true,
+                    tooltip = "Hide the gadget only when there in no unread mail.",
+                    getFunc = function() return settings.mail.Dynamic end,
+                    setFunc = function(newValue)
+                        settings.mail.Dynamic = newValue
+                        TEB.RebuildBar()
+                    end,
+                },
+                {
+                    type = "checkbox",
+                    name = "Indicate when there is unread mail",
+                    default = true,
+                    tooltip = "When there is unread mail, turn the gadget green.",
+                    getFunc = GetterFactory("mail", "good"), setFunc = SetterFactory("mail", "good"),
+                },
+                {
+                    type = "checkbox",
+                    name = "Pulse gadget",
+                    default = true,
+                    tooltip = "Pulse the gadget when there is unread mail.",
+                    getFunc = GetterFactory("mail", "critical"), setFunc = SetterFactory("mail", "critical"),
+                },
+            },
         },
         {
-            type = "dropdown",
-            name = "Writ Vouchers",
-            default = "Off",
-            choices = choiceList,
-            getFunc = function() return gadgetSettings["Writ Vouchers"] end,
-            setFunc = function(newValue)
-                gadgetSettings["Writ Vouchers"] = newValue
-                TEB.UpdateGadgetList("Writ Vouchers", newValue)
-            end,
-            },  
-        },
-    },  
-    {
-        type = "divider",
-    },    
-    { type = "submenu",
-    name = "Alliance Points",
-    controls = {   
-        {
-            type = "checkbox",
-            name = "Display Text",
-            default = true,
-            tooltip = "Display text for this gadget.",
-            getFunc = function() return TEB.savedVariables.gadgetText["Alliance Points"] end,
-            setFunc = function(newValue)
-                TEB.savedVariables.gadgetText["Alliance Points"] = newValue
-                gadgetText["Alliance Points"] = newValue
-            end,
-        },                                                
-        {
-            type = "dropdown",
-            name = "Display format",
-            tooltip = "Choose how to display alliance points.",
-            default = "Total Points",
-            choices = {"Total Points", "Session Points", "Points Per Hour", "Total Points/Points Per Hour", "Session Points/Points Per Hour", "Total Points/Session Points", "Total Points/Session Points (Points Per Hour)", "Total Points/Session Points/Points Per Hour"},
-            getFunc = function() return TEB.savedVariables.ap_DisplayPreference end,
-            setFunc = function(newValue)
-                TEB.savedVariables.ap_DisplayPreference = newValue
-                ap_DisplayPreference = newValue
-            end,
-        },
-      },
-    },
-    { type = "submenu",
-    name = "Bag Space",
-    controls = { 
-        {
-            type = "checkbox",
-            name = "Display Text",
-            default = true,
-            tooltip = "Display text for this gadget.",
-            getFunc = function() return TEB.savedVariables.gadgetText["Bag Space"] end,
-            setFunc = function(newValue)
-                TEB.savedVariables.gadgetText["Bag Space"] = newValue
-                gadgetText["Bag Space"] = newValue
-            end,
-        },                                             
-        {
-            type = "dropdown",
-            name = "Display format",
-            tooltip = "Choose how to display bag space.",
-            default = "slots used/total slots",
-            choices = {"slots used/total slots", "used%", "slots free/total slots", "slots free", "free%"},
-            getFunc = function() return TEB.savedVariables.bag_DisplayPreference end,
-            setFunc = function(newValue)
-                TEB.savedVariables.bag_DisplayPreference = newValue
-                bag_DisplayPreference = newValue
-            end,
-        },
-        {
-            type = "slider",
-            name = "Caution threshold (% used) [yellow]",
-            tooltip = "Choose at what percentage bag space will be colored yellow.",
-            min = 0,
-            max = 100,
-            step = 1,
-            default = 50,
-            getFunc = function() return TEB.savedVariables.bag_Warning end,
-            setFunc = function(newValue) 
-            TEB.savedVariables.bag_Warning = newValue
-            bag_Warning = newValue                    
-            end,
-        },
-        {
-            type = "slider",
-            name = "Warning threshold (% used) [orange]",
-            tooltip = "Choose at what percentage bag space will be colored red.",
-            min = 0,
-            max = 100,
-            step = 1,
-            default = 75,
-            getFunc = function() return TEB.savedVariables.bag_Danger end,
-            setFunc = function(newValue) 
-            TEB.savedVariables.bag_Danger = newValue
-            bag_Danger = newValue                    
-            end,
-        },
-        {
-            type = "slider",
-            name = "Critical threshold (% used) [red]",
-            tooltip = "Bag Space used over this percentage will cause the gadget to pulse.",
-            min = 0,
-            max = 100,
-            step = 1,
-            default = 90,
-            getFunc = function() return TEB.savedVariables.bag_Critical end,
-            setFunc = function(newValue) 
-            TEB.savedVariables.bag_Critical = newValue
-            bag_Critical = newValue                    
-            end,
-        }, 	
-        },
-    },            	  
-    { type = "submenu",
-    name = "Bank Space",
-    controls = { 
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Bank Space"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Bank Space"] = newValue
-                    gadgetText["Bank Space"] = newValue
-                end,
-            },                                            
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display bank space.",
-                default = "slots used/total slots",
-                choices = {"slots used/total slots", "used%", "slots free/total slots", "slots free", "free%"},
-                getFunc = function() return TEB.savedVariables.bank_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bank_DisplayPreference = newValue
-                    bank_DisplayPreference = newValue
-                end,
-            },
-            {
-                type = "slider",
-                name = "Caution threshold (% used) [yellow]",
-                tooltip = "Choose at what percentage bank space will be colored yellow.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 50,
-                getFunc = function() return TEB.savedVariables.bank_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.bank_Warning = newValue
-                bank_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Warning threshold (% used) [orange]",
-                tooltip = "Choose at what percentage bank space will be colored orange.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 75,
-                getFunc = function() return TEB.savedVariables.bank_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.bank_Danger = newValue
-                bank_Danger = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Critical threshold (% used) [red]",
-                tooltip = "Bank Space used over this percentage will cause the gadget to pulse.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 90,
-                getFunc = function() return TEB.savedVariables.bank_Critical end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.bank_Critical = newValue
-                bank_Critical = newValue                    
-                end,
-            },   	      	      	  
-        },
-    },
-    { type = "submenu",
-    name = "Bounty/Heat Timer",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Bounty Timer"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Bounty Timer"] = newValue
-                    gadgetText["Bounty Timer"] = newValue
-                end,
-            },          	   	   	  
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display the bounty timer.",
-                default = "simple",
-                choices = {"simple", "short", "exact"},
-                getFunc = function() return TEB.savedVariables.bounty_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bounty_DisplayPreference = newValue
-                    bounty_DisplayPreference = newValue
-                end,
-            },	  
-            {
-                type = "checkbox",
-                name = "Dynamically show timer",
-                default = true,
-                tooltip = "Show the icon and timer only when you have a bounty or heat.",
-                getFunc = function() return TEB.savedVariables.bounty_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bounty_Dynamic = newValue
-                    bounty_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },	 
-            {
-                type = "dropdown",
-                name = "Upstanding",
-                default = "normal",
-                choices = {"normal", "green"},
-                getFunc = function() return bounty_Good end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bounty_Good = newValue
-                    bounty_Good = newValue
-                end,
-            },               
-            {
-                type = "dropdown",
-                name = "Disreputable",
-                default = "yellow",
-                choices = {"normal", "yellow", "orange", "red"},
-                getFunc = function() return bounty_Warning end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bounty_Warning = newValue
-                    bounty_Warning = newValue
-                end,
-            },               
-            {
-                type = "dropdown",
-                name = "Notorious",
-                default = "orange",
-                choices = {"normal", "yellow", "orange", "red"},
-                getFunc = function() return bounty_Danger end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bounty_Danger = newValue
-                    bounty_Danger = newValue
-                end,
-            },  
-            {
-                type = "dropdown",
-                name = "Fugitive from Justice",
-                default = "red",
-                choices = {"normal", "yellow", "orange", "red"},
-                getFunc = function() return bounty_Critical end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.bounty_Critical = newValue
-                    bounty_Critical = newValue
-                end,
-            },                            
-        },
-    },     
-    { type = "submenu",
-    name = "Clock",
-    controls = { 
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Clock"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Clock"] = newValue
-                    gadgetText["Clock"] = newValue
-                end,
-            },     
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display the clock.",
-                default = "local clock",
-                choices = {"local clock", "ingame time", "local time/ingame time"},
-                getFunc = function() return TEB.savedVariables.clock_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.clock_DisplayPreference = newValue
-                    clock_DisplayPreference = newValue
-                end,
-            },                                                      
-            {
-                type = "checkbox",
-                name = "24 Hour Clock",
-                default = true,		
-                tooltip = "Display the clock in 24 hour mode. (ON = 24 hour clock, OFF = 12 hour clock)",
-                getFunc = function() return TEB.savedVariables.clock_TwentyFourHourClock end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.clock_TwentyFourHourClock = newValue
-                    clock_TwentyFourHourClock = newValue
-                end,
-            }, 
-        },
-    },
-    { type = "submenu",
-    name = "Durability",
-    controls = {     
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Durability"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Durability"] = newValue
-                    gadgetText["Durability"] = newValue
-                end,
-            },                                             
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display durability.",
-                default = "durability %",
-                choices = {"durability %", "durability %/repair cost", "repair cost", "durability % (repair kits)", "durability %/repair cost (repair kits)", "repair cost (repair kits)", "most damaged", "most damaged/durability %", "most damaged/durability %/repair cost", "most damanaged/repair cost"},
-                getFunc = function() return TEB.savedVariables.durability_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.durability_DisplayPreference = newValue
-                    durability_DisplayPreference = newValue
-                end,
-            },
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "Choose at what percentage durability will be colored yellow.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 50,
-                getFunc = function() return TEB.savedVariables.durability_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.durability_Warning = newValue
-                durability_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "Choose at what percentage durability will be colored red, indicating armor is about to break.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 25,
-                getFunc = function() return TEB.savedVariables.durability_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.durability_Danger = newValue
-                durability_Danger = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Critical threshold (pulse red)",
-                tooltip = "Durability below this number will cause the gadget to pulse.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 10,
-                getFunc = function() return TEB.savedVariables.durability_Critical end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.durability_Critical = newValue
-                durability_Critical = newValue                    
-                end,
-            }, 
-        },
-    },            
-    { type = "submenu",
-    name = "Enlightenment",
-    controls = { 
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Enlightenment"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Enlightenment"] = newValue
-                    gadgetText["Enlightenment"] = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Hide when enlighenment empty",
-                default = true,
-                tooltip = "Automatically hide the Enlighenment gadget, when there is no enlightenment to spend.",
-                getFunc = function() return TEB.savedVariables.enlightenment_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.enlightenment_Dynamic = newValue
-                    enlightenment_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },	  
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "Enlightenment below this number will be colored yellow.",
-                min = 0,
-                max = 1200000,
-                step = 10000,
-                default = 200000,
-                getFunc = function() return TEB.savedVariables.enlightenment_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.enlightenment_Warning = newValue
-                enlightenment_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "Enlightenment below this number will be colored red.",
-                min = 0,
-                max = 1200000,
-                step = 10000,
-                default = 100000,
-                getFunc = function() return TEB.savedVariables.enlightenment_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.enlightenment_Danger = newValue
-                enlightenment_Danger = newValue                    
-                end,
-            }, 
-            {
-                type = "slider",
-                name = "Critical threshold (pulse red)",
-                tooltip = "Enlightenment below this number will cause the gadget to pulse.",
-                min = 0,
-                max = 1200000,
-                step = 10000,
-                default = 500000,
-                getFunc = function() return TEB.savedVariables.enlightenment_Critical end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.enlightenment_Critical = newValue
-                enlightenment_Critical = newValue                    
-                end,
-            }, 
-        },
-    },         
-    { type = "submenu",
-    name = "Experience",
-    controls = { 
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Experience"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Experience"] = newValue
-                    gadgetText["Experience"] = newValue
-                end,
-            },                                             
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display experience.",
-                default = "% towards next level/CP",
-                choices = {"% towards next level/CP", "% needed for next level/CP", "current XP", "needed XP", "current XP/total needed"},
-                getFunc = function() return TEB.savedVariables.experience_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.experience_DisplayPreference = newValue
-                    experience_DisplayPreference = newValue
-                end,
-            }, 
-        },
-    },      
-    { type = "submenu",
-    name = "Event Tickets",
-    controls = { 
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Event Tickets"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Event Tickets"] = newValue
-                    gadgetText["Event Tickets"] = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Hide when have no tickets",
-                default = true,
-                tooltip = "Automatically hide the Event Tickets gadget when the character has no event tickets.",
-                getFunc = function() return TEB.savedVariables.et_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.et_Dynamic = newValue
-                    et_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display event tickets.",
-                default = "tickets",
-                choices = {"tickets", "tickets/max"},
-                getFunc = function() return TEB.savedVariables.et_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.et_DisplayPreference = newValue
-                    et_DisplayPreference = newValue
-                end,
-            },             
-            {
-                type = "slider",
-                name = "Warning threshold",
-                tooltip = "The warning color will be used when the number of tickets is equal to or higher than what is set here.",
-                min = 0,
-                max = 12,
-                step = 1,
-                default = 9,
-                getFunc = function() return TEB.savedVariables.et_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.et_Warning = newValue
-                et_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold",
-                tooltip = "The danger color will be used when the number of tickets is equal to or higher than what is set here.",
-                min = 0,
-                max = 12,
-                step = 1,
-                default = 12,
-                getFunc = function() return TEB.savedVariables.et_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.et_Danger = newValue
-                et_Danger = newValue                    
-                end,
-            },            
-        },
-    },		                                               
-    { type = "submenu",
-    name = "Fast Travel Timer",
-    controls = {   
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Fast Travel Timer"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Fast Travel Timer"] = newValue
-                    gadgetText["Fast Travel Timer"] = newValue
-                end,
-            },                                            
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display fast travel timer.",
-                default = "time left/cost",
-                choices = {"time left", "cost", "time left/cost"},
-                getFunc = function() return TEB.savedVariables.ft_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.ft_DisplayPreference = newValue
-                    ft_DisplayPreference = newValue
-                end,
-            },  
-            {
-                type = "dropdown",
-                name = "Timer display format",
-                tooltip = "Choose how to display fast travel time left until cheapest.",
-                default = "simple",
-                choices = {"simple", "short", "exact"},
-                getFunc = function() return TEB.savedVariables.ft_TimerDisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.ft_TimerDisplayPreference = newValue
-                    ft_TimerDisplayPreference = newValue
-                end,
-            },	  
-            {
-                type = "checkbox",
-                name = "Only show timer after traveling",
-                default = true,
-                tooltip = "Show the icon and timer only after you've fast traveled. When the timer reaches zero, the timer disappears again.",
-                getFunc = function() return TEB.savedVariables.ft_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.ft_Dynamic = newValue
-                    ft_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },	
-        },
-    },
-    { type = "submenu",
-    name = "Food/Drink Buff Timer",
-    controls = { 
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Food Buff Timer"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Food Buff Timer"] = newValue
-                    gadgetText["Food Buff Timer"] = newValue
-                end,
-            },                                             
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display the food buff timer.",
-                default = "simple",
-                choices = {"simple", "short", "exact"},
-                getFunc = function() return TEB.savedVariables.food_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.food_DisplayPreference = newValue
-                    food_DisplayPreference = newValue
-                end,
-            },
-            {
-                type = "slider",
-                name = "Warning threshold (minutes remaining)",
-                tooltip = "The warning color will be used when the timer falls below what is set here.",
-                min = 0,
-                max = 120,
-                step = 1,
-                default = 15,
-                getFunc = function() return TEB.savedVariables.food_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.food_Warning = newValue
-                food_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (minutes remaining)",
-                tooltip = "The danger color will be used when the timer falls below what is set here.",
-                min = 0,
-                max = 120,
-                step = 1,
-                default = 7,
-                getFunc = function() return TEB.savedVariables.food_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.food_Danger = newValue
-                food_Danger = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Critical threshold (minutes remaining)",
-                tooltip = "The gadget will pulse when the timer falls below what is set here.",
-                min = 0,
-                max = 120,
-                step = 1,
-                default = 2,
-                getFunc = function() return TEB.savedVariables.food_Critical end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.food_Critical = newValue
-                food_Critical = newValue                    
-                end,
-            }, 
-            {
-                type = "checkbox",
-                name = "Keep Pulsing After Expiring",
-                default = true,
-                tooltip = "Allows the gadget to continue pulsing even after the timer has expired.",
-                getFunc = function() return TEB.savedVariables.food_PulseAfter end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.food_PulseAfter = newValue
-                    food_PulseAfter = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Only show timer when buff active",
-                default = true,
-                tooltip = "Show the icon and timer only when a food buff is active.",
-                getFunc = function() return TEB.savedVariables.food_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.food_Dynamic = newValue
-                    food_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-              },            
-        },
-    },	  	   	    	       
-    { type = "submenu",
-    name = "FPS",
-    controls = {                                       
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["FPS"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["FPS"] = newValue
-                    gadgetText["FPS"] = newValue
-                end,
-            },   
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "FPS below this number will be colored yellow.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 30,
-                getFunc = function() return TEB.savedVariables.fps_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.fps_Warning = newValue
-                fps_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "FPS below this number will be colored red.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 15,
-                getFunc = function() return TEB.savedVariables.fps_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.fps_Danger = newValue
-                fps_Danger = newValue                    
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Use Fixed Width",
-                default = true,
-                tooltip = "Use fixed width for this gadget.",
-                warning = "Disabling this will cause UI reload.",
-                getFunc = function() return TEB.savedVariables.fps_Fixed end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.fps_Fixed = newValue
-                    fps_Fixed = newValue
-                    TEB.SetFPSFixed()
-                end,
-            },   	             
-            {
-                type = "slider",
-                name = "Fixed Width Size",
-                tooltip = "The size in pixels for the gadget.",
-                min = 1,
-                max = 400,
-                step = 1,
-                default = 100,
-                getFunc = function() return TEB.savedVariables.fps_FixedLength end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.fps_FixedLength = newValue
-                fps_FixedLength = newValue                  
-                if fps_Fixed then TEB.SetFPSFixed() end
-                end,
-            },
-        },
-    },
-    { type = "submenu",
-    name = "Gold",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Gold"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Gold"] = newValue
-                    gadgetText["Gold"] = newValue
-                end,
-            },                                              
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display gold.",
-                default = "gold on character",
-                choices = {"gold on character", "gold on character/gold in bank", "gold on character (gold in bank)", "character+bank gold", "tracked gold", "tracked+bank gold"},
-                getFunc = function() return TEB.savedVariables.gold_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gold_DisplayPreference = newValue
-                    gold_DisplayPreference = newValue
-                end,
-            }, 
-            {
-                type = "checkbox",
-                name = "Track this character",
-                tooltip = "Track this character's gold.",
-                default = true,
-                disabled = function() return TEB.DisableGoldTracker() end,
-                getFunc = function() return TEB.GetCharacterGoldTracked() end,
-                setFunc = function(newValue)
-                    TEB.SetCharacterGoldTracked(newValue)
-                end,
-            },	 
-        },
-    }, 
-    { type = "submenu",
-    name = "Kill Counter",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Kill Counter"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Kill Counter"] = newValue
-                    gadgetText["Kill Counter"] = newValue
-                end,
-            },           	  
-            {
-                type = "dropdown",
-                name = "Kill Counter display format",
-                tooltip = "Choose how to display the kill counter.",
-                default = "Killing Blows/Deaths (Kill Ratio)",
-                choices = {"Assists/Killing Blows/Deaths (Kill Ratio)", "Assists/Killing Blows/Deaths", "Killing Blows/Deaths (Kill Ratio)", "Killing Blows/Deaths", "Kill Ratio"},
-                getFunc = function() return TEB.savedVariables.kc_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.kc_DisplayPreference = newValue
-                    kc_DisplayPreference = newValue
-                end,
-            },		
-        },
-    },  
-    { type = "submenu",
-    name = "Latency",
-    controls = {                                  
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Latency"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Latency"] = newValue
-                    gadgetText["Latency"] = newValue
-                end,
-            },   
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "Latency above this number will be colored yellow.",
-                min = 0,
-                max = 5000,
-                step = 10,
-                default = 100,
-                getFunc = function() return TEB.savedVariables.latency_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.latency_Warning = newValue
-                latency_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "Latency above this number will be colored red.",
-                min = 0,
-                max = 5000,
-                step = 10,
-                default = 500,
-                getFunc = function() return TEB.savedVariables.latency_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.latency_Danger = newValue
-                latency_Danger = newValue                    
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Use Fixed Width",
-                default = true,
-                tooltip = "Use fixed width for this gadget.",
-                warning = "Disabling this will cause UI reload.",
-                getFunc = function() return TEB.savedVariables.latency_Fixed end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.latency_Fixed = newValue
-                    latency_Fixed = newValue
-                    TEB.SetLatencyFixed()
-                end,
-            },   	             
-            {
-                type = "slider",
-                name = "Fixed Width Size",
-                tooltip = "The size in pixels for the gadget.",
-                min = 1,
-                max = 400,
-                step = 1,
-                default = 100,
-                getFunc = function() return TEB.savedVariables.latency_FixedLength end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.latency_FixedLength = newValue
-                latency_FixedLength = newValue                  
-                if latency_Fixed then TEB.SetLatencyFixed() end
-                end,
-            },
-        },
-    },	        	       
-    { type = "submenu",
-    name = "Level",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Level"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Level"] = newValue
-                    gadgetText["Level"] = newValue
-                end,
-            },         	  	   	   	  
-            {
-                type = "dropdown",
-                name = "Display format when below level 50",
-                tooltip = "Choose how to display the level/CP when below level 50.",
-                default = "[Class Icon] Character Level (Unspent Points)",
-                choices = {"[Class Icon] Character Level", "[Class Icon] Character Level/Champion Points", "[Class Icon] Champion Points", "[CP Icon] Character Level", "[CP Icon] Character Level/Champion Points", "[CP Icon] Champion Points", "[Class Icon] Character Level (Unspent Points)", "[Class Icon] Character Level/Champion Points (Unspent Points)", "[Class Icon] Champion Points (Unspent Points)", "[CP Icon] Character Level (Unspent Points)", "[CP Icon] Character Level/Champion Points (Unspent Points)", "[CP Icon] Champion Points (Unspent Points)"},
-                getFunc = function() return TEB.savedVariables.level_DisplayPreferenceNotMax end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.level_DisplayPreferenceNotMax = newValue
-                    level_DisplayPreferenceNotMax = newValue
-                    TEB:RebuildBar()
-                end,
-            },	  
-            {
-                type = "dropdown",
-                name = "Display format when at level 50",
-                tooltip = "Choose how to display the level/CP when at level 50.",
-                default = "[CP Icon] Champion Points (Unspent Points)",
-                choices = {"[Class Icon] Character Level", "[Class Icon] Character Level/Champion Points", "[Class Icon] Champion Points", "[CP Icon] Character Level", "[CP Icon] Character Level/Champion Points", "[CP Icon] Champion Points", "[Class Icon] Character Level (Unspent Points)", "[Class Icon] Character Level/Champion Points (Unspent Points)", "[Class Icon] Champion Points (Unspent Points)", "[CP Icon] Character Level (Unspent Points)", "[CP Icon] Character Level/Champion Points (Unspent Points)", "[CP Icon] Champion Points (Unspent Points)"},
-                getFunc = function() return TEB.savedVariables.level_DisplayPreferenceMax end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.level_DisplayPreferenceMax = newValue
-                    level_DisplayPreferenceMax = newValue
-                    TEB:RebuildBar()            
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Dynamically show champion points",
-                default = true,
-                tooltip = "Show the icon and unspent points only when there is at least one point to spend.",
-                getFunc = function() return TEB.savedVariables.level_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.level_Dynamic = newValue
-                    level_Dynamic = newValue
-                end,
-            },	 
-        },
-    }, 
-    { type = "submenu",
-    name = "Location",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Location"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Location"] = newValue
-                    gadgetText["Location"] = newValue
-                end,
-            },                                              
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display your location.",
-                default = "(x, y) Zone Name",
-                choices = {"(x, y) Zone Name", "Zone Name (x, y)", "Zone Name", "x, y"},
-                getFunc = function() return TEB.savedVariables.location_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.location_DisplayPreference = newValue
-                    location_DisplayPreference = newValue
-                end,
-            },	
-        },
-    },
-    { type = "submenu",
-    name = "Memory Usage",
-    controls = {                                      
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Memory Usage"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Memory Usage"] = newValue
-                    gadgetText["Memory Usage"] = newValue
-                end,
-            }, 
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "Memory Usage above this number will be colored yellow.",
-                min = 0,
-                max = 1024,
-                step = 8,
-                default = 512,
-                getFunc = function() return TEB.savedVariables.memory_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.memory_Warning = newValue
-                memory_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "Memory usage above this number will be colored red.",
-                min = 0,
-                max = 1024,
-                step = 8,
-                default = 768,
-                getFunc = function() return TEB.savedVariables.memory_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.memory_Danger = newValue
-                memory_Danger = newValue                    
-                end,
-            }, 
-        },
-    },	        
-    { type = "submenu",
-    name = "Mount Timer",
-    controls = {                                     
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Mount Timer"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Mount Timer"] = newValue
-                    gadgetText["Mount Timer"] = newValue
-                end,
-            },             	  	    	    	  
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display the mount timer.",
-                default = "simple",
-                choices = {"simple", "short", "exact"},
-                getFunc = function() return TEB.savedVariables.mount_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mount_DisplayPreference = newValue
-                    mount_DisplayPreference = newValue
-                end,
-            },	  
-            {
-                type = "checkbox",
-                name = "Automatically hide timer when mount fully trained",
-                default = true,
-                tooltip = "Hide the icon and timer only when the mount is fully trained.",
-                getFunc = function() return TEB.savedVariables.mount_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mount_Dynamic = newValue
-                    mount_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },	
-            {
-                type = "checkbox",
-                name = "Indicate when the timer has reached zero",
-                default = true,
-                tooltip = "When the timer has reached zero, turn the gadget green.",
-                getFunc = function() return TEB.savedVariables.mount_Good end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mount_Good = newValue
-                    mount_Good = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Pulse gadget",
-                default = true,
-                tooltip = "Pulse the gadget when it is time to train your mount.",
-                getFunc = function() return TEB.savedVariables.mount_Critical end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mount_Critical = newValue
-                    mount_Critical = newValue
-                end,
-            },	  	
-            {
-                type = "checkbox",
-                name = "Track this character",
-                tooltip = "Track this character's mount training time left.",
-                default = true,
-                disabled = function() return TEB.DisableMountTracker() end,
-                reference = "mountTrackCheckbox",
-                getFunc = function() return TEB.GetCharacterMountTracked() end,
-                setFunc = function(newValue)
-                    TEB.SetCharacterMountTracked(newValue)
-                end,
-            },  
-        },
-    },  	  		  
-    { type = "submenu",
-    name = "Mundus Stone",
-    controls = {                                     
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Mundus Stone"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Mundus Stone"] = newValue
-                    gadgetText["Mundus Stone"] = newValue
-                end,
-            },             	  	    	    	  
-        },
-    },  	  		  
-    { type = "submenu",
-    name = "Research Timers",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for these gadgets.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Blacksmithing Research Timer"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Blacksmithing Research Timer"] = newValue
-                    TEB.savedVariables.gadgetText["Clothing Research Timer"] = newValue
-                    TEB.savedVariables.gadgetText["Woodworking Research Timer"] = newValue
-                    TEB.savedVariables.gadgetText["Jewelry Crafting Research Timer"] = newValue
-                    gadgetText["Blacksmithing Research Timer"] = newValue
-                    gadgetText["Clothing Research Timer"] = newValue
-                    gadgetText["Woodworking Research Timer"] = newValue
-                    gadgetText["Jewelry Crafting Research Timer"] = newValue
-                end,
-            },          	   	   	  
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display research timers.",
-                default = "simple",
-                choices = {"simple", "short", "exact"},
-                getFunc = function() return TEB.savedVariables.research_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.research_DisplayPreference = newValue
-                    research_DisplayPreference = newValue
-                end,
-            },	  
-            {
-                type = "checkbox",
-                name = "Only show timers while researching",
-                default = true,
-                tooltip = "Show the icon and timer only when you are actively researching.",
-                getFunc = function() return TEB.savedVariables.research_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.research_Dynamic = newValue
-                    research_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },	  
-            {
-                type = "checkbox",
-                name = "Only show the shortest timer",
-                default = false,
-                tooltip = "When researching multiple items, only show the timer that has the least amount of time left.",
-                getFunc = function() return TEB.savedVariables.research_ShowShortest end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.research_ShowShortest = newValue
-                    research_ShowShortest = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Show free slots",
-                default = true,
-                tooltip = "Show the number of free slots available for research.",
-                getFunc = function() return TEB.savedVariables.research_DisplayAllSlots end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.research_DisplayAllSlots = newValue
-                    research_DisplayAllSlots = newValue
-                end,
-            },
-            {
-                type = "dropdown",
-                name = "Display free slots as",
-                tooltip = "Choose how to display free research slots.",
-                default = "--",
-                choices = {"--", "-", "free", "0", "done"},
-                getFunc = function() return TEB.savedVariables.research_FreeText end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.research_FreeText = newValue
-                    research_FreeText = newValue
-                end,
-            },	
-        },
-    },  
-    { type = "submenu",
-    name = "Sky Shards",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Sky Shards"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Sky Shards"] = newValue
-                    gadgetText["Sky Shards"] = newValue
-                end,
-            },                                             
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display sky shard count.",
-                default = "collected/unspent points",
-                choices = {"collected/unspent points", "collected/total needed (unspent points)", "needed/unspent points", "collected", "needed"},
-                getFunc = function() return TEB.savedVariables.skyshards_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.skyshards_DisplayPreference = newValue
-                    skyshards_DisplayPreference = newValue
-                end,
-            },
-        },
-    },	
-    { type = "submenu",
-    name = "Soul Gems",
-    controls = {  
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Soul Gems"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Soul Gems"] = newValue
-                    gadgetText["Soul Gems"] = newValue
-                end,
-            },                                            
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display soul gem count.\ntotal filled = regular (non-crown) filled soul gems + crown soul gems\nregular filled = regular (non-crown) filled soul gems\ncrown = crown soul gems\nempty = empty soul gems",
-                default = "total filled/empty",
-                choices = {"total filled/empty", "total filled (empty)", "total filled (crown)/empty", "regular filled/crown/empty", "total filled", "regular filled"},
-                getFunc = function() return TEB.savedVariables.soulgems_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.soulgems_DisplayPreference = newValue
-                    soulgems_DisplayPreference = newValue
-                    TEB.CalculateBagItems()
-                end,
-            },
-        },
-    },
-    { type = "submenu",
-    name = "Tel Var Stones",
-    controls = {                                       
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Tel Var Stones"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Tel Var Stones"] = newValue
-                    gadgetText["Tel Var Stones"] = newValue
-                end,
-            }, 	
-        },
-    },  
-    { type = "submenu",
-    name = "Thief's Tools",
-    controls = {                                    
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Thief's Tools"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Thief's Tools"] = newValue
-                    gadgetText["Thief's Tools"] = newValue
-                end,
-            }, 
-            {
-                type = "slider",
-                name = "Interactions warning threshold (yellow)",
-                tooltip = "Fence and launder interactions below this number will be colored yellow.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 25,
-                getFunc = function() return TEB.savedVariables.tt_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.tt_Warning = newValue
-                tt_Warning = newValue
-                TEB.CalculateBagItems()                  
-                end,
-            },
-            {
-                type = "slider",
-                name = "Interactions danger threshold (red)",
-                tooltip = "Fence and launder interactions below this number will be colored red.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 10,
-                getFunc = function() return TEB.savedVariables.tt_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.tt_Danger = newValue
-                tt_Danger = newValue
-                TEB.CalculateBagItems()                    
-                end,
-            },
-            {
-                type = "dropdown",
-                name = "Display format",
-                tooltip = "Choose how to display the thief's tools.",
-                default = "stolen treasures/stolen goods (lockpicks)",
-                choices = {"lockpicks", "total stolen", "total stolen (lockpicks)", "stolen treasures/stolen goods", "stolen treasures/stolen goods (lockpicks)", "stolen treasures/fence_remaining stolen goods/launder_remaining", "stolen treasures/fence_remaining stolen goods/launder_remaining (lockpicks)", "stolen treasures/stolen goods fence_remaining/launder_remaining", "stolen treasures/stolen goods fence_remaining/launder_remaining (lockpicks)"},
-                getFunc = function() return TEB.savedVariables.tt_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.tt_DisplayPreference = newValue
-                    tt_DisplayPreference = newValue
-                    TEB.CalculateBagItems()
-                end,
-            },  
-        },
-    }, 		    
-    { type = "submenu",
-    name = "Transmute Crystals",
-    controls = {                                      
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Transmute Crystals"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Transmute Crystals"] = newValue
-                    gadgetText["Transmute Crystals"] = newValue
-                end,
-            }, 
-        },
-    },
-    { type = "submenu",
-    name = "Unread Mail",
-    controls = {                                      
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Unread Mail"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Unread Mail"] = newValue
-                    gadgetText["Unread Mail"] = newValue
-                end,
-            }, 
-            {
-                type = "checkbox",
-                name = "Automatically hide when no unread mail",
-                default = true,
-                tooltip = "Hide the gadget only when there in no unread mail.",
-                getFunc = function() return TEB.savedVariables.mail_Dynamic end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mail_Dynamic = newValue
-                    mail_Dynamic = newValue
-                    TEB:RebuildBar()
-                end,
-            },	
-            {
-                type = "checkbox",
-                name = "Indicate when there is unread mail",
-                default = true,
-                tooltip = "When there is unread mail, turn the gadget green.",
-                getFunc = function() return TEB.savedVariables.mail_Good end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mail_Good = newValue
-                    mail_Good = newValue
-                end,
-            },
-            {
-                type = "checkbox",
-                name = "Pulse gadget",
-                default = true,
-                tooltip = "Pulse the gadget when there is unread mail.",
-                getFunc = function() return TEB.savedVariables.mail_Critical end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.mail_Critical = newValue
-                    mail_Critical = newValue
-                end,
-            },	 
-        },
-    }, 	  		       	              
-    { type = "submenu",
-    name = "Vampirism",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Vampirism"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Vampirism"] = newValue
-                    gadgetText["Vampirism"] = newValue
-                end,
-            },          	   	   	  
+            type = "submenu",
+            name = "Vampirism",
+            controls = {
+            DTCheckBoxFactory("Vampirism"),
             {
                 type = "dropdown",
                 name = "Display format",
                 tooltip = "Choose how to display the vampirism gadget information.",
                 default = "Stage (Timer)",
                 choices = {"Stage (Timer)", "Timer"},
-                getFunc = function() return TEB.savedVariables.vampirism_DisplayPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_DisplayPreference = newValue
-                    vampirism_DisplayPreference = newValue
-                end,
-            },	  
+                getFunc = GetterFactory("vampirism", "DisplayPreference"), setFunc = SetterFactory("vampirism", "DisplayPreference"),
+            },
             {
                 type = "dropdown",
                 name = "Timer Display format",
                 tooltip = "Choose how to display the vampirism stage timer.",
                 default = "simple",
                 choices = {"simple", "short", "exact"},
-                getFunc = function() return TEB.savedVariables.vampirism_TimerPreference end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_TimerPreference = newValue
-                    vampirism_TimerPreference = newValue
-                end,
-            },	  
+                getFunc = GetterFactory("vampirism", "TimerPreference"), setFunc = SetterFactory("vampirism", "TimerPreference"),
+            },
             {
                 type = "checkbox",
                 name = "Hide if not a vampire",
                 default = true,
                 tooltip = "Show the gadget only if you are a vampire.",
-                getFunc = function() return TEB.savedVariables.vampirism_Dynamic end,
+                getFunc = function() return settings.vampirism.Dynamic end,
                 setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_Dynamic = newValue
-                    vampirism_Dynamic = newValue
-                    TEB:RebuildBar()
+                    settings.vampirism.Dynamic = newValue
+                    TEB.RebuildBar()
                 end,
-            },	 
-            {
-                type = "dropdown",
-                name = "Stage 1",
-                default = "normal",
-                choices = {"normal", "green", "yellow", "orange", "red"},
-                getFunc = function() return vampirism_StageColor[1] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_StageColor[1] = newValue
-                    vampirism_StageColor[1] = newValue
-                end,
-            },               
-            {
-                type = "dropdown",
-                name = "Stage 2",
-                default = "yellow",
-                choices = {"normal", "green", "yellow", "orange", "red"},
-                getFunc = function() return vampirism_StageColor[2] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_StageColor[2] = newValue
-                    vampirism_StageColor[2] = newValue
-                end,
-            },               
-            {
-                type = "dropdown",
-                name = "Stage 3",
-                default = "orange",
-                choices = {"normal", "green", "yellow", "orange", "red"},
-                getFunc = function() return vampirism_StageColor[3] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_StageColor[3] = newValue
-                    vampirism_StageColor[3] = newValue
-                end,
-            },  
-            {
-                type = "dropdown",
-                name = "Stage 4",
-                default = "red",
-                choices = {"normal", "green", "yellow", "orange", "red"},
-                getFunc = function() return vampirism_StageColor[4] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.vampirism_StageColor[4] = newValue
-                    vampirism_StageColor[4] = newValue
-                end,
-            },                            
+            },
+            VampireStageFactory(1),
+            VampireStageFactory(2),
+            VampireStageFactory(3),
+            VampireStageFactory(4),
         },
-    },         
-    { type = "submenu",
-    name = "Weapon Charge/Poison",
-    controls = {
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Weapon Charge"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Weapon Charge"] = newValue
-                    gadgetText["Weapon Charge"] = newValue
-                end,
-            },       
-            {
-                type = "checkbox",
-                name = "Display poison count when poison is applied",
-                default = true,
-                tooltip = "Replace weapon charge display with poison count whenever poison is applied to a weapon.",
-                getFunc = function() return TEB.savedVariables.wc_AutoPoison end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.wc_AutoPoison = newValue
-                    wc_AutoPoison = newValue
-                end,
-            },    	
-            {
-                    type = "description",
-                    text = "|c2A8FEEWeapon Charge Thresholds:",
-                    width = "full"
-            },     	    	                                         
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "Weapon charge below this number will be colored yellow.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 50,
-                getFunc = function() return TEB.savedVariables.wc_Warning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.wc_Warning = newValue
-                wc_Warning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "Weapon charge below this number will be colored red.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 25,
-                getFunc = function() return TEB.savedVariables.wc_Danger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.wc_Danger = newValue
-                wc_Danger = newValue                    
-                end,
-            }, 
-            {
-                type = "slider",
-                name = "Critical threshold (pulse)",
-                tooltip = "Weapon charge below this number will cause the gadget to pulse.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 10,
-                getFunc = function() return TEB.savedVariables.wc_Critical end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.wc_Critical = newValue
-                wc_Critical = newValue                    
-                end,
-            },
-            {
-                    type = "description",
-                    text = "|c2A8FEEPoison Count Thresholds:",
-                    width = "full"
-            },           
-            {
-                type = "slider",
-                name = "Warning threshold (yellow)",
-                tooltip = "Poison Count below this number will be colored yellow.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 20,
-                getFunc = function() return TEB.savedVariables.wc_PoisonWarning end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.wc_PoisonWarning = newValue
-                wc_PoisonWarning = newValue                    
-                end,
-            },
-            {
-                type = "slider",
-                name = "Danger threshold (red)",
-                tooltip = "Poison Count below this number will be colored red.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 10,
-                getFunc = function() return TEB.savedVariables.wc_PoisonDanger end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.wc_PoisonDanger = newValue
-                wc_PoisonDanger = newValue                    
-                end,
-            }, 
-            {
-                type = "slider",
-                name = "Critical threshold (pulse)",
-                tooltip = "Poison Count below this number will cause the gadget to pulse.",
-                min = 0,
-                max = 100,
-                step = 1,
-                default = 5,
-                getFunc = function() return TEB.savedVariables.wc_PoisonCritical end,
-                setFunc = function(newValue) 
-                TEB.savedVariables.wc_PoisonCritical = newValue
-                wc_PoisonCritical = newValue                    
-                end,
-            },          
-        },
-    },  
-    { type = "submenu",
-    name = "Writ Vouchers",
-    controls = {                                   
-            {
-                type = "checkbox",
-                name = "Display Text",
-                default = true,
-                tooltip = "Display text for this gadget.",
-                getFunc = function() return TEB.savedVariables.gadgetText["Writ Vouchers"] end,
-                setFunc = function(newValue)
-                    TEB.savedVariables.gadgetText["Writ Vouchers"] = newValue
-                    gadgetText["Writ Vouchers"] = newValue
-                end,
+    },
+        {
+            type = "submenu",
+            name = "Weapon Charge/Poison",
+            controls = {
+                DTCheckBoxFactory("Weapon Charge/Poison"),
+                {
+                    type = "checkbox",
+                    name = "Display poison count when poison is applied",
+                    default = true,
+                    tooltip = "Replace weapon charge display with poison count whenever poison is applied to a weapon.",
+                    getFunc = GetterFactory("wc", "AutoPoison"), setFunc = SetterFactory("wc", "AutoPoison"),
+                },
+                {
+                        type = "description",
+                        text = "|c2A8FEEWeapon Charge Thresholds:",
+                        width = "full"
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold (yellow)",
+                    tooltip = "Weapon charge below this number will be colored yellow.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 50,
+                    getFunc = GetterFactory("wc", "warning"), setFunc = SetterFactory("wc", "warning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "Weapon charge below this number will be colored red.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 25,
+                    getFunc = GetterFactory("wc", "danger"), setFunc = SetterFactory("wc", "danger"),
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold (pulse)",
+                    tooltip = "Weapon charge below this number will cause the gadget to pulse.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 10,
+                    getFunc = GetterFactory("wc", "critical"), setFunc = SetterFactory("wc", "critical"),
+                },
+                {
+                        type = "description",
+                        text = "|c2A8FEEPoison Count Thresholds:",
+                        width = "full"
+                },
+                {
+                    type = "slider",
+                    name = "Warning threshold (yellow)",
+                    tooltip = "Poison Count below this number will be colored yellow.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 20,
+                    getFunc = GetterFactory("wc", "PoisonWarning"), setFunc = SetterFactory("wc", "PoisonWarning"),
+                },
+                {
+                    type = "slider",
+                    name = "Danger threshold (red)",
+                    tooltip = "Poison Count below this number will be colored red.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 10,
+                    getFunc = GetterFactory("wc", "PoisonDanger"), setFunc = SetterFactory("wc", "PoisonDanger"),
+                },
+                {
+                    type = "slider",
+                    name = "Critical threshold (pulse)",
+                    tooltip = "Poison Count below this number will cause the gadget to pulse.",
+                    min = 0,
+                    max = 100,
+                    step = 1,
+                    default = 5,
+                    getFunc = GetterFactory("wc", "PoisonCritical"), setFunc = SetterFactory("wc", "PoisonCritical"),
+                },
             },
         },
-    },                   	  	    
-  })
-
-end
-
--- Combat bar color opacity
-function TEB.CombatColor(eventCode, combatState)
-    inCombat = combatState or false
-    if combatIndicator then
-        EVENT_MANAGER:RegisterForUpdate("TEBCombatColorFade", 20, TEB.CombatColorFade)
-    end
-    -- local maxAlpha = combatOpacity/100
-    -- local incrementAlpha = maxAlpha / 20
+        {
+            type = "submenu",
+            name = "Writ Vouchers",
+            controls = {
+                DTCheckBoxFactory("Writ Vouchers"),
+            },
+        },
+    }
     
-    --[[if showCombatOpacity > 0 then
-        showCombatOpacity = showCombatOpacity - 1
-        TEBTopCombatBG:SetAlpha(maxAlpha)
-        combatAlpha = maxAlpha
-    end]] 
+    TEB.panelControl = LAM2:RegisterAddonPanel("TEB_ASUGB", panelData)
+    LAM2:RegisterOptionControls("TEB_ASUGB", controlStructure)
+
 end
 
 EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ADD_ON_LOADED, TEB.OnAddOnLoaded)
 
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.CalculateBagItems)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_JUSTICE_STOLEN_ITEMS_REMOVED, TEB.CalculateBagItems)
-EVENT_MANAGER:RegisterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bags)
-EVENT_MANAGER:AddFilterForEvent("TEBBags", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
-EVENT_MANAGER:RegisterForEvent("TEBBagsUpgrade", EVENT_INVENTORY_BAG_CAPACITY_CHANGED, TEB.bags)
+TEB.debug = TEB.debug .. "Main code finished\n"
 
-EVENT_MANAGER:RegisterForEvent("TEBBank", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bank)
-EVENT_MANAGER:AddFilterForEvent("TEBBank", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BANK)
-EVENT_MANAGER:RegisterForEvent("TEBBankESOPlus", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.bank)
-EVENT_MANAGER:AddFilterForEvent("TEBBankESOPlus", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_SUBSCRIBER_BANK)
-
-EVENT_MANAGER:RegisterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.weaponcharge)
-EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
-EVENT_MANAGER:AddFilterForEvent("TEBWeaponCharge", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_ITEM_CHARGE)
-EVENT_MANAGER:RegisterForEvent("TEBWeaponChargeGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.weaponcharge)
-EVENT_MANAGER:AddFilterForEvent("TEBWeaponChargeGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
-EVENT_MANAGER:AddFilterForEvent("TEBWeaponChargeGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
-EVENT_MANAGER:RegisterForEvent("TEBWeaponChargeBarSwap", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, TEB.weaponcharge)
-
-EVENT_MANAGER:RegisterForEvent("TEBDurability", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.durability)
-EVENT_MANAGER:AddFilterForEvent("TEBDurability", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
-EVENT_MANAGER:AddFilterForEvent("TEBDurability", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DURABILITY_CHANGE)
-EVENT_MANAGER:RegisterForEvent("TEBDurabilityGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, TEB.durability)
-EVENT_MANAGER:AddFilterForEvent("TEBDurabilityGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
-EVENT_MANAGER:AddFilterForEvent("TEBDurabilityGearChange", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
-
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_BANK, TEB.BankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHATTER_BEGIN, TEB.ChatterHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CRAFTING_STATION_INTERACT, TEB.CraftingHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_OPEN_GUILD_BANK, TEB.GuildBankHideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_RETICLE_HIDDEN_UPDATE, TEB.HideBar)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ACTION_LAYER_POPPED, TEB.ShowBar)
-
-EVENT_MANAGER:AddFilterForEvent(TEB.name, EVENT_COMBAT_EVENT, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_COMBAT_EVENT, TEB.UpdateKillingBlows)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_DEAD, TEB.UpdateDeaths)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_PLAYER_COMBAT_STATE, TEB.CombatColor)
-
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CURRENCY_UPDATE, TEB.balance)
-
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_LEVEL_UPDATE, TEB.UpdateLevel)
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_CHAMPION_POINT_UPDATE, TEB.UpdateLevel)
-
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_ZONE_CHANGED, TEB.getZone)
-
-EVENT_MANAGER:RegisterForEvent(TEB.name, EVENT_MAIL_NUM_UNREAD_CHANGED, TEB.mail)
-
-EVENT_MANAGER:RegisterForEvent("TEBExperience", EVENT_EXPERIENCE_UPDATE, TEB.experience)
-EVENT_MANAGER:RegisterForEvent("TEBEnlightenment", EVENT_EXPERIENCE_UPDATE, TEB.enlightenment)
-
-EVENT_MANAGER:RegisterForEvent("TEBRecallRegister", EVENT_PLAYER_ACTIVATED, TEB.recallRegister)
-
-ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_BAR", "Lock/Unlock Bar")
-ZO_CreateStringId("SI_BINDING_NAME_LOCK_UNLOCK_GADGETS", "Lock/Unlock Gadgets")
+-- THE END

@@ -1,20 +1,18 @@
-## Title: The Elder Bar
+## Title: The Elder Bar |cff8040Reloaded|r
 ## Description: The Elder Bar adds a configurable information bar anywhere on the screen.
-## Author: Eldrni
-## Version: 10.0.3-P
-## APIVersion: 100033
+## Author: SimonIllyan (original version: Eldrni)
+## Version: 11.0.2
+## APIVersion: 100034 100035
 ## SavedVariables: TEBSavedVariables
-## DependsOn: LibAddonMenu-2.0>=28 LibFoodDrinkBuff>=14
+## DependsOn: LibAddonMenu-2.0>=32 LibFoodDrinkBuff>=17 LibSavedVars>=60004
 
 TEB.lua
 TEB.xml
 Bindings.xml
 
-## CHANGE LOG
+## View the changelog here: 
 ##
-## View the changelog here: https://www.esoui.com/downloads/info2099-TheElderBar.html#changelog
-##
-## Report issues here: https://github.com/jharrels/eso-elder-bar/issues
+## Report issues here: 
 ##
 ## This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. 
 ## The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. 

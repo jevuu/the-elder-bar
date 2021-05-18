@@ -1,8 +1,8 @@
-# The Elder Bar
+# The Elder Bar Reloaded
 
-The Elder Bar is an addon for Elder Scrolls Online. This addon adds an information bar on the screen, chocked full of information gadgets that update in real-time. The gadgets can be placed on the bar in any order and there are lots of options to configure each one. Last, but not least, the bar can also indicate when in combat.
+The Elder Bar Reloaded is an addon for Elder Scrolls Online. This addon adds an information bar on the screen, chocked full of information gadgets that update in real-time. The gadgets can be placed on the bar in any order and there are lots of options to configure each one. Last but not least, the bar can also indicate when in combat.
 
-# Features
+## Features
 
 * The Elder Bar can be unlocked, dragged, and dropped wherever you'd like it. You can assign a hotkey to lock/unlock the bar.
 * Individual gadgets can be unlocked, dragged, and dropped in any order. You can assign a hotkey to lock/unlock the gadgets.
@@ -16,7 +16,7 @@ The Elder Bar is an addon for Elder Scrolls Online. This addon adds an informati
 * Track mount training times across multiple characters. You can choose whether to track a character or not. Automatically stops tracking characters with mounts at maximum.
 * Track gold across multiple characters. You can choose whether to track a character or not.
 * Icons come in two variations: 
-	* white
+	* monochrome
 	* full color
 * Gadgets can pulse to draw the player's attention to them. They have five different modes: 
 	* fade in
@@ -28,15 +28,15 @@ The Elder Bar is an addon for Elder Scrolls Online. This addon adds an informati
 
 ## Gadgets
 
-1. Alliance Points
-2. Bag Space
-3. Bank Space
-4. Blacksmithing Research Timer
-5. Bounty/Heat Timer
-6. Clock
-7. Clothing Research Timer
-8. Durability
-9. Enlightenment
+ 1. Alliance Points
+ 2. Bag Space
+ 3. Bank Space
+ 4. Blacksmithing Research Timer
+ 5. Bounty/Heat Timer
+ 6. Clock
+ 7. Clothing Research Timer
+ 8. Durability
+ 9. Enlightenment
 10. Event Tickets
 11. Experience
 12. Fast Travel Timer
@@ -47,7 +47,7 @@ The Elder Bar is an addon for Elder Scrolls Online. This addon adds an informati
 17. Latency
 18. Level / Champion Points
 19. Location (Zone Name / Coordinates)
-20. Jewlery Crafting Research Timer
+20. Jewelry Crafting Research Timer
 21. Memory
 22. Mount Timer
 23. Mundus Stone
@@ -61,3 +61,14 @@ The Elder Bar is an addon for Elder Scrolls Online. This addon adds an informati
 31. Weapon Charge
 32. Woodworking Research Timer
 33. Writ Voucers
+
+## Change Log
+11.0.2 (2021-05-18)
+	- added color picker for the default color of text and icons
+	
+11.0.1 (2021-05-17)
+	- fixed converting settings from the old version to the new one, using LibSavedVars
+	
+11.0.0 (2021-05-16)
+	- first version of The Elder Bar Reloaded;
+	version numbering continues from the original The Elder Bar by Eldrni

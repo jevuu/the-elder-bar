@@ -10,7 +10,7 @@
         </Control>
         <!--##########################################-->
         <!-- Tooltip                                  -->
-        <!--##########################################-->         
+        <!--##########################################-->
         <TopLevelControl name="TEBTooltip" mouseEnabled="true" movable="true" clampedToScreen="true">
             <Dimensions x="410" y="300" />
             <Anchor point="TOPLEFT" />
@@ -18,80 +18,82 @@
                 <Backdrop name="$(parent)BG" alpha="1" edge="0" inherits="ZO_DefaultBackdrop" />
                 <Label name="$(parent)Left" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
-                </Label>                
+                </Label>
                 <Label name="$(parent)Right" font="ZoFontChat" color="cccccc" text="" horizontalAlignment="RIGHT">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="0" />
-                    <Dimensions x="100" />
-                </Label>                
+                </Label>
             </Controls>
         </TopLevelControl>
         <TopLevelControl name="TEBTop" mouseEnabled="true" movable="true" clampedToScreen="true">
-            <Dimensions x="100" y="22" />
-            <Anchor point="CENTER" />
+            <Anchor point="TOP" relativePoint="TOP" relativeTo="GuiRoot" />
+            <OnMoveStart>
+                TEBTop:SetDrawLayer(4)
+            </OnMoveStart>
             <OnMoveStop>
                 TEB.StopMovingBar(self)
-            </OnMoveStop>               
-            <OnUpdate> 
-                TEB.OnUpdate() 
+            </OnMoveStop>
+            <OnUpdate>
+                TEB.OnUpdate()
             </OnUpdate>
             <Controls>
                 <Backdrop name="$(parent)BG" alpha="1" edge="0">
-                    <Anchor point="TOPLEFT" offsetX="-ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" offsetY="-ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" offsetY="ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" />
-        
+                    <Anchor point="TOPLEFT" relativeTo="TEBTop" offsetX="-ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" offsetY="-ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="TEBTop" offsetX="ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" offsetY="ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" />
+
                     <Edge file="EsoUI/Art/Tooltips/UI-Border.dds" edgeFileWidth="128" edgeFileHeight="16" />
                     <Center file="EsoUI/Art/Tooltips/UI-TooltipCenter.dds" />
                     <Insets left="16" top="16" right="-16" bottom="-16" />
-        
+
                     <Controls>
                         <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP">
                             <AnchorFill />
                         </Texture>
-                    </Controls>                    
+                    </Controls>
                 </Backdrop>
                 <Backdrop name="$(parent)CombatBG" alpha="0" edge="0">
                     <Anchor point="TOPLEFT" offsetX="-ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" offsetY="-ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" />
                     <Anchor point="BOTTOMRIGHT" offsetX="ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" offsetY="ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET" />
-        
+
                     <Edge file="TEB/Images/combat-border.dds" edgeFileWidth="128" edgeFileHeight="16" />
                     <Center file="TEB/Images/combat-center.dds" />
                     <Insets left="16" top="16" right="-16" bottom="-16" />
-        
+
                     <Controls>
                         <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP">
                             <AnchorFill />
                         </Texture>
-                    </Controls>                    
+                    </Controls>
                 </Backdrop>
 
                 <!--##########################################-->
                 <!-- Information Anchor                       -->
-                <!--##########################################--> 
+                <!--##########################################-->
                 <Button name="$(parent)InfoAnchor">
-                    <Dimensions x="0" y="0" />
-                </Button>               
+                    <Dimensions x="0" y="22" />
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="0" offsetY="0" />
+                </Button>
 
                 <!--##########################################-->
                 <!-- Latency                                  -->
-                <!--##########################################--> 
+                <!--##########################################-->
                 <Button name="$(parent)LatencyIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)InfoAnchor" relativePoint="RIGHT" offsetX="0" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)InfoAnchor" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                     <Textures normal="TEB/Images/latency_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipLatency(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
-                    </OnMouseExit>                    
+                    </OnMouseExit>
                 </Button>
-                <Label name="$(parent)Latency" font="ZoFontChat" color="cccccc" text="">
+                <Label name="$(parent)Latency" font="ZoFontChat" color="cccccc" text="" wrapMode="TRUNCATE" multiLine="false">
                     <Anchor point="LEFT" relativeTo="$(parent)LatencyIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
 
@@ -100,21 +102,21 @@
                 <!--##########################################-->
                 <Button name="$(parent)LevelIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)WardenIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)WardenIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                     <Textures normal="TEB/Images/cp_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                    
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipNameLevel(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>                
+                </Button>
                 <Label name="$(parent)Level" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)LevelIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
@@ -124,14 +126,14 @@
                 <!--##########################################-->
                 <Button name="$(parent)GoldIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)CP" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)CP" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/gold_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                      
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipGold(self)
                     </OnMouseEnter>
@@ -142,20 +144,20 @@
                 <Label name="$(parent)Gold" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)GoldIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <!--##########################################-->
                 <!-- Telvar Stones                            -->
-                <!--##########################################-->                
+                <!--##########################################-->
                 <Button name="$(parent)TelvarIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Gold" relativePoint="RIGHT" offsetX="6" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Gold" relativePoint="RIGHT" offsetX="6" offsetY="0" />
                     <Textures normal="TEB/Images/telvar_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipCurrencies(self, "telvar")
                     </OnMouseEnter>
@@ -166,20 +168,20 @@
                 <Label name="$(parent)Telvar" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)TelvarIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <!--##########################################-->
                 <!-- Transmute Crystals                       -->
-                <!--##########################################-->                      
+                <!--##########################################-->
                 <Button name="$(parent)TCIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Telvar" relativePoint="RIGHT" offsetX="6" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Telvar" relativePoint="RIGHT" offsetX="6" offsetY="0" />
                     <Textures normal="TEB/Images/transmute_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipCurrencies(self, "tc")
                     </OnMouseEnter>
@@ -190,20 +192,20 @@
                 <Label name="$(parent)TC" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)TCIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <!--##########################################-->
                 <!-- Writs                                    -->
-                <!--##########################################-->                  
+                <!--##########################################-->
                 <Button name="$(parent)WritIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)TC" relativePoint="RIGHT" offsetX="6" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)TC" relativePoint="RIGHT" offsetX="6" offsetY="0" />
                     <Textures normal="writs_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipCurrencies(self, "writs")
                     </OnMouseEnter>
@@ -214,20 +216,20 @@
                 <Label name="$(parent)Writ" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)WritIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                                
+
                 <!--##########################################-->
                 <!-- Soul Gems                                -->
-                <!--##########################################-->                  
+                <!--##########################################-->
                 <Button name="$(parent)SoulGemsIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Writ" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Writ" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/soulgem_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipSoulGems(self)
                     </OnMouseEnter>
@@ -238,20 +240,20 @@
                 <Label name="$(parent)SoulGems" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)SoulGemsIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <!--##########################################-->
                 <!-- Alliance Points                          -->
-                <!--##########################################-->                  
+                <!--##########################################-->
                 <Button name="$(parent)APIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)SoulGems" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)SoulGems" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/ap_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipCurrencies(self, "ap")
                     </OnMouseEnter>
@@ -262,20 +264,20 @@
                 <Label name="$(parent)AP" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)APIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <!--##########################################-->
                 <!-- Bag Space                                -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)BagIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)AP" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)AP" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/bag_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipBag(self)
                     </OnMouseEnter>
@@ -287,20 +289,20 @@
                     <Anchor point="LEFT" relativeTo="$(parent)BagIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
 
-                
+
                 <!--##########################################-->
                 <!-- Mount Training Timer                     -->
-                <!--##########################################-->                  
+                <!--##########################################-->
                 <Button name="$(parent)MountIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Bag" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Bag" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/mount_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipM(self)
                     </OnMouseEnter>
@@ -311,203 +313,203 @@
                 <Label name="$(parent)Mount" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)MountIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <!--##########################################-->
                 <!-- XP                                       -->
-                <!--##########################################-->                
+                <!--##########################################-->
                 <Button name="$(parent)XPIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Mount" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Mount" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/experience_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipXP(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)XP" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)XPIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>   
-                
+                </Label>
+
                 <!--##########################################-->
                 <!-- Clock                                     -->
-                <!--##########################################-->                
+                <!--##########################################-->
                 <Button name="$(parent)TimeIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)XP" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)XP" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/clock_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipClock(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)Time" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)TimeIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
 
                 <!--##########################################-->
                 <!-- Sky Shards                               -->
-                <!--##########################################-->                
+                <!--##########################################-->
                 <Button name="$(parent)SkyShardsIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)XP" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)XP" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/skyshards_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipSkyShards(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)SkyShards" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)SkyShardsIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                
-                
+                </Label>
+
                 <!--##########################################-->
                 <!-- Equipment Durability                     -->
-                <!--##########################################-->                
+                <!--##########################################-->
                 <Button name="$(parent)DurabilityIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)SkyShards" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)SkyShards" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/durability_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipDurability(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
-                <Label name="$(parent)Durability" font="ZoFontChat" color="cccccc" text="">
+                </Button>
+                <Label name="$(parent)Durability" font="ZoFontChat" color="cccccc" text="" wrapMode="TRUNCATE" multiLine="false">
                     <Anchor point="LEFT" relativeTo="$(parent)DurabilityIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>  
+                </Label>
 
                 <!--##########################################-->
                 <!-- Research Timers                          -->
-                <!--##########################################-->                
+                <!--##########################################-->
                 <Button name="$(parent)ResearchBlacksmithingIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Durability" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Durability" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/blacksmithing_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipBlacksmith(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)ResearchBlacksmithing" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)ResearchBlacksmithingIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                  
+                </Label>
 
                 <Button name="$(parent)ResearchWoodworkingIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)ResearchBlacksmithing" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)ResearchBlacksmithing" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/woodworking_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipWoodworking(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)ResearchWoodworking" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)ResearchWoodworkingIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                  
+                </Label>
 
                 <Button name="$(parent)ResearchClothingIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)ResearchWoodworking" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)ResearchWoodworking" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/clothing_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipClothing(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)ResearchClothing" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)ResearchClothingIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
                 </Label>
-                
+
                 <Button name="$(parent)ResearchJewelryCraftingIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)ResearchClothing" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)ResearchClothing" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/jewelry_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipJewelry(self)
                     </OnMouseEnter>
                     <OnMouseExit>
                         TEB.HideTooltip(self)
                     </OnMouseExit>
-                </Button>    
+                </Button>
                 <Label name="$(parent)ResearchJewelryCrafting" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)ResearchJewelryCraftingIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>        
-                
+                </Label>
+
                 <!--##########################################-->
                 <!-- Bank Space                               -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)BankIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)ResearchJewelryCrafting" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)ResearchJewelryCrafting" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/bank_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipBank(self)
                     </OnMouseEnter>
@@ -517,21 +519,21 @@
                 </Button>
                 <Label name="$(parent)Bank" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)BankIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                   
+                </Label>
 
                 <!--##########################################-->
                 <!-- FPS                                      -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)FPSIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Bank" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Bank" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/fps_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipFPS(self)
                     </OnMouseEnter>
@@ -539,23 +541,23 @@
                         TEB.HideTooltip(self)
                     </OnMouseExit>
                 </Button>
-                <Label name="$(parent)FPS" font="ZoFontChat" color="cccccc" text="">
+                <Label name="$(parent)FPS" font="ZoFontChat" color="cccccc" text="" wrapMode="TRUNCATE" multiLine="false">
                     <Anchor point="LEFT" relativeTo="$(parent)FPSIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>  
-                
+                </Label>
+
                 <!--##########################################-->
                 <!-- Weapon Charge                            -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)WCIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)FPS" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)FPS" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/wc_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipWC(self)
                     </OnMouseEnter>
@@ -565,21 +567,21 @@
                 </Button>
                 <Label name="$(parent)WC" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)WCIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                  
+                </Label>
 
                 <!--##########################################-->
                 <!-- Location                                 -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)LocationIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)WC" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)WC" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/location_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipLocation(self)
                     </OnMouseEnter>
@@ -589,21 +591,21 @@
                 </Button>
                 <Label name="$(parent)Location" font="ZoFontChat" color="cccccc" text="">
                     <Anchor point="LEFT" relativeTo="$(parent)LocationIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>   
+                </Label>
 
                 <!--##########################################-->
                 <!-- Thief's Tools                           -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)TTIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Location" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Location" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/tt_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipTT(self)
                     </OnMouseEnter>
@@ -613,21 +615,21 @@
                 </Button>
                 <Label name="$(parent)TT" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)TTIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label> 
-                
+                </Label>
+
                 <!--##########################################-->
                 <!-- Memory                                   -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)MemoryIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)TT" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)TT" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/ram_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipMemory(self)
                     </OnMouseEnter>
@@ -637,21 +639,21 @@
                 </Button>
                 <Label name="$(parent)Memory" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)MemoryIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                 
+                </Label>
 
                 <!--##########################################-->
                 <!-- Fast Travel                              -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)FTIcon" mouseEnabled="true" movable="true" clampedToScreen="true">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Memory" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Memory" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/ft_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipFT(self)
                     </OnMouseEnter>
@@ -661,21 +663,21 @@
                 </Button>
                 <Label name="$(parent)FT" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)FTIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label> 
+                </Label>
 
                 <!--##########################################-->
                 <!-- Kill Counter                             -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)KillsIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)FT" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)FT" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/kc_white.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipKills(self)
                     </OnMouseEnter>
@@ -685,21 +687,21 @@
                 </Button>
                 <Label name="$(parent)Kills" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)KillsIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label> 
-                
+                </Label>
+
                 <!--##########################################-->
                 <!-- Englightenment                           -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)EnlightenmentIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Kills" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Kills" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/enlightened_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipEnlightenment(self)
                     </OnMouseEnter>
@@ -709,21 +711,21 @@
                 </Button>
                 <Label name="$(parent)Enlightenment" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)EnlightenmentIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>       
+                </Label>
 
                 <!--##########################################-->
                 <!-- Unread Mail                              -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)MailIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Enlightenment" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Enlightenment" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/enlightened_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipMail(self)
                     </OnMouseEnter>
@@ -733,21 +735,21 @@
                 </Button>
                 <Label name="$(parent)Mail" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)MailIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                            
+                </Label>
 
                 <!--##########################################-->
                 <!-- Event Tickets                            -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)ETIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Mail" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Mail" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/eventtickets_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipCurrencies(self, "et")
                     </OnMouseEnter>
@@ -757,21 +759,21 @@
                 </Button>
                 <Label name="$(parent)ET" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)ETIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                                               
+                </Label>
 
                 <!--##########################################-->
                 <!-- Food Buff                                -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)FoodIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)ET" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)ET" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/foodbuff_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipFood(self)
                     </OnMouseEnter>
@@ -781,20 +783,20 @@
                 </Button>
                 <Label name="$(parent)Food" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)FoodIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>   
+                </Label>
                 <!--##########################################-->
                 <!-- Mundus Stone                             -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)MundusIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Food" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Food" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/mundusstone_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipMundus(self)
                     </OnMouseEnter>
@@ -804,20 +806,20 @@
                 </Button>
                 <Label name="$(parent)Mundus" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)MundusIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>     
+                </Label>
                 <!--##########################################-->
                 <!-- Bounty/Heat Timer                        -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)BountyIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Mundus" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Mundus" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/bounty_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipInfamy(self)
                     </OnMouseEnter>
@@ -827,20 +829,20 @@
                 </Button>
                 <Label name="$(parent)Bounty" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)BountyIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>        
+                </Label>
                 <!--##########################################-->
                 <!-- Vampirism                                -->
-                <!--##########################################-->                 
+                <!--##########################################-->
                 <Button name="$(parent)VampirismIcon">
                     <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Bounty" relativePoint="RIGHT" offsetX="20" offsetY="0" /> 
+                    <Anchor point="LEFT" relativeTo="$(parent)Bounty" relativePoint="RIGHT" offsetX="20" offsetY="0" />
                     <Textures normal="TEB/Images/vampirism_color.dds" />
                     <OnMoveStart>
                         TEB.StartMovingGadget(self)
                     </OnMoveStart>
                     <OnMoveStop>
                         TEB.StopMovingGadget(self)
-                    </OnMoveStop>                     
+                    </OnMoveStop>
                     <OnMouseEnter>
                         TEB.ShowToolTipVampirism(self)
                     </OnMouseEnter>
@@ -850,14 +852,14 @@
                 </Button>
                 <Label name="$(parent)Vampirism" font="ZoFontChat" color="cccccc" text="test">
                     <Anchor point="LEFT" relativeTo="$(parent)VampirismIcon" relativePoint="RIGHT" offsetX="0" offsetY="0" />
-                </Label>                                                                                                                                  
+                </Label>
                 <!--##########################################-->
                 <!-- Ending Anchor                            -->
-                <!--##########################################--> 
+                <!--##########################################-->
                 <Button name="$(parent)EndingAnchor">
-                    <Dimensions x="0" y="0" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)FPS" relativePoint="TOPLEFT" offsetX="0" offsetY="0" /> 
-                </Button>                                       
+                    <Dimensions x="0" y="22" />
+                    <Anchor point="LEFT" relativeTo="$(parent)FPS" relativePoint="RIGHT" offsetX="0" offsetY="0" />
+                </Button>
             </Controls>
         </TopLevelControl>
   </Controls>
